@@ -1,10 +1,8 @@
 .page {
   --background: #fafafa;
   --foreground: #fff;
-
   --text-primary: #000;
   --text-secondary: #666;
-
   --button-primary-hover: #383838;
   --button-secondary-hover: #f2f2f2;
   --button-secondary-border: #ebebeb;
@@ -12,22 +10,22 @@
   display: flex;
   flex: 1;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
-  font-family: var(--font-geist-sans);
+  align-items: center;
   background-color: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 .main {
   display: flex;
   flex: 1;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
   width: 100%;
   max-width: 800px;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: space-between;
-  background-color: var(--foreground);
   padding: 120px 60px;
+  background-color: var(--foreground);
 }
 
 .intro {
@@ -40,33 +38,33 @@
 
 .intro h1 {
   max-width: 320px;
+  color: var(--text-primary);
   font-size: 40px;
   font-weight: 600;
   line-height: 48px;
   letter-spacing: -2.4px;
   text-wrap: balance;
-  color: var(--text-primary);
 }
 
 .intro p {
   max-width: 440px;
+  color: var(--text-secondary);
   font-size: 18px;
   line-height: 32px;
   text-wrap: balance;
-  color: var(--text-secondary);
 }
 
 .intro a {
-  font-weight: 500;
   color: var(--text-primary);
+  font-weight: 500;
 }
 
 .ctas {
   display: flex;
   flex-direction: row;
+  gap: 16px;
   width: 100%;
   max-width: 440px;
-  gap: 16px;
   font-size: 14px;
 }
 
@@ -74,20 +72,20 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  width: fit-content;
   height: 40px;
   padding: 0 16px;
-  border-radius: 128px;
   border: 1px solid transparent;
-  transition: 0.2s;
-  cursor: pointer;
-  width: fit-content;
+  border-radius: 128px;
   font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s;
 }
 
 a.primary {
+  gap: 8px;
   background: var(--text-primary);
   color: var(--background);
-  gap: 8px;
 }
 
 a.secondary {
@@ -107,7 +105,7 @@ a.secondary {
   }
 }
 
-@media (max-width: 600px) {
+@media (width <= 600px) {
   .main {
     padding: 48px 24px;
   }
@@ -131,10 +129,8 @@ a.secondary {
   .page {
     --background: #000;
     --foreground: #000;
-
     --text-primary: #ededed;
     --text-secondary: #999;
-
     --button-primary-hover: #ccc;
     --button-secondary-hover: #1a1a1a;
     --button-secondary-border: #1a1a1a;

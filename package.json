@@ -9,17 +9,26 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@tanstack/react-query": "5.100.14",
     "next": "16.2.6",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "react-hook-form": "7.76.1"
   },
   "devDependencies": {
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
+    "@types/node": "20",
+    "@types/react": "19",
+    "@types/react-dom": "19",
     "babel-plugin-react-compiler": "1.0.0",
-    "eslint": "^9",
+    "eslint": "9",
     "eslint-config-next": "16.2.6",
-    "typescript": "^5"
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-prettier": "5.5.5",
+    "eslint-plugin-simple-import-sort": "13.0.0",
+    "prettier": "3.8.3",
+    "stylelint": "17.12.0",
+    "stylelint-config-standard": "40.0.0",
+    "stylelint-order": "8.1.1",
+    "typescript": "5"
   }
 }
