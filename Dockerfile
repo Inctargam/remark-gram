@@ -2,7 +2,7 @@
 FROM node:24.16.0-alpine as dependencies
 WORKDIR /app
 RUN corepack enable && corepack prepare pnpm@latest --activate
-COPY package.json pnpm-lock.yaml* ./
+COPY package.json pnpm-lock.yaml* .npmrc ./
 RUN pnpm install --frozen-lockfile
 
 #Билдим приложение
@@ -23,4 +23,4 @@ WORKDIR /app
 ENV NODE_ENV production
 COPY --from=builder /app/ ./
 EXPOSE 3000
-CMD ["pnpm", "dev"]
+CMD ["pnpm", "start"]
