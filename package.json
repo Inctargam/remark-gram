@@ -31,5 +31,8 @@
     "stylelint-config-standard": "40.0.0",
     "stylelint-order": "8.1.1",
     "typescript": "5"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["sharp", "unrs-resolver"]
   }
 }
