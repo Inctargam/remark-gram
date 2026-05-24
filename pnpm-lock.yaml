@@ -9,7 +9,7 @@ importers:
   .:
     dependencies:
       '@tanstack/react-query':
-        specifier: ^5.100.14
+        specifier: 5.100.14
         version: 5.100.14(react@19.2.4)
       next:
         specifier: 16.2.6
@@ -21,7 +21,7 @@ importers:
         specifier: 19.2.4
         version: 19.2.4(react@19.2.4)
       react-hook-form:
-        specifier: ^7.76.1
+        specifier: 7.76.1
         version: 7.76.1(react@19.2.4)
     devDependencies:
       '@types/node':
