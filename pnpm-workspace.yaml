@@ -1,3 +1,8 @@
 allowBuilds:
   sharp: true
   unrs-resolver: true
+
+onlyBuiltDependencies:
+  - esbuild
+  - sharp
+  - unrs-resolver

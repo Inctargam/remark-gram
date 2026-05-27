@@ -1,7 +1,148 @@
-<!-- BEGIN:nextjs-agent-rules -->
+# Project Instructions
 
-# This is NOT the Next.js you know
+## Next.js
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
+This is NOT the Next.js you may know from older projects.
 
-<!-- END:nextjs-agent-rules -->
+The project uses Next.js 16. Before changing framework-specific code, read the relevant guide in `node_modules/next/dist/docs/`. APIs, conventions, routing behavior, and file structure may differ from older Next.js versions. Follow deprecation notices.
+
+## Package Manager
+
+Use `pnpm` only.
+
+- Install dependencies with `pnpm install`.
+- Run scripts with `pnpm <script>` or `pnpm run <script>`.
+- Do not introduce `package-lock.json`, `yarn.lock`, or npm/yarn commands.
+- Keep dependency versions pinned when adding or updating packages; do not use `^` or `~` for new dependencies.
+
+## Architecture
+
+Use Feature-Sliced Design (FSD). Do not use the classic "feature folder" structure as the project architecture.
+
+Next.js routing is an exception to the FSD folder layout. The framework-level `app` directory at the project root is required for Next.js routing only.
+
+- Keep route segments, `layout.tsx`, `page.tsx`, `loading.tsx`, `error.tsx`, route handlers, and other Next.js routing files in the root-level `app`.
+- Keep route files thin: compose pages/widgets/features from `src`, but do not place business logic there.
+- Do not treat the root-level `app` directory as the FSD `app` layer.
+- The FSD app layer lives in `src/app` and contains providers, app initialization, global setup, and app-level configuration.
+
+The expected source layers are:
+
+- `src/app` - app initialization, providers, global setup.
+- `src/pages` - page-level compositions.
+- `src/widgets` - large independent UI blocks assembled from features/entities/shared.
+- `src/features` - user actions and business scenarios.
+- `src/entities` - business entities and their model/ui/api.
+- `src/shared` - reusable infrastructure, UI kit, libs, config, API clients, types.
+
+FSD rules:
+
+- Prefer layer imports from lower layers only.
+- Do not import from higher layers into lower layers.
+- Use public APIs via `index.ts` where a slice exposes reusable code.
+- Keep slice internals private unless they are intentionally exported.
+- Place shared utilities in `src/shared`; place local utilities near the slice/component that owns them.
+
+## Naming
+
+- React component files: `PascalCase.tsx`.
+- Non-component files: `camelCase.ts`.
+- Storybook files: `ComponentName.stories.tsx`.
+- Tests: `name.test.ts` or `name.test.tsx`; test folders may be named `__tests__`.
+- Variables, objects, arrays, and functions: `camelCase`.
+- Constants: `CONSTANT_CASE`.
+- Enums: `PascalCase`; do not use `const enum`.
+- Types should not end with `Type`.
+- Local component props are named `Props`.
+- Exported component props use the entity name, for example `ButtonProps`.
+
+Avoid:
+
+- One-letter variable names except simple loop counters.
+- Abbreviations that reduce readability.
+- Meaningless names such as `foo`, `data1`, `temp`.
+- Leading underscores in ordinary variable names.
+
+## React
+
+- Do not use `React.FC` for component typing.
+- Destructure props in the function signature.
+- Keep one React component per file.
+- Prefer `Fragment` (`<>...</>`) over unnecessary wrapper elements.
+- If component logic grows beyond roughly 20 lines, move related logic into a custom hook.
+- Keep components reasonably small; split components before they become hard to scan.
+- Name event handlers with the `Handler` suffix, for example `submitHandler`.
+- Extract complex boolean expressions into named variables.
+- Prefer positive boolean conditions over negated branching when readability improves.
+- Use braces for single-line `if` blocks.
+
+Component file order:
+
+1. Imports.
+2. Types.
+3. Local constants.
+4. Component declaration.
+5. Hooks/state/selectors/actions.
+6. Effects.
+7. Handlers and callbacks.
+8. JSX return.
+
+## TypeScript
+
+- Keep TypeScript strict and explicit where it improves readability.
+- Prefer type-only imports for types: `import type { Foo } from './foo'`.
+- Use `as const` object maps when they are clearer than enums.
+- Avoid `any`; use `unknown` and narrow it.
+- Do not create broad `utils.ts` dumping grounds. Split utilities by responsibility.
+
+## Imports And Exports
+
+- In Next.js code, use the project alias `@/*` for source imports when appropriate.
+- Prefer named exports.
+- Avoid `export default` except where required by Next.js, Storybook/config tooling, dynamic imports, or third-party conventions.
+- Use `index.ts` as a public API for FSD slices and shared modules.
+- Do not import through deep private paths when a public API exists.
+
+## Comments
+
+- Comments should explain non-obvious decisions, not restate the code.
+- Write comments in English.
+- Prefer JSDoc for exported utilities or APIs that need explanation.
+- Do not leave commented-out code in the repository.
+
+## Commands
+
+Common commands:
+
+- `pnpm dev` - start Next.js dev server.
+- `pnpm build` - build the app.
+- `pnpm lint` - run ESLint.
+- `pnpm storybook` - start Storybook on port 6006.
+- `pnpm build-storybook` - build Storybook into `storybook-static`.
+
+## Generated Files
+
+- `storybook-static` is generated by Storybook and can be deleted/recreated.
+- Do not commit generated build output unless the task explicitly requires it.
+
+## Commit Messages
+
+Use the project/task prefix when available, then a lowercase conventional type:
+
+```text
+ST-1057 feat: add sign in form
+```
+
+Allowed types:
+
+- `init`
+- `feat`
+- `fix`
+- `refactor`
+- `test`
+- `docs`
+- `chore`
+- `build`
+- `ci`
+
+Use present tense and imperative mood.
