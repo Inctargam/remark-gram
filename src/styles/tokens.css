@@ -1,0 +1,99 @@
+:root {
+  /* ─── Primary ─────────────────────────────── */
+  --color-primary-100: #73A5FF;
+  --color-primary-300: #4C8DFF;
+  --color-primary-500: #397DF6;
+  --color-primary-700: #2F68CC;
+  --color-primary-900: #234E99;
+
+  /* ─── Danger ──────────────────────────────── */
+  --color-danger-100: #FF8099;
+  --color-danger-300: #F23D61;
+  --color-danger-500: #CC1439;
+  --color-danger-700: #990F2B;
+  --color-danger-900: #660A1D;
+
+  /* ─── Warning ─────────────────────────────── */
+  --color-warning-100: #FFD073;
+  --color-warning-300: #E6AC39;
+  --color-warning-500: #D99100;
+  --color-warning-700: #960;
+  --color-warning-900: #640;
+
+  /* ─── Success ─────────────────────────────── */
+  --color-success-100: #80FFBF;
+  --color-success-300: #22E684;
+  --color-success-500: #14CC70;
+  --color-success-700: #0F9954;
+  --color-success-900: #0A6638;
+
+  /* ─── Light ───────────────────────────────── */
+  --color-light-100: #FFF;
+  --color-light-300: #F7FBFF;
+  --color-light-500: #EDF3FA;
+  --color-light-700: #D5DAE0;
+  --color-light-900: #8D9094;
+
+  /* ─── Dark ────────────────────────────────── */
+  --color-dark-100: #4C4C4C;
+  --color-dark-300: #333;
+  --color-dark-500: #171717;
+  --color-dark-700: #0D0D0D;
+  --color-dark-900: #000;
+
+  /* ─── Semantic aliases ────────────────────── */
+  --color-bg: #0D0D0D;
+  --color-bg-secondary: #171717;
+  --color-bg-card: #171717;
+  --color-border: #D5DAE0;
+  --color-text-primary: #FFF;
+  --color-text-secondary: #8D9094;
+  --color-text-placeholder: #8D9094;
+
+  /* ─── Typography ──────────────────────────── */
+  --font-base: 'Inter', sans-serif;
+  /* large */
+  --font-size-large: 26px;
+  --font-weight-large: 600;
+  --line-height-large: 36px;
+  /* h1 */
+  --font-size-h1: 20px;
+  --font-weight-h1: 700;
+  --line-height-h1: 36px;
+  /* h2 */
+  --font-size-h2: 18px;
+  --font-weight-h2: 700;
+  --line-height-h2: 24px;
+  /* h3 */
+  --font-size-h3: 16px;
+  --font-weight-h3: 600;
+  --line-height-h3: 24px;
+  /* regular-16 */
+  --font-size-regular-16: 16px;
+  --font-weight-regular-16: 400;
+  --line-height-regular-16: 24px;
+  /* bold-16 */
+  --font-size-bold-16: 16px;
+  --font-weight-bold-16: 700;
+  --line-height-bold-16: 24px;
+  /* regular-14 */
+  --font-size-regular-14: 14px;
+  --font-weight-regular-14: 400;
+  --line-height-regular-14: 24px;
+  /* medium-14 */
+  --font-size-medium-14: 14px;
+  --font-weight-medium-14: 500;
+  --line-height-medium-14: 24px;
+  /* bold-14 */
+  --font-size-bold-14: 14px;
+  --font-weight-bold-14: 700;
+  --line-height-bold-14: 24px;
+  /* small */
+  --font-size-small: 12px;
+  --font-weight-small: 400;
+  --line-height-small: 16px;
+  /* semibold-small */
+  --font-size-semibold-small: 12px;
+  --font-weight-semibold-small: 600;
+  --line-height-semibold-small: 16px;
+}

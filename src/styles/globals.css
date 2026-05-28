@@ -1,0 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('./tokens.css');
+@import url('./reset.css');
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  font-family: var(--font-base), sans-serif;
+}
+
+a {
+  color: var(--color-primary-500);
+  text-decoration: underline;
+}
+
+a:hover {
+  color: var(--color-primary-300);
+}
