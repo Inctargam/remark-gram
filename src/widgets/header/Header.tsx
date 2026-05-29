@@ -24,7 +24,7 @@ export const Header = ({
 }: HeaderProps) => (
   <header className={styles.header}>
     <div className={styles.inner}>
-      <span className={styles.logo}>Inctagram</span>
+      <span className={styles.logo}>remarkgram</span>
       <div className={styles.controls}>
         {variant === 'auth' && (
           <div className={styles.bell}>

@@ -8,7 +8,7 @@ export type HeaderMobileProps = {
 
 export const HeaderMobile = ({ onMenuClick }: HeaderMobileProps) => (
   <header className={styles.header}>
-    <span className={styles.logo}>Inctagram</span>
+    <span className={styles.logo}>remarkgram</span>
     <button className={styles.menuButton} onClick={onMenuClick} aria-label="Open menu">
       <Icon iconId="icon-more-horizontal" />
     </button>
