@@ -1,0 +1,125 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 24px;
+  border: none;
+  border-radius: 2px;
+  font-family: var(--font-base);
+  font-size: var(--font-size-regular-16);
+  font-weight: 600;
+  line-height: var(--line-height-regular-16);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.button[data-disabled] {
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ─── Primary ─────────────────────────────── */
+
+.primary {
+  background-color: var(--color-primary-500);
+  color: var(--color-light-100);
+}
+
+.primary:hover {
+  background-color: var(--color-primary-100);
+}
+
+.primary:active {
+  background-color: var(--color-primary-700);
+  color: var(--color-light-500);
+}
+
+.primary:focus-visible {
+  outline: 2px solid var(--color-primary-700);
+  outline-offset: 0;
+}
+
+.primary[data-disabled] {
+  background-color: var(--color-primary-900);
+  color: var(--color-light-900);
+}
+
+/* ─── Secondary ───────────────────────────── */
+
+.secondary {
+  background-color: var(--color-dark-300);
+  color: var(--color-light-100);
+}
+
+.secondary:hover {
+  background-color: var(--color-dark-100);
+}
+
+.secondary:active {
+  background-color: #212121;
+}
+
+.secondary:focus-visible {
+  outline: 2px solid var(--color-primary-300);
+  outline-offset: 0;
+}
+
+.secondary[data-disabled] {
+  background-color: var(--color-dark-500);
+  color: var(--color-light-900);
+}
+
+/* ─── Outline ─────────────────────────────── */
+
+.outline {
+  background-color: transparent;
+  color: var(--color-primary-500);
+  border: 1px solid var(--color-primary-500);
+}
+
+.outline:hover {
+  color: var(--color-primary-100);
+  border-color: var(--color-primary-100);
+}
+
+.outline:active {
+  color: var(--color-primary-700);
+  border-color: var(--color-primary-700);
+}
+
+.outline:focus-visible {
+  color: var(--color-primary-700);
+  border-color: var(--color-primary-700);
+  outline: 2px solid var(--color-primary-700);
+  outline-offset: 1px;
+}
+
+.outline[data-disabled] {
+  color: var(--color-primary-900);
+  border-color: var(--color-primary-900);
+}
+
+/* ─── Text ────────────────────────────────── */
+
+.text {
+  background-color: transparent;
+  color: var(--color-primary-500);
+}
+
+.text:hover {
+  color: var(--color-primary-100);
+}
+
+.text:active {
+  color: var(--color-primary-700);
+}
+
+.text:focus-visible {
+  outline: 2px solid var(--color-primary-700);
+  outline-offset: 2px;
+}
+
+.text[data-disabled] {
+  color: var(--color-light-900);
+}
