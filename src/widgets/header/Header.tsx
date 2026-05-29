@@ -9,6 +9,8 @@ type Variant = 'auth' | 'guest'
 
 export type HeaderProps = {
   variant: Variant
+  // Slot pattern: the page/feature layer injects the language selector component.
+  // Keeps Header decoupled from the Select implementation (not yet built).
   languageSelector?: ReactNode
   notificationCount?: number
   onLoginClick?: () => void

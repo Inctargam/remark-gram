@@ -10,6 +10,7 @@ const meta = {
   parameters: {
     layout: 'fullscreen',
   },
+  // Same viewport workaround as HeaderMobile — constrains to mobile width.
   decorators: [
     (Story) => (
       <div style={{ width: '360px' }}>
@@ -34,6 +35,7 @@ export default meta
 
 type Story = StoryObj<typeof meta>
 
+// One story per active item so visual regression tests catch icon changes per state.
 export const Home: Story = {
   args: { activeItem: 'home' },
 }

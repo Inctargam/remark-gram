@@ -10,6 +10,8 @@ const meta = {
   parameters: {
     layout: 'fullscreen',
   },
+  // Storybook 10 viewport parameters do not resize the canvas as expected.
+  // A decorator wrapper is the reliable way to constrain mobile component width.
   decorators: [
     (Story) => (
       <div style={{ width: '360px' }}>
@@ -29,4 +31,5 @@ export default meta
 
 type Story = StoryObj<typeof meta>
 
+// No additional args needed — the component has a single visual state.
 export const Default: Story = {}

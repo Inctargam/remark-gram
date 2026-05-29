@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
+// fn() creates a spy function — clicks are recorded and shown in the Actions panel.
 import { fn } from 'storybook/test'
 
 import { Header } from './Header'
@@ -8,6 +9,7 @@ const meta = {
   component: Header,
   tags: ['autodocs'],
   parameters: {
+    // fullscreen — the header uses width: 100%, centered layout would clip it.
     layout: 'fullscreen',
   },
   argTypes: {
@@ -20,6 +22,7 @@ const meta = {
       control: { type: 'number', min: 0 },
       description: 'Количество уведомлений (только для variant="auth")',
     },
+    // ReactNode cannot be represented as a form control — disable to avoid a broken input.
     languageSelector: {
       control: false,
       description: 'Слот для компонента выбора языка (ReactNode)',
@@ -27,6 +30,8 @@ const meta = {
     onLoginClick: { description: 'Коллбэк кнопки Log in' },
     onSignupClick: { description: 'Коллбэк кнопки Sign up' },
   },
+  // Callbacks defined at meta level are shared by all stories — no need to repeat them.
+  // Each click appears as an event in the Actions panel.
   args: {
     onLoginClick: fn(),
     onSignupClick: fn(),
@@ -60,6 +65,7 @@ export const AuthWithNotifications: Story = {
 export const AuthWithLanguageSelector: Story = {
   args: {
     variant: 'auth',
+    // Placeholder for the real Select component — demonstrates the languageSelector slot.
     languageSelector: (
       <span style={{ color: 'var(--color-light-100)', fontSize: '14px' }}>🌐 EN</span>
     ),

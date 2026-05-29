@@ -2,13 +2,23 @@ import type { Meta, StoryObj } from '@storybook/react'
 
 import { Button } from './Button'
 
+// `satisfies Meta<typeof Button>` is preferred over `: Meta<typeof Button>`.
+// `satisfies` validates the object against the type but preserves literal types,
+// which gives better TypeScript inference for args in stories below.
 const meta = {
+  // Path shown in the Storybook sidebar.
   title: 'shared/ui/Button',
   component: Button,
+  // Enables the auto-generated Docs tab for this component.
+  // Without this tag the Docs page does not appear.
   tags: ['autodocs'],
   parameters: {
+    // Centers the component in the canvas — suitable for small, self-contained UI elements.
     layout: 'centered',
   },
+  // argTypes describes how each prop appears in the Controls panel.
+  // Storybook can infer basic controls from TypeScript, but explicit argTypes
+  // give us descriptions and let us choose the control widget.
   argTypes: {
     variant: {
       control: 'select',
@@ -28,6 +38,8 @@ const meta = {
 
 export default meta
 
+// `typeof meta` — not `typeof Button` — so Story inherits args already narrowed
+// by the meta object (e.g. `variant` is typed as the union, not a plain string).
 type Story = StoryObj<typeof meta>
 
 export const Primary: Story = {
@@ -54,6 +66,9 @@ export const Disabled: Story = {
   },
 }
 
+// `render` replaces the default single-instance render.
+// Use it when you need multiple component instances or a custom layout —
+// args only controls one instance at a time.
 export const AllVariants: Story = {
   render: () => (
     <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>

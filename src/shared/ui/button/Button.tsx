@@ -8,6 +8,8 @@ type Variant = 'primary' | 'secondary' | 'outline' | 'text'
 
 export type ButtonProps = {
   variant?: Variant
+  // Override className to plain string — BaseUI's className accepts an object with state flags,
+  // but we manage states via CSS [data-*] selectors so a plain string is sufficient here.
   className?: string
 } & Omit<BaseButtonProps, 'className'>
 
