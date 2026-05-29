@@ -96,4 +96,14 @@
   --font-size-semibold-small: 12px;
   --font-weight-semibold-small: 600;
   --line-height-semibold-small: 16px;
+  /* regular-link */
+  --font-size-regular-link: 14px;
+  --font-weight-regular-link: 400;
+  --line-height-regular-link: 24px;
+  --text-decoration-regular-link: underline;
+  /* small-link */
+  --font-size-small-link: 12px;
+  --font-weight-small-link: 400;
+  --line-height-small-link: 16px;
+  --text-decoration-small-link: underline;
 }
