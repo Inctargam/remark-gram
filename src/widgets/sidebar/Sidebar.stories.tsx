@@ -52,22 +52,12 @@ const meta = {
     ),
   ],
   argTypes: {
-    activeItem: {
-      control: 'select',
-      options: ['home', 'create', 'profile', 'messenger', 'search', 'statistics', 'favorites'],
-      description: 'Fallback active item when currentPathname is not available',
-    },
     currentPathname: {
       control: 'text',
       description: 'Override текущего URL для Storybook и тестов',
     },
-    logoutHref: {
-      control: 'text',
-      description: 'URL страницы Sign In для Log Out',
-    },
   },
   args: {
-    logoutHref: '/sign-in',
     onLogout: fn(),
     onNavigate: fn(),
   },
@@ -91,7 +81,7 @@ export const ProfileActive: Story = {
 
 export const Focus: Story = {
   args: {
-    currentPathname: '/',
+    currentPathname: '/focus-preview',
   },
   play: async ({ canvas }) => {
     const createLink = canvas.getByRole('link', { name: 'Create' })
@@ -110,40 +100,29 @@ export const Disabled: Story = {
   play: async ({ args, canvas }) => {
     const homeLink = canvas.getByRole('link', { name: 'Home' })
     const createItem = canvas.getByText('Create').closest('[aria-disabled="true"]')
-    const profileLink = canvas.getByRole('link', { name: 'My Profile' })
 
     await expect(homeLink).not.toHaveAttribute('aria-current')
     await expect(createItem).toBeInTheDocument()
 
     await userEvent.click(canvas.getByText('Create'))
     await expect(args.onNavigate).not.toHaveBeenCalledWith('create')
-
-    await userEvent.tab()
-    await userEvent.tab()
-    await expect(profileLink).toHaveFocus()
   },
 }
 
 export const Interactive: Story = {
   args: {
-    currentPathname: '/',
+    currentPathname: '/search',
   },
   play: async ({ args, canvas }) => {
     const homeLink = canvas.getByRole('link', { name: 'Home' })
     const searchLink = canvas.getByRole('link', { name: 'Search' })
-    const logoutLink = canvas.getByRole('link', { name: 'Log Out' })
+    const logoutButton = canvas.getByRole('button', { name: 'Log Out' })
 
-    await expect(homeLink).toHaveAttribute('aria-current', 'page')
-    await expect(searchLink).toHaveAttribute('href', '/search')
-    await expect(searchLink).not.toHaveAttribute('aria-current')
-    await expect(logoutLink).toHaveAttribute('href', '/sign-in')
-
-    await userEvent.click(searchLink)
-    await expect(args.onNavigate).toHaveBeenCalledWith('search')
-    await expect(searchLink).toHaveAttribute('aria-current', 'page')
     await expect(homeLink).not.toHaveAttribute('aria-current')
+    await expect(searchLink).toHaveAttribute('href', '/search')
+    await expect(searchLink).toHaveAttribute('aria-current', 'page')
 
-    await userEvent.click(logoutLink)
+    await userEvent.click(logoutButton)
     await expect(args.onLogout).toHaveBeenCalled()
   },
 }

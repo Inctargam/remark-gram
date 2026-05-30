@@ -3,7 +3,6 @@
 import clsx from 'clsx'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
 
 import { Icon } from '@/shared/ui/icon'
 
@@ -28,10 +27,8 @@ export type SidebarItem = {
 }
 
 export type SidebarProps = {
-  activeItem?: SidebarItemId
   currentPathname?: string
   items?: SidebarItem[]
-  logoutHref?: string
   className?: string
   onNavigate?: (item: SidebarItemId) => void
   onLogout?: () => void
@@ -91,41 +88,21 @@ const isPathActive = (pathname: string, href: string) => {
   return pathname === href || pathname.startsWith(`${href}/`)
 }
 
-const getActiveItemByPathname = (items: SidebarItem[], pathname?: string) => {
-  if (!pathname) {
-    return undefined
-  }
-
-  return items.find(({ href }) => isPathActive(pathname, href))?.id
-}
-
 export const Sidebar = ({
-  activeItem = 'home',
   currentPathname,
   items = SIDEBAR_ITEMS,
-  logoutHref = '/sign-in',
   className,
   onNavigate,
   onLogout,
 }: SidebarProps) => {
   const pathname = usePathname()
   const activePathname = currentPathname ?? pathname ?? undefined
-  const routeActiveItem = getActiveItemByPathname(items, activePathname)
-  const [optimisticActiveItem, setOptimisticActiveItem] = useState<
-    { id: SidebarItemId; pathname?: string } | undefined
-  >()
-  const currentOptimisticItem =
-    optimisticActiveItem && optimisticActiveItem.pathname === activePathname
-      ? optimisticActiveItem.id
-      : undefined
-  const resolvedActiveItem =
-    currentOptimisticItem ?? routeActiveItem ?? (activePathname ? undefined : activeItem)
 
   return (
-    <aside className={clsx(styles.root, className)}>
-      <nav className={styles.nav} aria-label="Primary navigation">
+    <nav className={clsx(styles.root, className)} aria-label="Primary navigation">
+      <div className={styles.navList}>
         {items.map(({ id, label, href, icon, activeIcon, disabled }) => {
-          const isActive = resolvedActiveItem === id
+          const isActive = activePathname ? isPathActive(activePathname, href) : false
           const content = (
             <>
               <Icon
@@ -152,20 +129,17 @@ export const Sidebar = ({
               aria-current={isActive ? 'page' : undefined}
               className={clsx(styles.item, isActive && styles.active)}
               href={href}
-              onClick={() => {
-                setOptimisticActiveItem({ id, pathname: activePathname })
-                onNavigate?.(id)
-              }}>
+              onClick={() => onNavigate?.(id)}>
               {content}
             </Link>
           )
         })}
-      </nav>
+      </div>
 
-      <Link className={styles.logout} href={logoutHref} onClick={onLogout}>
+      <button className={styles.logout} onClick={onLogout} type="button">
         <Icon className={styles.icon} height={24} iconId="icon-log-out-outline" width={24} />
         <span className={styles.label}>Log Out</span>
-      </Link>
-    </aside>
+      </button>
+    </nav>
   )
 }
