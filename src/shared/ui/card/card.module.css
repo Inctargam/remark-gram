@@ -1,0 +1,25 @@
+.root {
+  box-sizing: border-box;
+  width: 100%;
+  border: 1px solid var(--color-dark-300);
+  border-radius: 2px;
+  background-color: var(--color-dark-500);
+  color: var(--color-light-100);
+  font-family: var(--font-base), sans-serif;
+}
+
+.none {
+  padding: 0;
+}
+
+.small {
+  padding: 12px;
+}
+
+.medium {
+  padding: 24px;
+}
+
+.large {
+  padding: 36px;
+}
