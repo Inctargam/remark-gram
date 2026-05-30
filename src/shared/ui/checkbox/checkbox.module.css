@@ -1,0 +1,124 @@
+.root {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 6px;
+  color: var(--color-light-100);
+  font-family: var(--font-base), sans-serif;
+  font-size: var(--font-size-regular-14);
+  font-weight: var(--font-weight-regular-14);
+  line-height: var(--line-height-regular-14);
+  cursor: pointer;
+  user-select: none;
+}
+
+.root[data-disabled] {
+  color: var(--color-light-900);
+  cursor: not-allowed;
+}
+
+.control {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+  justify-content: center;
+  align-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background-color: transparent;
+  color: var(--color-light-500);
+  cursor: pointer;
+}
+
+.control::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  z-index: 0;
+  border-radius: 50%;
+  background-color: transparent;
+  transition: background-color 0.15s;
+}
+
+.control::after {
+  content: '';
+  position: relative;
+  z-index: 1;
+  width: 18px;
+  height: 18px;
+  border: 2px solid currentcolor;
+  border-radius: 2px;
+  background-color: transparent;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+.control:hover::before {
+  background-color: var(--color-dark-300);
+}
+
+.control:active::before {
+  background-color: var(--color-dark-100);
+}
+
+.control:focus-visible {
+  outline: none;
+}
+
+.control:focus-visible::before,
+.control[data-focused]::before {
+  background-color: var(--color-dark-500);
+}
+
+.control[data-checked] {
+  color: var(--color-light-100);
+}
+
+.control[data-checked]::after {
+  background-color: var(--color-light-100);
+}
+
+.control[data-disabled] {
+  color: var(--color-light-900);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.control[data-disabled][data-checked] {
+  color: var(--color-dark-100);
+}
+
+.control[data-disabled][data-checked]::after {
+  background-color: var(--color-dark-100);
+}
+
+.indicator {
+  position: absolute;
+  z-index: 2;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+}
+
+.indicator::before {
+  content: '';
+  width: 10px;
+  height: 6px;
+  margin-bottom: 2px;
+  border-bottom: 2px solid var(--color-dark-900);
+  border-left: 2px solid var(--color-dark-900);
+  transform: rotate(-45deg);
+}
+
+.control[data-disabled] .indicator::before {
+  border-color: var(--color-light-700);
+}
+
+.label {
+  min-width: 0;
+}
