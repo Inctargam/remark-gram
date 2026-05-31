@@ -1,0 +1,31 @@
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Hidden on mobile, visible on desktop */
+.sidebarSlot {
+  display: none;
+}
+
+.main {
+  flex: 1;
+}
+
+@media (min-width: 768px) {
+  .shell {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .sidebarSlot {
+    display: block;
+    flex-shrink: 0;
+  }
+
+  /* Hidden on desktop */
+  .bottomBarSlot {
+    display: none;
+  }
+}
