@@ -1,0 +1,11 @@
+.forceActive {
+  --radio-item-state-background: var(--color-dark-100);
+}
+
+.forceHover {
+  --radio-item-state-background: var(--color-dark-300);
+}
+
+.forceFocus {
+  --radio-item-state-background: var(--color-dark-500);
+}
