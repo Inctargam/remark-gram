@@ -1,0 +1,16 @@
+.frame {
+  padding: 24px;
+  background-color: var(--color-dark-900);
+}
+
+.hoverState label {
+  --radio-item-state-background: var(--color-dark-300);
+}
+
+.focusState label {
+  --radio-item-state-background: var(--color-dark-500);
+}
+
+.activeState label {
+  --radio-item-state-background: var(--color-dark-100);
+}

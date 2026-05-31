@@ -1,0 +1,19 @@
+.frame {
+  padding: 24px;
+  background-color: var(--color-dark-700);
+}
+
+.hoverState textarea {
+  border-color: var(--color-dark-100);
+}
+
+.activeState textarea {
+  border-color: var(--color-light-100);
+  color: var(--color-light-100);
+}
+
+.focusState textarea {
+  color: var(--color-light-100);
+  outline: 2px solid var(--color-primary-700);
+  outline-offset: 0;
+}
