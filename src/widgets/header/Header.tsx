@@ -1,51 +1,75 @@
+'use client'
+
+import Link from 'next/link'
 import type { ReactNode } from 'react'
 
+import { ROUTES } from '@/shared/config/routes'
 import { Button } from '@/shared/ui/button'
 import { Icon } from '@/shared/ui/icon'
 
 import styles from './header.module.css'
 
-type Variant = 'auth' | 'guest'
-
-export type HeaderProps = {
-  variant: Variant
-  // Slot pattern: the page/feature layer injects the language selector component.
-  // Keeps Header decoupled from the Select implementation (not yet built).
-  languageSelector?: ReactNode
+// Discriminated union — TS не позволит передать notificationCount при variant="guest"
+// и onLoginClick при variant="auth": невозможные комбинации отсечены на уровне типов.
+type AuthVariant = {
+  variant: 'auth'
   notificationCount?: number
-  onLoginClick?: () => void
-  onSignupClick?: () => void
+  onBellClick?: () => void
+  languageSelector?: ReactNode
 }
 
-export const Header = ({
-  variant,
-  languageSelector,
-  notificationCount = 0,
-  onLoginClick,
-  onSignupClick,
-}: HeaderProps) => (
-  <header className={styles.header}>
-    <div className={styles.inner}>
-      <span className={styles.logo}>remarkgram</span>
-      <div className={styles.controls}>
-        {variant === 'auth' && (
-          <div className={styles.bell}>
-            <Icon iconId="icon-bell-outline" />
-            {notificationCount > 0 && <span className={styles.badge}>{notificationCount}</span>}
-          </div>
-        )}
-        {languageSelector}
-        {variant === 'guest' && (
-          <>
-            <Button variant="text" onClick={onLoginClick}>
-              Log in
-            </Button>
-            <Button variant="primary" onClick={onSignupClick}>
-              Sign up
-            </Button>
-          </>
-        )}
+type GuestVariant = {
+  variant: 'guest'
+  // Принимаем строки чтобы не хардкодить 'Log in' / 'Sign up' — заготовка под i18n.
+  loginLabel?: string
+  signupLabel?: string
+  onLoginClick?: () => void
+  onSignupClick?: () => void
+  languageSelector?: ReactNode
+}
+
+export type HeaderProps = AuthVariant | GuestVariant
+
+export const Header = (props: HeaderProps) => {
+  const { variant, languageSelector } = props
+
+  return (
+    <header className={styles.header}>
+      <div className={styles.inner}>
+        <Link className={styles.logo} href={ROUTES.home}>
+          remarkgram
+        </Link>
+
+        <div className={styles.controls}>
+          {variant === 'auth' && (
+            <button
+              aria-label="Notifications"
+              className={styles.bell}
+              type="button"
+              onClick={props.onBellClick}>
+              <Icon iconId="icon-bell-outline" />
+              {!!props.notificationCount && props.notificationCount > 0 && (
+                <span className={styles.badge}>
+                  {props.notificationCount > 99 ? '99+' : props.notificationCount}
+                </span>
+              )}
+            </button>
+          )}
+
+          {languageSelector}
+
+          {variant === 'guest' && (
+            <>
+              <Button variant="text" onClick={props.onLoginClick}>
+                {props.loginLabel ?? 'Log in'}
+              </Button>
+              <Button variant="primary" onClick={props.onSignupClick}>
+                {props.signupLabel ?? 'Sign up'}
+              </Button>
+            </>
+          )}
+        </div>
       </div>
-    </div>
-  </header>
-)
+    </header>
+  )
+}
