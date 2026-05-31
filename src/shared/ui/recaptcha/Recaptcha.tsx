@@ -1,6 +1,7 @@
 'use client'
 
 import clsx from 'clsx'
+import type { KeyboardEvent } from 'react'
 import { useEffect, useRef, useState } from 'react'
 
 import { Icon } from '../icon'
@@ -21,7 +22,7 @@ export type RecaptchaProps = {
 
 const ERROR_MESSAGES: Partial<Record<RecaptchaState, string>> = {
   error: 'Please verify that you are not a robot',
-  expired: 'Verifiction expired. Check the checkbox again.',
+  expired: 'Verification expired. Check the checkbox again.',
 }
 
 export const Recaptcha = ({
@@ -69,16 +70,26 @@ export const Recaptcha = ({
     onVerify?.()
   }
 
+  const keyDownHandler = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== ' ' && event.key !== 'Enter') {
+      return
+    }
+
+    event.preventDefault()
+    verifyHandler()
+  }
+
   return (
     <div className={clsx(styles.wrapper, hasOuterError && styles.wrapperError, className)}>
-      <button
+      <div
         aria-checked={isChecked}
+        aria-disabled={isLoading ? 'true' : undefined}
         aria-label={label}
         className={clsx(styles.root, styles[visualState])}
-        disabled={isLoading}
         onClick={verifyHandler}
+        onKeyDown={keyDownHandler}
         role="checkbox"
-        type="button">
+        tabIndex={isLoading ? -1 : 0}>
         {topMessage && <span className={styles.topMessage}>{topMessage}</span>}
 
         <span className={styles.challenge}>
@@ -101,7 +112,7 @@ export const Recaptcha = ({
           <span className={styles.brandName}>reCAPTCHA</span>
           <span className={styles.links}>Privacy - Terms</span>
         </span>
-      </button>
+      </div>
 
       {bottomMessage && <p className={styles.bottomMessage}>{bottomMessage}</p>}
     </div>
