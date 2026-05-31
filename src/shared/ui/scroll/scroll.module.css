@@ -24,17 +24,6 @@
   min-width: 100%;
 }
 
-.fade .viewport {
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0,
-    black min(24px, var(--scroll-area-overflow-y-start)),
-    black calc(100% - min(24px, var(--scroll-area-overflow-y-end))),
-    transparent 100%
-  );
-  mask-repeat: no-repeat;
-}
-
 .scrollbar {
   display: flex;
   padding: 5px;

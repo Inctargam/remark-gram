@@ -1,11 +1,16 @@
-.forceActive {
-  --radio-item-state-background: var(--color-dark-100);
+.frame {
+  padding: 24px;
+  background-color: var(--color-dark-900);
 }
 
-.forceHover {
+.hoverState label {
   --radio-item-state-background: var(--color-dark-300);
 }
 
-.forceFocus {
+.focusState label {
   --radio-item-state-background: var(--color-dark-500);
+}
+
+.activeState label {
+  --radio-item-state-background: var(--color-dark-100);
 }

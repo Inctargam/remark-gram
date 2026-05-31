@@ -13,10 +13,6 @@ const meta = {
     layout: 'centered',
   },
   argTypes: {
-    fade: {
-      control: 'boolean',
-      description: 'Adds top and bottom fade masks based on Base UI overflow variables.',
-    },
     orientation: {
       control: 'radio',
       options: ['vertical', 'horizontal', 'both'],
@@ -25,7 +21,6 @@ const meta = {
   },
   args: {
     children: null,
-    fade: false,
     orientation: 'vertical',
   },
 } satisfies Meta<typeof Scroll>

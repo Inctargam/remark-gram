@@ -10,33 +10,22 @@ type Orientation = 'vertical' | 'horizontal' | 'both'
 export type ScrollProps = {
   children: ReactNode
   className?: string
-  contentClassName?: string
-  fade?: boolean
   orientation?: Orientation
-  viewportClassName?: string
 } & Omit<ScrollAreaRootProps, 'children' | 'className'>
 
 export const Scroll = ({
   children,
   className,
-  contentClassName,
-  fade = false,
   orientation = 'vertical',
-  viewportClassName,
   ...props
 }: ScrollProps) => {
   const hasHorizontalScrollbar = orientation === 'horizontal' || orientation === 'both'
   const hasVerticalScrollbar = orientation === 'vertical' || orientation === 'both'
 
   return (
-    <ScrollArea.Root
-      className={clsx(styles.root, fade && styles.fade, className)}
-      overflowEdgeThreshold={8}
-      {...props}>
-      <ScrollArea.Viewport className={clsx(styles.viewport, viewportClassName)}>
-        <ScrollArea.Content className={clsx(styles.content, contentClassName)}>
-          {children}
-        </ScrollArea.Content>
+    <ScrollArea.Root className={clsx(styles.root, className)} overflowEdgeThreshold={8} {...props}>
+      <ScrollArea.Viewport className={styles.viewport}>
+        <ScrollArea.Content className={styles.content}>{children}</ScrollArea.Content>
       </ScrollArea.Viewport>
 
       {hasVerticalScrollbar && (

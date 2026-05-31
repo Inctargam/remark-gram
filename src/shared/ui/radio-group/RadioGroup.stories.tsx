@@ -1,11 +1,11 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Decorator, Meta, StoryObj } from '@storybook/react'
 
 import { RadioGroup } from './RadioGroup'
 import styles from './radioGroup.stories.module.css'
 
 const options = [
-  { label: 'RadioGroup', value: 'checked' },
-  { label: 'RadioGroup', value: 'off' },
+  { label: 'Checked option', value: 'checked' },
+  { label: 'Off option', value: 'off' },
 ]
 
 const meta = {
@@ -15,6 +15,13 @@ const meta = {
   parameters: {
     layout: 'centered',
   },
+  decorators: [
+    (Story) => (
+      <div className={styles.frame}>
+        <Story />
+      </div>
+    ),
+  ],
   argTypes: {
     direction: {
       control: 'radio',
@@ -35,36 +42,52 @@ export default meta
 
 type Story = StoryObj<typeof meta>
 
-export const Default: Story = {
-  args: {
-    defaultValue: 'checked',
-  },
-}
+const withState = (className: string): Decorator =>
+  function StateDecorator(Story) {
+    return (
+      <div className={className}>
+        <Story />
+      </div>
+    )
+  }
 
-export const Active: Story = {
+export const Checked: Story = {
   args: {
     defaultValue: 'checked',
-    itemClassName: styles.forceActive,
   },
 }
 
 export const Hover: Story = {
   args: {
     defaultValue: 'checked',
-    itemClassName: styles.forceHover,
   },
+  decorators: [withState(styles.hoverState)],
 }
 
 export const Focus: Story = {
   args: {
     defaultValue: 'checked',
-    itemClassName: styles.forceFocus,
   },
+  decorators: [withState(styles.focusState)],
+}
+
+export const Active: Story = {
+  args: {
+    defaultValue: 'checked',
+  },
+  decorators: [withState(styles.activeState)],
 }
 
 export const Disabled: Story = {
   args: {
     defaultValue: 'checked',
     disabled: true,
+  },
+}
+
+export const Vertical: Story = {
+  args: {
+    defaultValue: 'checked',
+    direction: 'vertical',
   },
 }
