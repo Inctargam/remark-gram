@@ -19,24 +19,15 @@ export const Checkbox = ({
   labelClassName,
   disabled,
   ...props
-}: CheckboxProps) => {
-  const control = (
-    <BaseCheckbox.Root
-      className={clsx(styles.control, controlClassName)}
-      disabled={disabled}
-      {...props}>
+}: CheckboxProps) => (
+  <BaseCheckbox.Root
+    className={clsx(styles.root, !children && styles.iconOnly, className)}
+    disabled={disabled}
+    {...props}>
+    <span className={clsx(styles.control, controlClassName)} aria-hidden="true">
       <BaseCheckbox.Indicator className={styles.indicator} />
-    </BaseCheckbox.Root>
-  )
+    </span>
 
-  if (!children) {
-    return control
-  }
-
-  return (
-    <label className={clsx(styles.root, className)} data-disabled={disabled || undefined}>
-      {control}
-      <span className={clsx(styles.label, labelClassName)}>{children}</span>
-    </label>
-  )
-}
+    {children && <span className={clsx(styles.label, labelClassName)}>{children}</span>}
+  </BaseCheckbox.Root>
+)

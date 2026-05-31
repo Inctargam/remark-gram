@@ -13,9 +13,19 @@
   user-select: none;
 }
 
+.root:focus-visible {
+  outline: none;
+}
+
 .root[data-disabled] {
   color: var(--color-light-900);
   cursor: not-allowed;
+}
+
+.iconOnly {
+  gap: 0;
+  min-height: auto;
+  padding: 0;
 }
 
 .control {
@@ -30,7 +40,6 @@
   border: none;
   background-color: transparent;
   color: var(--color-light-500);
-  cursor: pointer;
 }
 
 .control::before {
@@ -55,42 +64,37 @@
   transition: background-color 0.15s, border-color 0.15s;
 }
 
-.control:hover::before {
+.root:hover .control::before {
   background-color: var(--color-dark-300);
 }
 
-.control:active::before {
+.root:active .control::before {
   background-color: var(--color-dark-100);
 }
 
-.control:focus-visible {
-  outline: none;
-}
-
-.control:focus-visible::before,
-.control[data-focused]::before {
+.root:focus-visible .control::before,
+.root[data-focused] .control::before {
   background-color: var(--color-dark-500);
 }
 
-.control[data-checked] {
+.root[data-checked] .control {
   color: var(--color-light-100);
 }
 
-.control[data-checked]::after {
+.root[data-checked] .control::after {
   background-color: var(--color-light-100);
 }
 
-.control[data-disabled] {
+.root[data-disabled] .control {
   color: var(--color-light-900);
-  cursor: not-allowed;
   pointer-events: none;
 }
 
-.control[data-disabled][data-checked] {
+.root[data-disabled][data-checked] .control {
   color: var(--color-dark-100);
 }
 
-.control[data-disabled][data-checked]::after {
+.root[data-disabled][data-checked] .control::after {
   background-color: var(--color-dark-100);
 }
 
@@ -115,7 +119,7 @@
   transform: rotate(-45deg);
 }
 
-.control[data-disabled] .indicator::before {
+.root[data-disabled] .indicator::before {
   border-color: var(--color-light-700);
 }
 
