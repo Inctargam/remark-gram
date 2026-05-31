@@ -31,6 +31,14 @@ const eslintConfig = defineConfig([
     },
   },
   ...storybook.configs['flat/recommended'],
+  {
+    files: ['**/*.stories.tsx', '**/*.stories.ts'],
+    rules: {
+      // @storybook/nextjs-vite does not re-export Meta/StoryObj/Decorator —
+      // importing from @storybook/react is the only viable option until it does
+      'storybook/no-renderer-packages': 'off',
+    },
+  },
 ])
 
 export default eslintConfig

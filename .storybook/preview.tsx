@@ -3,12 +3,20 @@ import '@/app/styles/globals.css'
 import type { Preview } from '@storybook/react'
 
 const preview: Preview = {
+  tags: ['autodocs'],
   parameters: {
     controls: {
       matchers: {
         color: /(background|color)$/i,
         date: /Date$/i,
       },
+    },
+
+    docs: {
+      controls: {
+        sort: 'requiredFirst',
+      },
+      toc: true,
     },
 
     a11y: {
