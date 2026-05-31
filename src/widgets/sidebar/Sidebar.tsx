@@ -136,10 +136,10 @@ export const Sidebar = ({
         })}
       </div>
 
-      <button className={styles.logout} onClick={onLogout} type="button">
+      <Link className={styles.logout} href="/sign-in" onClick={onLogout}>
         <Icon className={styles.icon} height={24} iconId="icon-log-out-outline" width={24} />
         <span className={styles.label}>Log Out</span>
-      </button>
+      </Link>
     </nav>
   )
 }
