@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react'
-import { fn } from 'storybook/test'
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
+import { expect, fn, userEvent } from 'storybook/test'
 
 import { HeaderMobile } from './HeaderMobile'
 
@@ -10,8 +10,6 @@ const meta = {
   parameters: {
     layout: 'fullscreen',
   },
-  // Storybook 10 viewport parameters do not resize the canvas as expected.
-  // A decorator wrapper is the reliable way to constrain mobile component width.
   decorators: [
     (Story) => (
       <div style={{ width: '360px' }}>
@@ -20,7 +18,11 @@ const meta = {
     ),
   ],
   argTypes: {
-    onMenuClick: { description: 'Коллбэк кнопки открытия меню' },
+    languageSelector: {
+      control: false,
+      description: 'Слот для селектора языка',
+    },
+    onMenuClick: { description: 'Открывает модалку с дополнительными пунктами навигации' },
   },
   args: {
     onMenuClick: fn(),
@@ -31,5 +33,31 @@ export default meta
 
 type Story = StoryObj<typeof meta>
 
-// No additional args needed — the component has a single visual state.
 export const Default: Story = {}
+
+export const WithLanguageSelector: Story = {
+  args: {
+    languageSelector: (
+      <span style={{ color: 'var(--color-light-100)', fontSize: '14px' }}>🌐 EN</span>
+    ),
+  },
+}
+
+/** Логотип — ссылка на главную. */
+export const LogoLink: Story = {
+  play: async ({ canvas }) => {
+    const logo = canvas.getByRole('link', { name: 'remarkgram' })
+
+    await expect(logo).toHaveAttribute('href', '/')
+  },
+}
+
+/** Клик по кнопке меню вызывает onMenuClick. */
+export const MenuClick: Story = {
+  play: async ({ args, canvas }) => {
+    const button = canvas.getByRole('button', { name: 'Open menu' })
+
+    await userEvent.click(button)
+    await expect(args.onMenuClick).toHaveBeenCalledOnce()
+  },
+}

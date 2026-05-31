@@ -1,16 +1,33 @@
+'use client'
+
+import Link from 'next/link'
+import type { ReactNode } from 'react'
+
+import { ROUTES } from '@/shared/config/routes'
 import { Icon } from '@/shared/ui/icon'
 
 import styles from './headerMobile.module.css'
 
 export type HeaderMobileProps = {
+  languageSelector?: ReactNode
   onMenuClick?: () => void
 }
 
-export const HeaderMobile = ({ onMenuClick }: HeaderMobileProps) => (
+export const HeaderMobile = ({ languageSelector, onMenuClick }: HeaderMobileProps) => (
   <header className={styles.header}>
-    <span className={styles.logo}>remarkgram</span>
-    <button className={styles.menuButton} onClick={onMenuClick} aria-label="Open menu">
-      <Icon iconId="icon-more-horizontal" />
-    </button>
+    <Link className={styles.logo} href={ROUTES.home}>
+      remarkgram
+    </Link>
+
+    <div className={styles.controls}>
+      {languageSelector}
+      <button
+        aria-label="Open menu"
+        className={styles.menuButton}
+        type="button"
+        onClick={onMenuClick}>
+        <Icon iconId="icon-more-horizontal-outline" />
+      </button>
+    </div>
   </header>
 )

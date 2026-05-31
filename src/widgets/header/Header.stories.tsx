@@ -1,6 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react'
-// fn() creates a spy function — clicks are recorded and shown in the Actions panel.
-import { fn } from 'storybook/test'
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
+import { expect, fn, userEvent } from 'storybook/test'
 
 import { Header } from './Header'
 
@@ -9,30 +8,28 @@ const meta = {
   component: Header,
   tags: ['autodocs'],
   parameters: {
-    // fullscreen — the header uses width: 100%, centered layout would clip it.
     layout: 'fullscreen',
+    docs: {
+      description: {
+        component:
+          'Десктопный хедер. Discriminated union по `variant` — ' +
+          'TS не допустит `notificationCount` при `variant="guest"` и наоборот.',
+      },
+    },
   },
   argTypes: {
     variant: {
       control: 'radio',
       options: ['auth', 'guest'],
-      description: 'Вариант хедера: для авторизованного или гостевого пользователя',
+      description: 'Переключает набор допустимых пропов',
     },
-    notificationCount: {
-      control: { type: 'number', min: 0 },
-      description: 'Количество уведомлений (только для variant="auth")',
-    },
-    // ReactNode cannot be represented as a form control — disable to avoid a broken input.
     languageSelector: {
       control: false,
-      description: 'Слот для компонента выбора языка (ReactNode)',
+      description: 'Слот для селектора языка (ReactNode) — заготовка под i18n',
     },
-    onLoginClick: { description: 'Коллбэк кнопки Log in' },
-    onSignupClick: { description: 'Коллбэк кнопки Sign up' },
   },
-  // Callbacks defined at meta level are shared by all stories — no need to repeat them.
-  // Each click appears as an event in the Actions panel.
   args: {
+    variant: 'guest',
     onLoginClick: fn(),
     onSignupClick: fn(),
   },
@@ -43,31 +40,66 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Guest: Story = {
+  args: { variant: 'guest' },
+}
+
+export const GuestWithLabels: Story = {
   args: {
     variant: 'guest',
+    loginLabel: 'Войти',
+    signupLabel: 'Зарегистрироваться',
   },
 }
 
 export const Auth: Story = {
-  args: {
-    variant: 'auth',
-    notificationCount: 0,
-  },
+  args: { variant: 'auth', notificationCount: 0 },
 }
 
 export const AuthWithNotifications: Story = {
-  args: {
-    variant: 'auth',
-    notificationCount: 5,
+  args: { variant: 'auth', notificationCount: 5 },
+  play: async ({ canvas }) => {
+    const badge = canvas.getByText('5')
+
+    await expect(badge).toBeInTheDocument()
+  },
+}
+
+/** Переполнение: 100+ уведомлений → показывает '99+'. */
+export const AuthWithManyNotifications: Story = {
+  args: { variant: 'auth', notificationCount: 247 },
+  play: async ({ canvas }) => {
+    await expect(canvas.getByText('99+')).toBeInTheDocument()
   },
 }
 
 export const AuthWithLanguageSelector: Story = {
   args: {
     variant: 'auth',
-    // Placeholder for the real Select component — demonstrates the languageSelector slot.
     languageSelector: (
       <span style={{ color: 'var(--color-light-100)', fontSize: '14px' }}>🌐 EN</span>
     ),
+  },
+}
+
+/** Логотип — ссылка на главную. */
+export const LogoLink: Story = {
+  args: { variant: 'guest' },
+  play: async ({ canvas }) => {
+    const logo = canvas.getByRole('link', { name: 'remarkgram' })
+
+    await expect(logo).toHaveAttribute('href', '/')
+  },
+}
+
+/** Клик по колокольчику вызывает onBellClick. */
+export const BellClick: Story = {
+  args: { variant: 'auth', notificationCount: 3, onBellClick: fn() },
+  play: async ({ args, canvas }) => {
+    const bell = canvas.getByRole('button', { name: 'Notifications' })
+
+    await userEvent.click(bell)
+    // StoryObj инферит args как полный union — сужение по variant недоступно в play,
+    // поэтому явный каст к нужному подтипу.
+    await expect((args as { onBellClick?: () => void }).onBellClick).toHaveBeenCalledOnce()
   },
 }
