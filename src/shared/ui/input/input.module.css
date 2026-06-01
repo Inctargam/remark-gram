@@ -1,0 +1,204 @@
+.root {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── Label ──────────────────────────────── */
+
+.label {
+  color: var(--color-light-900);
+  font-family: var(--font-base);
+  font-size: var(--font-size-regular-14);
+  font-weight: var(--font-weight-regular-14);
+  line-height: var(--line-height-regular-14);
+}
+
+.root[data-disabled] .label {
+  color: var(--color-dark-100);
+}
+
+/* ─── Wrapper ────────────────────────────── */
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* ─── Field (text/email/password) ────────── */
+
+.field {
+  width: 100%;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--color-dark-100);
+  border-radius: 2px;
+  background-color: transparent;
+  color: var(--color-light-100);
+  font-family: var(--font-base);
+  font-size: var(--font-size-regular-16);
+  font-weight: var(--font-weight-regular-16);
+  line-height: var(--line-height-regular-16);
+  outline: none;
+  transition:
+    border-color 0.15s,
+    background-color 0.15s,
+    color 0.15s,
+    box-shadow 0.15s;
+}
+
+.field::placeholder {
+  color: var(--color-light-900);
+  opacity: 1;
+}
+
+.field:hover:not([data-disabled]):not([data-invalid]) {
+  border-color: var(--color-light-900);
+}
+
+.field:focus:not([data-invalid]) {
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 1px var(--color-primary-500);
+}
+
+.field:focus:not(:placeholder-shown):not([data-invalid]) {
+  border-color: var(--color-light-100);
+  box-shadow: 0 0 0 1px var(--color-light-100);
+  background-color: var(--color-dark-500);
+}
+
+.field[data-invalid] {
+  border-color: var(--color-danger-500);
+}
+
+.field[data-invalid]:focus {
+  border-color: var(--color-danger-500);
+  box-shadow: 0 0 0 1px var(--color-danger-500);
+}
+
+.field[data-disabled] {
+  border-color: var(--color-dark-100);
+  color: var(--color-dark-100);
+  cursor: not-allowed;
+}
+
+.field[data-disabled]::placeholder {
+  color: var(--color-dark-100);
+}
+
+/* ─── Password icon ──────────────────────── */
+
+.fieldWithEndIcon {
+  padding-right: 36px;
+}
+
+.endIcon {
+  position: absolute;
+  right: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-light-100);
+  cursor: pointer;
+}
+
+/* ─── Search ─────────────────────────────── */
+
+.searchWrapper {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--color-dark-100);
+  border-radius: 2px;
+  transition:
+    border-color 0.15s,
+    background-color 0.15s,
+    box-shadow 0.15s;
+}
+
+.searchWrapper:hover:not([data-disabled]):not([data-invalid]) {
+  border-color: var(--color-light-900);
+}
+
+.searchWrapper:focus-within:not([data-invalid]) {
+  border-color: var(--color-primary-700);
+  box-shadow: 0 0 0 1px var(--color-primary-700);
+}
+
+.searchWrapper:focus-within:not([data-invalid]):has(.searchField:not(:placeholder-shown)) {
+  border-color: var(--color-light-100);
+  box-shadow: 0 0 0 1px var(--color-light-100);
+  background-color: var(--color-dark-500);
+}
+
+.searchWrapper[data-invalid] {
+  border-color: var(--color-danger-500);
+}
+
+.searchWrapper[data-disabled] {
+  border-color: var(--color-dark-100);
+  cursor: not-allowed;
+}
+
+.searchIcon {
+  flex-shrink: 0;
+  color: var(--color-light-900);
+}
+
+.searchWrapper:focus-within:not([data-disabled]):not([data-invalid]):has(.searchField:not(:placeholder-shown))
+  .searchIcon {
+  color: var(--color-light-100);
+}
+
+.searchWrapper[data-invalid] .searchIcon {
+  color: var(--color-light-100);
+}
+
+.searchWrapper[data-disabled] .searchIcon {
+  color: var(--color-dark-100);
+}
+
+.searchField {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--color-light-100);
+  font-family: var(--font-base);
+  font-size: var(--font-size-regular-16);
+  font-weight: var(--font-weight-regular-16);
+  line-height: var(--line-height-regular-16);
+}
+
+.searchField::placeholder {
+  color: var(--color-light-900);
+  opacity: 1;
+}
+
+.searchWrapper[data-disabled] .searchField {
+  color: var(--color-dark-100);
+}
+
+.searchWrapper[data-disabled] .searchField::placeholder {
+  color: var(--color-dark-100);
+}
+
+/* ─── Error ──────────────────────────────── */
+
+.error {
+  color: var(--color-danger-500);
+  font-family: var(--font-base);
+  font-size: var(--font-size-regular-14);
+  font-weight: var(--font-weight-regular-14);
+  line-height: var(--line-height-regular-14);
+}
