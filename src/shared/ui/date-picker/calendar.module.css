@@ -1,0 +1,137 @@
+.calendar {
+    padding: 16px;
+    background-color: var(--color-dark-500);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    width: 252px;
+    height: 36px;
+    margin-bottom: 12px;
+    padding: 0 0 0 8px;
+}
+
+.navButtons {
+    display: flex;
+    align-items: center;
+    gap: 1px;
+}
+
+.navBtn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 36px;
+    height: 36px;
+    padding: 8px;
+    border: none;
+    border-radius: 24px;
+    background: var(--color-dark-100);
+    color: var(--color-light-100);
+    cursor: pointer;
+
+    &:disabled {
+        color: var(--color-dark-100);
+        cursor: not-allowed;
+    }
+
+    &:hover:not(:disabled) {
+        background-color: var(--color-dark-300);
+    }
+}
+
+.monthLabel {
+    color: var(--color-light-100);
+    font-family: var(--font-base);
+    font-size: var(--font-size-bold-16);
+    font-weight: var(--font-weight-bold-16);
+    line-height: var(--line-height-bold-16);
+}
+
+.weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 36px);
+    height: 32px;
+}
+
+.weekday {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--color-light-900);
+    font-family: var(--font-base);
+    font-size: var(--font-size-regular-14);
+    font-weight: var(--font-weight-medium-14);
+    line-height: var(--line-height-regular-14);
+}
+
+.week {
+    display: grid;
+    grid-template-columns: repeat(7, 36px);
+}
+
+.day {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 2px solid transparent;
+    border-radius: 18px;
+    background: none;
+    color: var(--color-light-100);
+    font-family: var(--font-base);
+    font-size: var(--font-size-regular-16);
+    font-weight: var(--font-weight-regular-16);
+    line-height: var(--line-height-regular-16);
+    cursor: pointer;
+    transition: background-color 0.15s,
+    border-color 0.15s,
+    color 0.15s;
+
+    &:disabled {
+        color: var(--color-dark-100);
+        cursor: not-allowed;
+    }
+
+    &:hover:not(:disabled, .daySelected, .dayRangeStart, .dayRangeEnd, .dayRangeMiddle) {
+        background-color: var(--color-primary-700);
+    }
+}
+
+.dayWeekend {
+    color: var(--color-danger-300);
+}
+
+.dayToday {
+    color: var(--color-primary-500);
+    font-weight: var(--font-weight-h3);
+}
+
+.daySelected {
+    background-color: var(--color-primary-900);
+}
+
+.dayRangeStart {
+    border-radius: 18px 0 0 18px;
+    background-color: var(--color-primary-900);
+}
+
+.dayRangeEnd {
+    border-radius: 0 18px 18px 0;
+    background-color: var(--color-primary-900);
+}
+
+.dayRangeMiddle {
+    border-radius: 0;
+    background-color: var(--color-primary-900);
+}
+
+.dayFocused {
+    border-color: var(--color-primary-300);
+    border-radius: 18px;
+}

@@ -1,0 +1,67 @@
+.storyWrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.storyWrapper button {
+  flex: none;
+  width: 85px;
+  height: 36px;
+}
+
+.cell {
+  display: flex;
+  justify-content: center;
+}
+
+.cell button {
+  flex: none;
+  width: 85px;
+  height: 36px;
+}
+
+.simHovered button:not([data-disabled]) {
+  background-color: rgb(35 78 153 / 15%);
+}
+
+.simPressed button:not([data-disabled]) {
+  background-color: rgb(115 165 255 / 15%);
+}
+
+.simFocused button:not([data-disabled]) {
+  border-radius: 2px;
+  outline: 2px solid var(--color-primary-700);
+  outline-offset: -2px;
+}
+
+.allVariants {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.headerRow,
+.variantsRow {
+  display: grid;
+  align-items: center;
+  gap: 12px;
+  grid-template-columns: 100px 100px 100px 100px 100px 100px;
+}
+
+.stateLabel {
+  color: var(--color-light-900);
+  font-family: var(--font-base);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-small);
+  line-height: var(--line-height-small);
+  text-align: right;
+}
+
+.headerCell {
+  color: var(--color-light-900);
+  font-family: var(--font-base);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-small);
+  line-height: var(--line-height-small);
+  text-align: center;
+}
