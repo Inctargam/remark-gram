@@ -3,61 +3,52 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { Select } from './Select'
 
 const options = [
-  { label: 'Russia', value: 'russia' },
-  { label: 'Ukraine', value: 'ukraine' },
-  { label: 'Belarus', value: 'belarus' },
-  { label: 'Kazakhstan', value: 'kazakhstan' },
+  { label: 'Select-box', value: 'option-1' },
+  { label: 'Select-box', value: 'option-2' },
+  { label: 'Select-box', value: 'option-3' },
 ]
 
 const meta: Meta<typeof Select> = {
   title: 'Shared/UI/Select',
   component: Select,
   tags: ['autodocs'],
-  argTypes: {
-    disabled: {
-      control: 'boolean',
+  parameters: {
+    backgrounds: {
+      default: 'dark',
+      values: [{ name: 'dark', value: '#171717' }],
     },
-    label: {
-      control: 'text',
-    },
-    placeholder: {
-      control: 'text',
-    },
+  },
+  args: {
+    options,
+    placeholder: 'Select-box',
   },
 }
 
 export default meta
-
 type Story = StoryObj<typeof Select>
 
-export const Default: Story = {
+export const Default: Story = {}
+
+export const Active: Story = {
   args: {
-    options,
-    placeholder: 'Select country...',
+    value: 'option-1',
   },
 }
 
-export const WithLabel: Story = {
-  args: {
-    options,
-    label: 'Country',
-    placeholder: 'Select country...',
+export const Hover: Story = {
+  parameters: {
+    pseudo: { hover: true },
+  },
+}
+
+export const Focus: Story = {
+  parameters: {
+    pseudo: { focusVisible: true },
   },
 }
 
 export const Disabled: Story = {
   args: {
-    options,
-    label: 'Country',
-    placeholder: 'Select country...',
     disabled: true,
-  },
-}
-
-export const WithSelectedValue: Story = {
-  args: {
-    options,
-    label: 'Country',
-    value: 'russia',
   },
 }

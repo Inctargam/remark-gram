@@ -1,48 +1,61 @@
-import { Select as BaseSelect } from '@base-ui/react/select'
+'use client'
+
 import type { SelectRootProps } from '@base-ui/react/select'
+import { Select as BaseSelect } from '@base-ui/react/select'
 import clsx from 'clsx'
+
+import { Icon } from '@/shared/ui/icon'
 
 import styles from './Select.module.css'
 
-export type SelectOption = {
+export type SelectOption<T = string> = {
   label: string
-  value: string
+  value: T
 }
 
-export type SelectProps = Omit<SelectRootProps<string, false>, 'children'> & {
-  options: SelectOption[]
-  label?: string
+export type SelectProps<T extends string | number = string> = Omit<
+  SelectRootProps<T, false>,
+  'children'
+> & {
+  options: SelectOption<T>[]
   placeholder?: string
+  label?: string
   className?: string
 }
 
-export const Select = ({
+export const Select = <T extends string | number = string>({
   options,
-  label,
   placeholder = 'Select...',
+  label,
   className,
   ...rootProps
-}: SelectProps) => {
+}: SelectProps<T>) => {
   return (
     <div className={clsx(styles.wrapper, className)}>
       {label && <label className={styles.label}>{label}</label>}
+
       <BaseSelect.Root {...rootProps}>
         <BaseSelect.Trigger className={styles.trigger}>
-          <BaseSelect.Value placeholder={placeholder} />
-          <BaseSelect.Icon className={styles.icon}>▼</BaseSelect.Icon>
+          <BaseSelect.Value className={styles.value} placeholder={placeholder} />
+          <BaseSelect.Icon className={styles.icon}>
+            <Icon iconId="icon-arrow-ios-down-outline" width={16} height={16} />
+          </BaseSelect.Icon>
         </BaseSelect.Trigger>
 
-        <BaseSelect.Positioner className={styles.positioner}>
-          <BaseSelect.Popup className={styles.popup}>
-            <BaseSelect.List className={styles.list}>
+        <BaseSelect.Portal>
+          <BaseSelect.Positioner alignItemWithTrigger={false}>
+            <BaseSelect.Popup className={styles.popup}>
               {options.map((option) => (
-                <BaseSelect.Item key={option.value} value={option.value} className={styles.item}>
+                <BaseSelect.Item
+                  key={String(option.value)}
+                  value={option.value}
+                  className={styles.item}>
                   <BaseSelect.ItemText>{option.label}</BaseSelect.ItemText>
                 </BaseSelect.Item>
               ))}
-            </BaseSelect.List>
-          </BaseSelect.Popup>
-        </BaseSelect.Positioner>
+            </BaseSelect.Popup>
+          </BaseSelect.Positioner>
+        </BaseSelect.Portal>
       </BaseSelect.Root>
     </div>
   )
