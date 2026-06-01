@@ -1,4 +1,4 @@
-import type { Decorator, Meta, StoryObj } from '@storybook/react'
+import type { Decorator, Meta, StoryObj } from '@storybook/nextjs-vite'
 
 import { TextArea } from './TextArea'
 import styles from './textArea.stories.module.css'
@@ -67,4 +67,45 @@ export const Disabled: Story = {
   args: {
     disabled: true,
   },
+}
+
+export const AllStates: Story = {
+  render: () => (
+    <div className={styles.allStates}>
+      <div className={styles.state}>
+        <span className={styles.stateLabel}>Default</span>
+        <TextArea label="Text-area" placeholder="Text-area" />
+      </div>
+
+      <div className={styles.state}>
+        <span className={styles.stateLabel}>Error</span>
+        <TextArea
+          defaultValue="Text-area"
+          error="Error text"
+          label="Text-area"
+          placeholder="Text-area"
+        />
+      </div>
+
+      <div className={`${styles.state} ${styles.activeState}`}>
+        <span className={styles.stateLabel}>Active</span>
+        <TextArea defaultValue="Text-area" label="Text-area" placeholder="Text-area" />
+      </div>
+
+      <div className={`${styles.state} ${styles.hoverState}`}>
+        <span className={styles.stateLabel}>Hover</span>
+        <TextArea label="Text-area" placeholder="Text-area" />
+      </div>
+
+      <div className={`${styles.state} ${styles.focusState}`}>
+        <span className={styles.stateLabel}>Focus</span>
+        <TextArea defaultValue="Text-area" label="Text-area" placeholder="Text-area" />
+      </div>
+
+      <div className={styles.state}>
+        <span className={styles.stateLabel}>Disabled</span>
+        <TextArea disabled label="Text-area" placeholder="Text-area" />
+      </div>
+    </div>
+  ),
 }

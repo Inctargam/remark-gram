@@ -1,4 +1,4 @@
-import type { Decorator, Meta, StoryObj } from '@storybook/react'
+import type { Decorator, Meta, StoryObj } from '@storybook/nextjs-vite'
 
 import { RadioGroup } from './RadioGroup'
 import styles from './radioGroup.stories.module.css'
@@ -90,4 +90,71 @@ export const Vertical: Story = {
     defaultValue: 'checked',
     direction: 'vertical',
   },
+}
+
+export const AllStates: Story = {
+  render: () => (
+    <div className={styles.allStates}>
+      <div className={styles.state}>
+        <span className={styles.stateLabel}>Checked</span>
+        <RadioGroup
+          defaultValue="checked"
+          direction="horizontal"
+          name="radio-group-all-states-checked"
+          options={options}
+        />
+      </div>
+
+      <div className={`${styles.state} ${styles.hoverState}`}>
+        <span className={styles.stateLabel}>Hover</span>
+        <RadioGroup
+          defaultValue="checked"
+          direction="horizontal"
+          name="radio-group-all-states-hover"
+          options={options}
+        />
+      </div>
+
+      <div className={`${styles.state} ${styles.focusState}`}>
+        <span className={styles.stateLabel}>Focus</span>
+        <RadioGroup
+          defaultValue="checked"
+          direction="horizontal"
+          name="radio-group-all-states-focus"
+          options={options}
+        />
+      </div>
+
+      <div className={`${styles.state} ${styles.activeState}`}>
+        <span className={styles.stateLabel}>Active</span>
+        <RadioGroup
+          defaultValue="checked"
+          direction="horizontal"
+          name="radio-group-all-states-active"
+          options={options}
+        />
+      </div>
+
+      <div className={styles.state}>
+        <span className={styles.stateLabel}>Disabled</span>
+        <RadioGroup
+          defaultValue="checked"
+          direction="horizontal"
+          disabled
+          name="radio-group-all-states-disabled"
+          options={options}
+        />
+      </div>
+
+      <div className={styles.state}>
+        <span className={styles.stateLabel}>Vertical</span>
+        <RadioGroup
+          defaultValue="checked"
+          direction="vertical"
+          name="radio-group-all-states-vertical"
+          options={options}
+        />
+      </div>
+    </div>
+  ),
 }
