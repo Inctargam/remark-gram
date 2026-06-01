@@ -1,4 +1,4 @@
-import { ROUTES } from '@/shared/config/routes'
+import { ROUTES } from '@/shared/config'
 
 import type { NavItem, NavItemId } from '../model/types'
 
@@ -58,6 +58,6 @@ const BOTTOM_BAR_IDS: NavItemId[] = ['home', 'create', 'messenger', 'search', 'p
 
 // map по BOTTOM_BAR_IDS, а не filter по NAV_ITEMS — иначе порядок следует NAV_ITEMS,
 // а не заданной последовательности для нижней панели.
-export const BOTTOM_BAR_ITEMS: NavItem[] = BOTTOM_BAR_IDS
-  .map(id => NAV_ITEMS.find(item => item.id === id))
-  .filter((item): item is NavItem => item !== undefined)
+export const BOTTOM_BAR_ITEMS: NavItem[] = BOTTOM_BAR_IDS.map((id) =>
+  NAV_ITEMS.find((item) => item.id === id)
+).filter((item): item is NavItem => item !== undefined)

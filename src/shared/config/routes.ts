@@ -7,4 +7,8 @@ export const ROUTES = {
   statistics: '/statistics',
   favorites: '/favorites',
   signIn: '/sign-in',
+  signUp: '/sign-up',
+  forgotPassword: '/forgot-password',
+  termsOfService: '/terms-of-service',
+  privacyPolicy: '/privacy-policy',
 } as const

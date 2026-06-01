@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 
-import { ROUTES } from '@/shared/config/routes'
+import { ROUTES } from '@/shared/config'
 import { Button } from '@/shared/ui/button'
 import { Icon } from '@/shared/ui/icon'
 

@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 
-import { ROUTES } from '@/shared/config/routes'
+import { ROUTES } from '@/shared/config'
 import { Icon } from '@/shared/ui/icon'
 
 import styles from './LogoutButton.module.css'

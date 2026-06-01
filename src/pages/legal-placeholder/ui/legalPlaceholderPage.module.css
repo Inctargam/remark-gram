@@ -1,0 +1,33 @@
+.page {
+  min-height: 100vh;
+  background-color: var(--color-dark-900);
+}
+
+.main {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding: 72px 16px 48px;
+}
+
+.content {
+  width: min(100%, 378px);
+}
+
+.title {
+  margin: 0;
+  color: var(--color-light-100);
+  font-size: var(--font-size-h1);
+  font-weight: var(--font-weight-h1);
+  line-height: var(--line-height-h1);
+  text-align: center;
+}
+
+.text {
+  margin: 24px 0 0;
+  color: var(--color-light-900);
+  font-size: var(--font-size-regular-16);
+  font-weight: var(--font-weight-regular-16);
+  line-height: var(--line-height-regular-16);
+  text-align: center;
+}
