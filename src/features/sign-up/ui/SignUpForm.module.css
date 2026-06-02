@@ -1,4 +1,5 @@
 .card {
+  height: 648px;
   width: min(100%, 378px);
 }
 
@@ -10,7 +11,7 @@
 
 .title {
   margin: 0;
-  color: var(--color-light-100);
+  color: var(--color-text-primary);
   font-size: var(--font-size-h1);
   font-weight: var(--font-weight-h1);
   line-height: var(--line-height-h1);
@@ -51,19 +52,20 @@
 }
 
 .agreement {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  align-items: start;
+  column-gap: 8px;
   margin-top: 12px;
 }
 
 .agreementLabel {
   max-width: 282px;
   margin: 0;
-  color: var(--color-light-100);
-  font-size: var(--font-size-regular-12);
-  font-weight: var(--font-weight-regular-12);
-  line-height: var(--line-height-regular-12);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-small);
+  line-height: var(--line-height-small);
 }
 
 .agreementLink {
@@ -78,6 +80,7 @@
 .submitButton {
   width: 100%;
   margin-top: 12px;
+  color: var(--color-text-primary);
 }
 
 .signinBlock {
@@ -90,12 +93,37 @@
 
 .signinText {
   margin: 0;
-  color: var(--color-light-100);
+  color: var(--color-text-primary);
   font-size: var(--font-size-regular-16);
   font-weight: var(--font-weight-regular-16);
   line-height: var(--line-height-regular-16);
 }
 
-.signinButton {
+.signinLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
+  padding: 6px 24px;
+  border-radius: 2px;
+  color: var(--color-primary-500);
+  font-family: var(--font-base);
+  font-size: var(--font-size-regular-16);
+  font-weight: 600;
+  line-height: var(--line-height-regular-16);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.signinLink:hover {
+  color: var(--color-primary-100);
+}
+
+.signinLink:active {
+  color: var(--color-primary-700);
+}
+
+.signinLink:focus-visible {
+  outline: 2px solid var(--color-primary-700);
+  outline-offset: 2px;
 }

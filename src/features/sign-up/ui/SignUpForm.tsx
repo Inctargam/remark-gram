@@ -16,7 +16,6 @@ export const SignUpForm = () => {
     <Card className={styles.card} padding="medium">
       <form className={styles.form}>
         <h1 className={styles.title}>Sign Up</h1>
-
         <div className={styles.socials} aria-label="Social sign up options">
           <button className={styles.socialButton} type="button" aria-label="Sign up with Google">
             <Icon iconId="icon-google" width={36} height={36} />
@@ -25,7 +24,6 @@ export const SignUpForm = () => {
             <Icon iconId="icon-github" width={36} height={36} />
           </button>
         </div>
-
         <div className={styles.fields}>
           <Input label="Username" name="username" placeholder="Epam11" type="text" />
           <Input label="Email" name="email" placeholder="Epam@epam.com" type="email" />
@@ -42,7 +40,6 @@ export const SignUpForm = () => {
             type="password"
           />
         </div>
-
         <div className={styles.agreement}>
           <Checkbox aria-label="Agree to Terms of Service and Privacy Policy" />
           <p className={styles.agreementLabel}>
@@ -56,16 +53,14 @@ export const SignUpForm = () => {
             </Link>
           </p>
         </div>
-
         <Button className={styles.submitButton} type="submit" variant="primary">
           Sign Up
         </Button>
-
         <div className={styles.signinBlock}>
           <p className={styles.signinText}>Do you have an account?</p>
-          <Button className={styles.signinButton} type="button" variant="text">
+          <Link className={styles.signinLink} href={ROUTES.signIn}>
             Sign In
-          </Button>
+          </Link>
         </div>
       </form>
     </Card>
