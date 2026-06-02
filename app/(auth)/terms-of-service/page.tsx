@@ -1,5 +1,5 @@
-import { LegalPlaceholderPage } from '@/pages/legal-placeholder'
+import { LegalDocumentPage } from '@/pages/legal-document'
 
 export default function Page() {
-  return <LegalPlaceholderPage title="Terms of Service" />
+  return <LegalDocumentPage title="Terms of Service" />
 }

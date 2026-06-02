@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 
-import { LegalPlaceholderPage } from './LegalPlaceholderPage'
+import { LegalDocumentPage } from './LegalDocumentPage'
 
 const meta = {
-  title: 'pages/LegalPlaceholderPage',
-  component: LegalPlaceholderPage,
+  title: 'pages/LegalDocumentPage',
+  component: LegalDocumentPage,
   tags: ['autodocs'],
   parameters: {
     layout: 'fullscreen',
@@ -17,7 +17,7 @@ const meta = {
   args: {
     title: 'Terms of Service',
   },
-} satisfies Meta<typeof LegalPlaceholderPage>
+} satisfies Meta<typeof LegalDocumentPage>
 
 export default meta
 
