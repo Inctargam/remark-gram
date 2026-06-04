@@ -1,7 +1,7 @@
 .shell {
   display: flex;
-  flex-direction: column;
   min-height: 100vh;
+  flex-direction: column;
 }
 
 .content {
@@ -10,7 +10,6 @@
   flex-direction: column;
 }
 
-/* Hidden on mobile, visible on desktop */
 .sidebarSlot {
   display: none;
 }
@@ -25,8 +24,8 @@
 
 @media (min-width: 768px) {
   .content {
-    flex-direction: row;
     align-items: flex-start;
+    flex-direction: row;
   }
 
   .sidebarSlot {
@@ -34,7 +33,6 @@
     flex-shrink: 0;
   }
 
-  /* Hidden on desktop */
   .bottomBarSlot {
     display: none;
   }

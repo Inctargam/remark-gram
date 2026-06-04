@@ -1,5 +1,3 @@
-import { Header } from '@/widgets/header'
-
 import styles from './legalDocumentPage.module.css'
 
 type Props = {
@@ -8,7 +6,6 @@ type Props = {
 
 export const LegalDocumentPage = ({ title }: Props) => (
   <div className={styles.page}>
-    <Header variant="guest" />
     <main className={styles.main}>
       <section className={styles.content} aria-labelledby="legal-document-title">
         <h1 className={styles.title} id="legal-document-title">
