@@ -14,7 +14,7 @@ export type SelectOption<T = string> = {
 }
 
 export type SelectProps<T extends string | number = string> = Omit<
-  SelectRootProps<T, false>,
+  SelectRootProps<T>,
   'children'
 > & {
   options: SelectOption<T>[]

@@ -15,7 +15,7 @@ type Props = {
    * Когда будет RTK Query, передавать из useGetMeQuery().
    */
   email?: string
-  /** Called before redirecting — can be async (e.g. an RTK Query mutation trigger). */
+  /** Called before redirecting — can be async (e.g., an RTK Query mutation trigger). */
   onLogout?: () => Promise<void> | void
 }
 

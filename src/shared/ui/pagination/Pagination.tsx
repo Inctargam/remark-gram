@@ -2,7 +2,7 @@
 
 import { Select } from '@base-ui/react/select'
 import clsx from 'clsx'
-import { useCallback, useMemo} from 'react'
+import { useCallback, useMemo } from 'react'
 
 import { Icon } from '@/shared/ui/icon'
 
@@ -85,10 +85,7 @@ export function Pagination({
   onItemsPerPageChange,
   className,
 }: PaginationProps) {
-  const pages = useMemo(
-    () => buildPages(currentPage, totalPages),
-    [currentPage, totalPages]
-  )
+  const pages = useMemo(() => buildPages(currentPage, totalPages), [currentPage, totalPages])
 
   const goTo = useCallback(
     (page: number) => {

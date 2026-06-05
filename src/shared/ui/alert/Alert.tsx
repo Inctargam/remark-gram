@@ -1,4 +1,5 @@
 import clsx from 'clsx'
+import React from 'react'
 
 import { Icon } from '@/shared/ui/icon'
 
@@ -26,7 +27,7 @@ export const Alert = ({ variant, children, onClose, className }: AlertProps) => 
           onClick={onClose}
           type="button"
           aria-label="Close alert">
-          <Icon iconId="icon-close-outline" width={24} height={24}  />
+          <Icon iconId="icon-close-outline" width={24} height={24} />
         </button>
       )}
     </div>
