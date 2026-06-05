@@ -14,6 +14,10 @@ const meta = {
       values: [{ name: 'dark', value: '#171717' }],
     },
   },
+  args: {
+    onPageChange: () => {},
+    onItemsPerPageChange: () => {},
+  },
   argTypes: {
     onPageChange: { action: 'page changed' },
     onItemsPerPageChange: { action: 'items per page changed' },
