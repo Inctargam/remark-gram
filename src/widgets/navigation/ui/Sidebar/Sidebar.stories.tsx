@@ -4,6 +4,7 @@ import { expect, userEvent } from 'storybook/test'
 
 import { LogoutButton } from '@/features/logout'
 
+import { NAV_ITEMS } from '../../config/nav-items'
 import { Sidebar } from './Sidebar'
 
 const meta = {
@@ -34,7 +35,13 @@ const meta = {
   argTypes: {
     footer: {
       control: false,
-      description: 'Слот подвала — обычно LogoutButton. Позиционируется Sidebar, не компонентом-потребителем.',
+      description:
+        'Слот подвала — обычно LogoutButton. Позиционируется Sidebar, не компонентом-потребителем.',
+    },
+    items: {
+      control: false,
+      description:
+        'Список пунктов навигации. В продукте используется NAV_ITEMS, в stories можно показать состояния.',
     },
     className: { control: false },
   },
@@ -85,6 +92,51 @@ export const NestedPathActive: Story = {
 /** Sidebar без footer-слота — кнопка выхода не рендерится. */
 export const WithoutFooter: Story = {
   render: () => <Sidebar />,
+}
+
+/** Hover-состояние полного Sidebar: Feed подсвечивается синим, но не становится active. */
+export const Hover: Story = {
+  render: withFooter,
+  parameters: {
+    nextjs: { navigation: { pathname: '/hover-preview' } },
+  },
+  play: async ({ canvas }) => {
+    const feedLink = canvas.getByRole('link', { name: 'Home' })
+
+    await userEvent.hover(feedLink)
+    await expect(feedLink).not.toHaveAttribute('aria-current')
+  },
+}
+
+/** Focus-состояние полного Sidebar: рамка фокуса без active-состояния. */
+export const Focus: Story = {
+  render: withFooter,
+  parameters: {
+    nextjs: { navigation: { pathname: '/focus-preview' } },
+  },
+  play: async ({ canvas }) => {
+    const feedLink = canvas.getByRole('link', { name: 'Home' })
+
+    await userEvent.tab()
+    await expect(feedLink).toHaveFocus()
+    await expect(feedLink).not.toHaveAttribute('aria-current')
+  },
+}
+
+/** Disabled-состояние полного Sidebar: Feed не является ссылкой и окрашен как disabled. */
+export const Disabled: Story = {
+  render: () => (
+    <Sidebar
+      footer={<LogoutButton />}
+      items={NAV_ITEMS.map((item) => (item.id === 'home' ? { ...item, disabled: true } : item))}
+    />
+  ),
+  play: async ({ canvas }) => {
+    const disabledItem = canvas.getByText('Home').closest('[aria-disabled="true"]')
+
+    await expect(disabledItem).toBeInTheDocument()
+    await expect(disabledItem?.tagName.toLowerCase()).toBe('span')
+  },
 }
 
 /** Keyboard-навигация: второй Tab попадает на Create. */
