@@ -39,7 +39,7 @@ export const SignInForm = () => {
         </Button>
 
         <div className={styles.signupBlock}>
-          <p className={styles.signupText}>Don&apos;t have an account?</p>
+          <p className={styles.signupText}>Don&rsquo;t have an account?</p>
           <Link className={styles.signupLink} href={ROUTES.signUp}>
             Sign Up
           </Link>

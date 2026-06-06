@@ -5,9 +5,19 @@ import type { Preview } from '@storybook/react'
 const preview: Preview = {
   tags: ['autodocs'],
   parameters: {
+    // Монтирует App Router контекст для всех stories.
+    // Без этого useRouter/usePathname бросают "invariant expected app router to be mounted".
+    // Отдельные stories переопределяют pathname через parameters.nextjs.navigation.
     nextjs: {
+      // Монтирует AppRouterContext — нужен для useRouter из next/navigation.
+      // Без этого Storybook использует PageRouterProvider и useRouter бросает
+      // "invariant expected app router to be mounted".
       appDirectory: true,
+      navigation: {
+        pathname: '/',
+      },
     },
+
     controls: {
       matchers: {
         color: /(background|color)$/i,

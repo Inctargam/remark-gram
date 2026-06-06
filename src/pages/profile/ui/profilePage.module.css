@@ -1,0 +1,136 @@
+.page {
+  min-height: calc(100vh - 60px);
+  padding: 36px 24px 84px;
+  background-color: var(--color-dark-700);
+  color: var(--color-text-primary);
+  font-family: var(--font-base), sans-serif;
+}
+
+.header {
+  display: grid;
+  grid-template-columns: 204px minmax(0, 1fr);
+  gap: 38px;
+  max-width: 972px;
+}
+
+.avatar {
+  width: 204px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background-color: var(--color-dark-900);
+}
+
+.summary {
+  min-width: 0;
+}
+
+.topRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.title {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-h1);
+  font-weight: var(--font-weight-h1);
+  line-height: var(--line-height-h1);
+}
+
+.settingsButton {
+  min-width: 167px;
+  color: var(--color-text-primary);
+}
+
+.stats {
+  display: flex;
+  gap: 64px;
+  margin: 19px 0 0;
+  color: var(--color-text-primary);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column-reverse;
+  margin: 0;
+  font-size: var(--font-size-regular-14);
+  line-height: var(--line-height-regular-14);
+}
+
+.statValue {
+  margin: 0;
+  font-weight: var(--font-weight-bold-14);
+}
+
+.statLabel {
+  font-weight: var(--font-weight-regular-14);
+}
+
+.description {
+  max-width: 730px;
+  margin: 20px 0 0;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-regular-14);
+  font-weight: var(--font-weight-regular-14);
+  line-height: var(--line-height-regular-14);
+}
+
+.posts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 234px));
+  gap: 12px;
+  max-width: 972px;
+  margin-top: 48px;
+}
+
+.post {
+  aspect-ratio: 234 / 228;
+  border-radius: 2px;
+  background-color: var(--color-dark-900);
+}
+
+@media (max-width: 1023px) {
+  .page {
+    padding: 36px 16px 84px;
+  }
+
+  .header {
+    grid-template-columns: 128px minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  .avatar {
+    width: 128px;
+  }
+
+  .topRow {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .stats {
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+
+  .posts {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .header {
+    grid-template-columns: 1fr;
+  }
+
+  .avatar {
+    width: 112px;
+  }
+
+  .posts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

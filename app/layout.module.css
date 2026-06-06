@@ -1,10 +1,15 @@
 .shell {
   display: flex;
-  flex-direction: column;
   min-height: 100vh;
+  flex-direction: column;
 }
 
-/* Hidden on mobile, visible on desktop */
+.content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
 .sidebarSlot {
   display: none;
 }
@@ -13,10 +18,14 @@
   flex: 1;
 }
 
+.languageSelector {
+  width: 163px;
+}
+
 @media (min-width: 768px) {
-  .shell {
-    flex-direction: row;
+  .content {
     align-items: flex-start;
+    flex-direction: row;
   }
 
   .sidebarSlot {
@@ -24,7 +33,6 @@
     flex-shrink: 0;
   }
 
-  /* Hidden on desktop */
   .bottomBarSlot {
     display: none;
   }

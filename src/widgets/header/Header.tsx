@@ -9,8 +9,6 @@ import { Icon } from '@/shared/ui/icon'
 
 import styles from './header.module.css'
 
-// Discriminated union — TS не позволит передать notificationCount при variant="guest"
-// и onLoginClick при variant="auth": невозможные комбинации отсечены на уровне типов.
 type AuthVariant = {
   variant: 'auth'
   notificationCount?: number
@@ -20,11 +18,8 @@ type AuthVariant = {
 
 type GuestVariant = {
   variant: 'guest'
-  // Принимаем строки чтобы не хардкодить 'Log in' / 'Sign up' — заготовка под i18n.
   loginLabel?: string
   signupLabel?: string
-  onLoginClick?: () => void
-  onSignupClick?: () => void
   languageSelector?: ReactNode
 }
 
@@ -60,10 +55,10 @@ export const Header = (props: HeaderProps) => {
 
           {variant === 'guest' && (
             <>
-              <Button variant="text" onClick={props.onLoginClick}>
+              <Button nativeButton={false} render={<Link href={ROUTES.signIn} />} variant="text">
                 {props.loginLabel ?? 'Log in'}
               </Button>
-              <Button variant="primary" onClick={props.onSignupClick}>
+              <Button nativeButton={false} render={<Link href={ROUTES.signUp} />} variant="primary">
                 {props.signupLabel ?? 'Sign up'}
               </Button>
             </>

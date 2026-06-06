@@ -30,8 +30,6 @@ const meta = {
   },
   args: {
     variant: 'guest',
-    onLoginClick: fn(),
-    onSignupClick: fn(),
   },
 } satisfies Meta<typeof Header>
 

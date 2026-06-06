@@ -1,4 +1,5 @@
 .card {
+  height: 504px;
   width: min(100%, 378px);
 }
 
@@ -10,7 +11,7 @@
 
 .title {
   margin: 0;
-  color: var(--color-light-100);
+  color: var(--color-text-primary);
   font-size: var(--font-size-h1);
   font-weight: var(--font-weight-h1);
   line-height: var(--line-height-h1);
@@ -52,7 +53,7 @@
 
 .forgotPassword {
   align-self: flex-end;
-  margin-top: 12px;
+  margin-top: 36px;
   color: var(--color-light-900);
   font-size: var(--font-size-regular-14);
   font-weight: var(--font-weight-regular-14);
@@ -67,6 +68,7 @@
 .submitButton {
   width: 100%;
   margin-top: 24px;
+  color: var(--color-text-primary);
 }
 
 .signupBlock {
@@ -79,7 +81,7 @@
 
 .signupText {
   margin: 0;
-  color: var(--color-light-100);
+  color: var(--color-text-primary);
   font-size: var(--font-size-regular-16);
   font-weight: var(--font-weight-regular-16);
   line-height: var(--line-height-regular-16);
@@ -89,8 +91,11 @@
   display: inline-flex;
   justify-content: center;
   align-items: center;
-  min-height: 36px;
+  width: 100%;
+  padding: 6px 24px;
+  border-radius: 2px;
   color: var(--color-primary-500);
+  font-family: var(--font-base);
   font-size: var(--font-size-regular-16);
   font-weight: 600;
   line-height: var(--line-height-regular-16);
@@ -98,5 +103,14 @@
 }
 
 .signupLink:hover {
-  color: var(--color-primary-300);
+  color: var(--color-primary-100);
+}
+
+.signupLink:active {
+  color: var(--color-primary-700);
+}
+
+.signupLink:focus-visible {
+  outline: 2px solid var(--color-primary-700);
+  outline-offset: 2px;
 }
