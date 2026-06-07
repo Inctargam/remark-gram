@@ -2,7 +2,6 @@
 
 import { Select } from '@base-ui/react/select'
 import clsx from 'clsx'
-import { useCallback, useMemo } from 'react'
 
 import { Icon } from '@/shared/ui/icon'
 
@@ -19,8 +18,6 @@ export type PaginationProps = {
 }
 
 const DEFAULT_OPTIONS = [10, 20, 30, 50, 100]
-
-// ─── Pagination logic ──────────────────────────────────────────────────
 
 function buildPages(current: number, total: number): (number | '…')[] {
   const pages: (number | '…')[] = []
@@ -45,31 +42,25 @@ function buildPages(current: number, total: number): (number | '…')[] {
     for (let page = firstPage; page <= 5; page++) {
       add(page)
     }
-
     add('…')
     add(lastPage)
-
     return pages
   }
 
   if (isNearEnd) {
     add(firstPage)
     add('…')
-
     for (let page = lastPage - 4; page <= lastPage; page++) {
       add(page)
     }
-
     return pages
   }
 
   add(firstPage)
   add('…')
-
   for (let page = current - 1; page <= current + 1; page++) {
     add(page)
   }
-
   add('…')
   add(lastPage)
 
@@ -85,22 +76,18 @@ export function Pagination({
   onItemsPerPageChange,
   className,
 }: PaginationProps) {
-  const pages = useMemo(() => buildPages(currentPage, totalPages), [currentPage, totalPages])
+  const pages = buildPages(currentPage, totalPages)
 
-  const goTo = useCallback(
-    (page: number) => {
-      if (page < 1 || page > totalPages) return
-      if (page === currentPage) return
-      onPageChange?.(page)
-    },
-    [currentPage, totalPages, onPageChange]
-  )
+  const goTo = (page: number) => {
+    if (page < 1 || page > totalPages) return
+    if (page === currentPage) return
+    onPageChange?.(page)
+  }
 
   if (totalPages <= 0) return null
 
   return (
     <nav className={clsx(s.root, className)} aria-label="Pagination">
-      {/* Prev */}
       <button
         type="button"
         className={s.arrow}
@@ -110,7 +97,6 @@ export function Pagination({
         <Icon iconId="icon-arrow-ios-back" width={24} height={24} className={s.arrowIcon} />
       </button>
 
-      {/* Pages */}
       <ol className={s.list}>
         {pages.map((page, idx) =>
           page === '…' ? (
@@ -133,7 +119,6 @@ export function Pagination({
         )}
       </ol>
 
-      {/* Next */}
       <button
         type="button"
         className={s.arrow}
@@ -143,7 +128,6 @@ export function Pagination({
         <Icon iconId="icon-arrow-ios-forward" width={24} height={24} />
       </button>
 
-      {/* Items per page */}
       <div className={s.perPage}>
         <span className={s.perPageText}>Show</span>
 
