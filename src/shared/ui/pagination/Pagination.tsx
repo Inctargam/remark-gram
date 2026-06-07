@@ -68,14 +68,14 @@ function buildPages(current: number, total: number): (number | '…')[] {
 }
 
 export function Pagination({
-                             currentPage,
-                             totalPages,
-                             itemsPerPage,
-                             itemsPerPageOptions = DEFAULT_OPTIONS,
-                             onPageChange,
-                             onItemsPerPageChange,
-                             className,
-                           }: PaginationProps) {
+  currentPage,
+  totalPages,
+  itemsPerPage,
+  itemsPerPageOptions = DEFAULT_OPTIONS,
+  onPageChange,
+  onItemsPerPageChange,
+  className,
+}: PaginationProps) {
   const pages = buildPages(currentPage, totalPages)
 
   const goTo = (page: number) => {
