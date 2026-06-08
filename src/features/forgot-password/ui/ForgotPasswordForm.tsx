@@ -1,6 +1,7 @@
 'use client'
 import Link from 'next/link'
 
+import { EmailSentModal } from '@/entities/auth'
 import { ROUTES } from '@/shared/config'
 import { Button } from '@/shared/ui/button'
 import { Card } from '@/shared/ui/card'
@@ -8,7 +9,6 @@ import { Input } from '@/shared/ui/input'
 import { Recaptcha } from '@/shared/ui/recaptcha'
 
 import { useForgotPasswordForm } from '../model/useForgotPasswordForm'
-import { EmailSentModal } from './EmailSentModal'
 import styles from './ForgotPasswordForm.module.css'
 
 export const ForgotPasswordForm = () => {

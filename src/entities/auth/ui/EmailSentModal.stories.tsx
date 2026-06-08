@@ -2,9 +2,8 @@ import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { useState } from 'react'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 
+import { EmailSentModal } from '@/entities/auth'
 import { Button } from '@/shared/ui/button'
-
-import { EmailSentModal } from './EmailSentModal'
 
 type ModalStoryProps = {
   email: string
@@ -24,7 +23,7 @@ const ModalStory = ({ email }: ModalStoryProps) => {
 }
 
 const meta = {
-  title: 'features/forgot-password/EmailSentModal',
+  title: 'entities/auth/EmailSentModal',
   component: EmailSentModal,
   tags: ['autodocs'],
   parameters: {

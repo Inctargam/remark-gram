@@ -43,6 +43,8 @@ export const CreateNewPasswordForm = () => {
           />
         </div>
 
+        <p className={styles.passwordHint}>Your password must be between 6 and 20 characters</p>
+
         <Button
           className={styles.submitButton}
           disabled={isSubmitDisabled}

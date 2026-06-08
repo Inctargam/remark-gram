@@ -1,11 +1,13 @@
 import { type ChangeEvent, type FormEvent, useEffect, useRef, useState } from 'react'
 
 import type { RecaptchaState } from '@/shared/ui/recaptcha'
-
+//тест
 const RECAPTCHA_LOADING_DURATION = 300
 
 export const useForgotPasswordForm = () => {
+  //тест
   const recaptchaTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
   const [email, setEmail] = useState('')
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false)
   const [recaptchaState, setRecaptchaState] = useState<RecaptchaState>('default')
@@ -15,6 +17,7 @@ export const useForgotPasswordForm = () => {
   const isRecaptchaVerified = recaptchaState === 'checked'
   const isSubmitDisabled = !normalizedEmail || (!submittedEmail && !isRecaptchaVerified)
 
+  //тест
   useEffect(() => {
     return () => {
       if (recaptchaTimeoutRef.current) {
@@ -35,7 +38,7 @@ export const useForgotPasswordForm = () => {
 
   const recaptchaVerifyHandler = () => {
     setRecaptchaState('loading')
-
+    //тест
     recaptchaTimeoutRef.current = setTimeout(() => {
       setRecaptchaState('checked')
     }, RECAPTCHA_LOADING_DURATION)

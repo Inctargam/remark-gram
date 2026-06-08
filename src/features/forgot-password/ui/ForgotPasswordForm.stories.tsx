@@ -24,7 +24,7 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
-  play: async ({ canvas }) => {
+  play: async ({ canvas, canvasElement }) => {
     const email = canvas.getByLabelText('Email')
     const recaptcha = canvas.getByRole('checkbox', { name: "I'm not a robot" })
     const submitButton = canvas.getByRole('button', { name: 'Send Link' })
@@ -44,7 +44,11 @@ export const Default: Story = {
 
     await userEvent.click(submitButton)
 
-    await expect(canvas.getByText('The link has been sent by email.')).toBeInTheDocument()
-    await expect(canvas.getByRole('button', { name: 'Send Link Again' })).toBeEnabled()
+    await expect(canvasElement.querySelector('[role="status"]')).toHaveTextContent(
+      'The link has been sent by email.'
+    )
+    await expect(canvasElement.querySelector('button[type="submit"]')).toHaveTextContent(
+      'Send Link Again'
+    )
   },
 }

@@ -3,13 +3,18 @@ import { type ChangeEvent, type FormEvent, useState } from 'react'
 
 import { ROUTES } from '@/shared/config'
 
+const MIN_PASSWORD_LENGTH = 6
+const MAX_PASSWORD_LENGTH = 20
+
 export const useCreateNewPasswordForm = () => {
   const router = useRouter()
   const [password, setPassword] = useState('')
   const [passwordConfirmation, setPasswordConfirmation] = useState('')
   const [passwordConfirmationError, setPasswordConfirmationError] = useState('')
 
-  const isSubmitDisabled = !password || !passwordConfirmation
+  const isPasswordLengthValid =
+    password.length >= MIN_PASSWORD_LENGTH && password.length <= MAX_PASSWORD_LENGTH
+  const isSubmitDisabled = !isPasswordLengthValid || !passwordConfirmation
 
   const passwordChangeHandler = (event: ChangeEvent<HTMLInputElement>) => {
     setPassword(event.target.value)
@@ -29,7 +34,7 @@ export const useCreateNewPasswordForm = () => {
     }
 
     if (password !== passwordConfirmation) {
-      setPasswordConfirmationError('Passwords must match')
+      setPasswordConfirmationError('The passwords must match')
 
       return
     }
