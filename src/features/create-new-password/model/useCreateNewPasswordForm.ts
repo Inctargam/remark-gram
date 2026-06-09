@@ -1,54 +1,69 @@
 import { useRouter } from 'next/navigation'
-import { type ChangeEvent, type FormEvent, useState } from 'react'
+import { useForm } from 'react-hook-form'
 
 import { ROUTES } from '@/shared/config'
 
+type CreateNewPasswordFormValues = {
+  newPassword: string
+  passwordConfirmation: string
+}
+
 const MIN_PASSWORD_LENGTH = 6
 const MAX_PASSWORD_LENGTH = 20
+const PASSWORD_LENGTH_ERROR = 'Your password must be between 6 and 20 characters'
+const PASSWORDS_MATCH_ERROR = 'The passwords must match'
 
 export const useCreateNewPasswordForm = () => {
   const router = useRouter()
-  const [password, setPassword] = useState('')
-  const [passwordConfirmation, setPasswordConfirmation] = useState('')
-  const [passwordConfirmationError, setPasswordConfirmationError] = useState('')
 
-  const isPasswordLengthValid =
-    password.length >= MIN_PASSWORD_LENGTH && password.length <= MAX_PASSWORD_LENGTH
-  const isSubmitDisabled = !isPasswordLengthValid || !passwordConfirmation
+  const {
+    formState: { errors, isValid },
+    getValues,
+    handleSubmit,
+    register,
+    trigger,
+  } = useForm<CreateNewPasswordFormValues>({
+    defaultValues: {
+      newPassword: '',
+      passwordConfirmation: '',
+    },
+    mode: 'onChange',
+  })
 
-  const passwordChangeHandler = (event: ChangeEvent<HTMLInputElement>) => {
-    setPassword(event.target.value)
-    setPasswordConfirmationError('')
-  }
+  const newPasswordField = register('newPassword', {
+    maxLength: {
+      message: PASSWORD_LENGTH_ERROR,
+      value: MAX_PASSWORD_LENGTH,
+    },
+    minLength: {
+      message: PASSWORD_LENGTH_ERROR,
+      value: MIN_PASSWORD_LENGTH,
+    },
+    onChange: () => {
+      if (getValues('passwordConfirmation')) {
+        void trigger('passwordConfirmation')
+      }
+    },
+    required: PASSWORD_LENGTH_ERROR,
+  })
 
-  const passwordConfirmationChangeHandler = (event: ChangeEvent<HTMLInputElement>) => {
-    setPasswordConfirmation(event.target.value)
-    setPasswordConfirmationError('')
-  }
+  const passwordConfirmationField = register('passwordConfirmation', {
+    required: 'Password confirmation is required',
+    validate: (value) => value === getValues('newPassword') || PASSWORDS_MATCH_ERROR,
+  })
 
-  const submitHandler = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-
-    if (isSubmitDisabled) {
-      return
-    }
-
-    if (password !== passwordConfirmation) {
-      setPasswordConfirmationError('The passwords must match')
-
-      return
-    }
-
+  const submitFormHandler = () => {
     router.push(ROUTES.signIn)
   }
 
+  const submitHandler = handleSubmit(submitFormHandler)
+
   return {
-    isSubmitDisabled,
-    password,
-    passwordChangeHandler,
-    passwordConfirmation,
-    passwordConfirmationChangeHandler,
-    passwordConfirmationError,
+    isSubmitDisabled: !isValid,
+    newPasswordError: errors.newPassword?.message,
+    newPasswordField,
+    passwordConfirmationError: errors.passwordConfirmation?.message,
+    passwordConfirmationField,
     submitHandler,
   }
 }

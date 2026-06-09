@@ -14,8 +14,8 @@ import styles from './ForgotPasswordForm.module.css'
 export const ForgotPasswordForm = () => {
   const {
     confirmationOpenChangeHandler,
-    email,
-    emailChangeHandler,
+    emailError,
+    emailField,
     isConfirmationOpen,
     isSubmitDisabled,
     recaptchaState,
@@ -31,12 +31,11 @@ export const ForgotPasswordForm = () => {
 
         <Input
           className={styles.emailField}
+          error={emailError}
           label="Email"
-          name="email"
-          onChange={emailChangeHandler}
           placeholder="Epam@epam.com"
           type="email"
-          value={email}
+          {...emailField}
         />
 
         <p className={styles.description}>

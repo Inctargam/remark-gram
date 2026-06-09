@@ -1,23 +1,35 @@
-import { type ChangeEvent, type FormEvent, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useForm } from 'react-hook-form'
 
 import type { RecaptchaState } from '@/shared/ui/recaptcha'
-//тест
+
+type ForgotPasswordFormValues = {
+  email: string
+}
+
 const RECAPTCHA_LOADING_DURATION = 300
 
 export const useForgotPasswordForm = () => {
-  //тест
   const recaptchaTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const [email, setEmail] = useState('')
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false)
   const [recaptchaState, setRecaptchaState] = useState<RecaptchaState>('default')
   const [submittedEmail, setSubmittedEmail] = useState<string | null>(null)
 
-  const normalizedEmail = email.trim()
-  const isRecaptchaVerified = recaptchaState === 'checked'
-  const isSubmitDisabled = !normalizedEmail || (!submittedEmail && !isRecaptchaVerified)
+  const {
+    formState: { errors, isValid },
+    handleSubmit,
+    register,
+  } = useForm<ForgotPasswordFormValues>({
+    defaultValues: {
+      email: '',
+    },
+    mode: 'onChange',
+  })
 
-  //тест
+  const isRecaptchaVerified = recaptchaState === 'checked'
+  const isSubmitDisabled = !isValid || (!submittedEmail && !isRecaptchaVerified)
+
   useEffect(() => {
     return () => {
       if (recaptchaTimeoutRef.current) {
@@ -26,34 +38,36 @@ export const useForgotPasswordForm = () => {
     }
   }, [])
 
-  const emailChangeHandler = (event: ChangeEvent<HTMLInputElement>) => {
-    setEmail(event.target.value)
-    setIsConfirmationOpen(false)
-    setSubmittedEmail(null)
+  const emailField = register('email', {
+    validate: (value) => Boolean(value.trim()) || 'Email is required',
+    onChange: () => {
+      setIsConfirmationOpen(false)
+      setSubmittedEmail(null)
 
-    if (isRecaptchaVerified) {
-      setRecaptchaState('default')
-    }
-  }
+      if (isRecaptchaVerified) {
+        setRecaptchaState('default')
+      }
+    },
+  })
 
   const recaptchaVerifyHandler = () => {
     setRecaptchaState('loading')
-    //тест
+
     recaptchaTimeoutRef.current = setTimeout(() => {
       setRecaptchaState('checked')
     }, RECAPTCHA_LOADING_DURATION)
   }
 
-  const submitHandler = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-
+  const submitFormHandler = ({ email }: ForgotPasswordFormValues) => {
     if (isSubmitDisabled) {
       return
     }
 
-    setSubmittedEmail(normalizedEmail)
+    setSubmittedEmail(email.trim())
     setIsConfirmationOpen(true)
   }
+
+  const submitHandler = handleSubmit(submitFormHandler)
 
   const confirmationOpenChangeHandler = (open: boolean) => {
     setIsConfirmationOpen(open)
@@ -61,8 +75,8 @@ export const useForgotPasswordForm = () => {
 
   return {
     confirmationOpenChangeHandler,
-    email,
-    emailChangeHandler,
+    emailError: errors.email?.message,
+    emailField,
     isConfirmationOpen,
     isSubmitDisabled,
     recaptchaState,

@@ -1,1 +1,1 @@
-export { PasswordRecoveryForm } from './ui/PasswordRecoveryForm'
+export { PasswordRecoveryExpiredLink } from './ui/PasswordRecoveryExpiredLink'

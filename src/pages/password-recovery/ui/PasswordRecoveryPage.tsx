@@ -1,11 +1,15 @@
-import { PasswordRecoveryForm } from '@/features/password-recovery'
+import { PasswordRecoveryExpiredLink } from '@/features/password-recovery'
 
 import styles from './passwordRecoveryPage.module.css'
 
-export const PasswordRecoveryPage = () => (
+type Props = {
+  email?: string | null
+}
+
+export const PasswordRecoveryPage = ({ email }: Props) => (
   <div className={styles.page}>
     <main className={styles.main}>
-      <PasswordRecoveryForm />
+      <PasswordRecoveryExpiredLink email={email} />
     </main>
   </div>
 )

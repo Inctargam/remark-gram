@@ -31,8 +31,8 @@ export const Default: Story = {
 
     await userEvent.type(canvas.getByLabelText('New password'), '123456')
     await userEvent.type(canvas.getByLabelText('Password confirmation'), '654321')
-    await userEvent.click(submitButton)
 
     await expect(canvas.getByText('The passwords must match')).toBeInTheDocument()
+    await expect(submitButton).toBeDisabled()
   },
 }

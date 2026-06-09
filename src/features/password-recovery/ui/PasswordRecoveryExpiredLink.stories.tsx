@@ -1,11 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { expect, userEvent, within } from 'storybook/test'
 
-import { PasswordRecoveryForm } from './PasswordRecoveryForm'
+import { PasswordRecoveryExpiredLink } from './PasswordRecoveryExpiredLink'
 
 const meta = {
-  title: 'features/PasswordRecoveryForm',
-  component: PasswordRecoveryForm,
+  title: 'features/PasswordRecoveryExpiredLink',
+  component: PasswordRecoveryExpiredLink,
   tags: ['autodocs'],
   parameters: {
     layout: 'fullscreen',
@@ -25,13 +25,16 @@ const meta = {
       </div>
     ),
   ],
-} satisfies Meta<typeof PasswordRecoveryForm>
+} satisfies Meta<typeof PasswordRecoveryExpiredLink>
 
 export default meta
 
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
+  args: {
+    email: 'epam@epam.com',
+  },
   play: async ({ canvas, canvasElement }) => {
     const documentBody = within(canvasElement.ownerDocument.body)
 

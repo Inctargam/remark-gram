@@ -7,7 +7,7 @@ import { EmailSentModal } from '@/entities/auth'
 import { Button } from '@/shared/ui/button'
 
 import timeManagementRafiki from '../assets/timeManagementRafiki.png'
-import styles from './PasswordRecoveryForm.module.css'
+import styles from './PasswordRecoveryExpiredLink.module.css'
 
 type Props = {
   email?: string | null
@@ -15,8 +15,9 @@ type Props = {
 
 const DEFAULT_RECOVERY_EMAIL = 'epam@epam.com'
 
-export const PasswordRecoveryForm = ({ email = DEFAULT_RECOVERY_EMAIL }: Props) => {
+export const PasswordRecoveryExpiredLink = ({ email }: Props) => {
   const [isEmailSentModalOpen, setIsEmailSentModalOpen] = useState(false)
+  const recoveryEmail = email ?? DEFAULT_RECOVERY_EMAIL
 
   const resendLinkClickHandler = () => {
     setIsEmailSentModalOpen(true)
@@ -38,7 +39,7 @@ export const PasswordRecoveryForm = ({ email = DEFAULT_RECOVERY_EMAIL }: Props) 
       </section>
 
       <EmailSentModal
-        email={email}
+        email={recoveryEmail}
         open={isEmailSentModalOpen}
         onOpenChange={setIsEmailSentModalOpen}
       />

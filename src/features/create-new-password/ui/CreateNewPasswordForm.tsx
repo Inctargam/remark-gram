@@ -10,11 +10,10 @@ import styles from './CreateNewPasswordForm.module.css'
 export const CreateNewPasswordForm = () => {
   const {
     isSubmitDisabled,
-    password,
-    passwordChangeHandler,
-    passwordConfirmation,
-    passwordConfirmationChangeHandler,
+    newPasswordError,
+    newPasswordField,
     passwordConfirmationError,
+    passwordConfirmationField,
     submitHandler,
   } = useCreateNewPasswordForm()
 
@@ -25,21 +24,18 @@ export const CreateNewPasswordForm = () => {
 
         <div className={styles.fields}>
           <Input
+            error={newPasswordError}
             label="New password"
-            name="newPassword"
-            onChange={passwordChangeHandler}
             placeholder="******************"
             type="password"
-            value={password}
+            {...newPasswordField}
           />
           <Input
             error={passwordConfirmationError}
             label="Password confirmation"
-            name="passwordConfirmation"
-            onChange={passwordConfirmationChangeHandler}
             placeholder="******************"
             type="password"
-            value={passwordConfirmation}
+            {...passwordConfirmationField}
           />
         </div>
 
