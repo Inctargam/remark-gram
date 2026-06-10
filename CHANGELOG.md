@@ -4,6 +4,23 @@
 
 ## Unreleased
 
+### 2026-06-10
+
+#### Auth — Registration (UC-1)
+
+- Реализован полный флоу регистрации: форма с валидацией `onBlur`, отправка на `POST /v1/auth/registration`, модалка успеха с email пользователя.
+- Валидация не показывает ошибки на пустых полях при blur — кнопка заблокирована через `hasAllValues`, а не через `required`.
+- Серверные ошибки (email/username уже заняты) выводятся под соответствующим полем через `setError`.
+- Страница подтверждения email: три состояния — загрузка, успех, истёкшая ссылка с формой повторной отправки.
+- Разделение `ConfirmEmailPage` (данные) / `ConfirmEmailView` (UI) для изолированного тестирования.
+- Mock route handlers для трёх эндпоинтов (`registration`, `registration-confirmation`, `resend-registration-email`) — удалить при подключении реального бэкенда.
+- Добавлены Storybook stories: `SignUpForm` (Default, WithValidationErrors), `SignUpSuccessModal` (Open, CloseByOk, CloseByX), `ConfirmEmailView` (Loading, Success, Expired, ExpiredWithError, ResendSuccess).
+
+#### Verification
+
+- `pnpm tsc --noEmit` — 0 ошибок в исходниках.
+- `pnpm lint` — 0 ошибок в наших файлах; 4 pre-existing ошибки в `icon/select/navigation/alert` не затрагивались.
+
 ### 2026-06-05
 
 #### Header
