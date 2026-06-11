@@ -44,6 +44,11 @@
   outline-offset: 2px;
 }
 
+.socialButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
 .fields {
   display: flex;
   flex-direction: column;

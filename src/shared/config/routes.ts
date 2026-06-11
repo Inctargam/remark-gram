@@ -8,6 +8,7 @@ export const ROUTES = {
   favorites: '/favorites',
   signIn: '/sign-in',
   signUp: '/sign-up',
+  googleOAuthCallback: '/auth/google/callback',
   forgotPassword: '/forgot-password',
   termsOfService: '/terms-of-service',
   privacyPolicy: '/privacy-policy',

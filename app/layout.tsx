@@ -3,6 +3,7 @@ import '@/app/styles/globals.css'
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 
+import { QueryProvider } from '@/app/providers'
 import { LogoutButton } from '@/features/logout'
 import type { SelectOption } from '@/shared/ui/select'
 import { Select } from '@/shared/ui/select'
@@ -27,29 +28,31 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body>
-        <div className={styles.shell}>
-          <Header
-            languageSelector={
-              <Select className={styles.languageSelector} options={LANGUAGE_OPTIONS} value="en" />
-            }
-            {...(IS_AUTHENTICATED_MOCK
-              ? { variant: 'auth' as const }
-              : { variant: 'guest' as const })}
-          />
-          <div className={styles.content}>
-            {IS_AUTHENTICATED_MOCK && (
-              <div className={styles.sidebarSlot}>
-                <Sidebar footer={<LogoutButton />} />
-              </div>
-            )}
-            <div className={styles.main}>{children}</div>
-            {IS_AUTHENTICATED_MOCK && (
-              <div className={styles.bottomBarSlot}>
-                <BottomBar />
-              </div>
-            )}
+        <QueryProvider>
+          <div className={styles.shell}>
+            <Header
+              languageSelector={
+                <Select className={styles.languageSelector} options={LANGUAGE_OPTIONS} value="en" />
+              }
+              {...(IS_AUTHENTICATED_MOCK
+                ? { variant: 'auth' as const }
+                : { variant: 'guest' as const })}
+            />
+            <div className={styles.content}>
+              {IS_AUTHENTICATED_MOCK && (
+                <div className={styles.sidebarSlot}>
+                  <Sidebar footer={<LogoutButton />} />
+                </div>
+              )}
+              <div className={styles.main}>{children}</div>
+              {IS_AUTHENTICATED_MOCK && (
+                <div className={styles.bottomBarSlot}>
+                  <BottomBar />
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        </QueryProvider>
       </body>
     </html>
   )
