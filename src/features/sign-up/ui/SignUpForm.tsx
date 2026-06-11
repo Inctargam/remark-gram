@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { Controller } from 'react-hook-form'
 
 import { ROUTES } from '@/shared/config'
 import { Button } from '@/shared/ui/button'
@@ -9,12 +10,31 @@ import { Checkbox } from '@/shared/ui/checkbox'
 import { Icon } from '@/shared/ui/icon'
 import { Input } from '@/shared/ui/input'
 
+import { useSignUpForm } from '../model/useSignUpForm'
+import {
+  EMAIL_RULES,
+  PASSWORD_CONFIRMATION_RULES,
+  PASSWORD_RULES,
+  USERNAME_RULES,
+} from '../model/validationRules'
 import styles from './SignUpForm.module.css'
+import { SignUpSuccessModal } from './SignUpSuccessModal'
 
 export const SignUpForm = () => {
+  const {
+    register,
+    control,
+    errors,
+    isSubmitDisabled,
+    submitHandler,
+    isSuccessModalOpen,
+    registeredEmail,
+    closeModalHandler,
+  } = useSignUpForm()
+
   return (
     <Card className={styles.card} padding="medium">
-      <form className={styles.form}>
+      <form className={styles.form} onSubmit={submitHandler}>
         <h1 className={styles.title}>Sign Up</h1>
         <div className={styles.socials} aria-label="Social sign up options">
           <button className={styles.socialButton} type="button" aria-label="Sign up with Google">
@@ -25,23 +45,48 @@ export const SignUpForm = () => {
           </button>
         </div>
         <div className={styles.fields}>
-          <Input label="Username" name="username" placeholder="Epam11" type="text" />
-          <Input label="Email" name="email" placeholder="Epam@epam.com" type="email" />
+          <Input
+            label="Username"
+            placeholder="Epam11"
+            type="text"
+            error={errors.username?.message}
+            {...register('username', USERNAME_RULES)}
+          />
+          <Input
+            label="Email"
+            placeholder="Epam@epam.com"
+            type="email"
+            error={errors.email?.message}
+            {...register('email', EMAIL_RULES)}
+          />
           <Input
             label="Password"
-            name="password"
             placeholder="******************"
             type="password"
+            error={errors.password?.message}
+            {...register('password', PASSWORD_RULES)}
           />
           <Input
             label="Password confirmation"
-            name="passwordConfirmation"
             placeholder="******************"
             type="password"
+            error={errors.passwordConfirmation?.message}
+            {...register('passwordConfirmation', PASSWORD_CONFIRMATION_RULES)}
           />
         </div>
         <div className={styles.agreement}>
-          <Checkbox aria-label="Agree to Terms of Service and Privacy Policy" />
+          <Controller
+            name="agreeToTerms"
+            control={control}
+            render={({ field: { ref, value, onChange } }) => (
+              <Checkbox
+                ref={ref}
+                checked={Boolean(value)}
+                onCheckedChange={(checked) => onChange(checked)}
+                aria-label="Agree to Terms of Service and Privacy Policy"
+              />
+            )}
+          />
           <p className={styles.agreementLabel}>
             I agree to the{' '}
             <Link className={styles.agreementLink} href={ROUTES.termsOfService}>
@@ -53,7 +98,11 @@ export const SignUpForm = () => {
             </Link>
           </p>
         </div>
-        <Button className={styles.submitButton} type="submit" variant="primary">
+        <Button
+          className={styles.submitButton}
+          type="submit"
+          variant="primary"
+          disabled={isSubmitDisabled}>
           Sign Up
         </Button>
         <div className={styles.signinBlock}>
@@ -63,6 +112,11 @@ export const SignUpForm = () => {
           </Link>
         </div>
       </form>
+      <SignUpSuccessModal
+        open={isSuccessModalOpen}
+        email={registeredEmail}
+        onClose={closeModalHandler}
+      />
     </Card>
   )
 }

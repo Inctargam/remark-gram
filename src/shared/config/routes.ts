@@ -13,4 +13,5 @@ export const ROUTES = {
   createNewPassword: '/create-new-password',
   termsOfService: '/terms-of-service',
   privacyPolicy: '/privacy-policy',
+  confirmEmail: '/confirm-email',
 } as const

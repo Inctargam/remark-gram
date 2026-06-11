@@ -1,0 +1,31 @@
+.signInLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 24px;
+  border-radius: 2px;
+  background-color: var(--color-primary-500);
+  color: var(--color-light-100);
+  font-family: var(--font-base);
+  font-size: var(--font-size-regular-16);
+  font-weight: 600;
+  line-height: var(--line-height-regular-16);
+  text-decoration: none;
+  transition:
+    background-color 0.15s,
+    color 0.15s;
+}
+
+.signInLink:hover {
+  background-color: var(--color-primary-100);
+}
+
+.signInLink:active {
+  background-color: var(--color-primary-700);
+  color: var(--color-light-500);
+}
+
+.signInLink:focus-visible {
+  outline: 2px solid var(--color-primary-700);
+  outline-offset: 0;
+}

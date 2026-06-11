@@ -1,9 +1,17 @@
 import '@/app/styles/globals.css'
 
 import type { Preview } from '@storybook/nextjs-vite'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 const preview: Preview = {
   tags: ['autodocs'],
+  decorators: [
+    (Story) => (
+      <QueryClientProvider client={new QueryClient()}>
+        <Story />
+      </QueryClientProvider>
+    ),
+  ],
   parameters: {
     // Монтирует App Router контекст для всех stories.
     // Без этого useRouter/usePathname бросают "invariant expected app router to be mounted".
