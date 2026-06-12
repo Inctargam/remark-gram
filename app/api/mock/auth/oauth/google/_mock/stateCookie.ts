@@ -31,7 +31,7 @@ export const isGoogleOAuthMockStateValid = (request: Request, state: string | un
   const expectedState = getCookieValue(request, GOOGLE_OAUTH_CONFIG.stateCookieName)
 
   if (!expectedState || !state) {
-    return true
+    return false
   }
 
   return expectedState === state

@@ -1,4 +1,7 @@
-import { GoogleOAuthCallbackPage } from '@/pages/google-oauth-callback'
+import {
+  GoogleOAuthCallbackPage,
+  parseGoogleOAuthCallbackParams,
+} from '@/pages/google-oauth-callback'
 
 type Props = {
   searchParams: Promise<{
@@ -9,19 +12,9 @@ type Props = {
   }>
 }
 
-const getSearchParam = (value: string | string[] | undefined) => {
-  return Array.isArray(value) ? (value[0] ?? null) : (value ?? null)
-}
-
 export default async function Page({ searchParams }: Props) {
   const params = await searchParams
-  const oauthError = getSearchParam(params.error_description) ?? getSearchParam(params.error)
+  const parsedParams = parseGoogleOAuthCallbackParams(params)
 
-  return (
-    <GoogleOAuthCallbackPage
-      code={getSearchParam(params.code)}
-      state={getSearchParam(params.state)}
-      oauthError={oauthError}
-    />
-  )
+  return <GoogleOAuthCallbackPage {...parsedParams} />
 }

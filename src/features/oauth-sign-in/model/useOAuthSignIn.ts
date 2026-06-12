@@ -19,7 +19,6 @@ export const useOAuthSignIn = () => {
   }
 
   return {
-    error: null,
     pendingProvider,
     signInWithOAuth,
   }
