@@ -52,3 +52,26 @@ export const Default: Story = {
     )
   },
 }
+
+export const ResetRecaptchaOnEmailChange: Story = {
+  play: async ({ canvas }) => {
+    const email = canvas.getByLabelText('Email')
+    const recaptcha = canvas.getByRole('checkbox', { name: "I'm not a robot" })
+    const submitButton = canvas.getByRole('button', { name: 'Send Link' })
+
+    await userEvent.type(email, 'first@example.com')
+    await userEvent.click(recaptcha)
+    await userEvent.clear(email)
+    await userEvent.type(email, 'second@example.com')
+
+    await expect(recaptcha).toHaveAttribute('aria-checked', 'false')
+    await expect(submitButton).toBeDisabled()
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 350)
+    })
+
+    await expect(recaptcha).toHaveAttribute('aria-checked', 'false')
+    await expect(submitButton).toBeDisabled()
+  },
+}

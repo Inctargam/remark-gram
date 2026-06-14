@@ -14,7 +14,7 @@ const meta = {
   argTypes: {
     state: {
       control: 'select',
-      options: ['default', 'hover', 'checked', 'loading', 'error', 'expired'],
+      options: ['default', 'checked', 'loading', 'error', 'expired'],
       description: 'Визуальное состояние reCAPTCHA',
     },
     label: {
@@ -31,12 +31,6 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   args: {
     state: 'default',
-  },
-}
-
-export const Hover: Story = {
-  args: {
-    state: 'hover',
   },
 }
 
@@ -103,7 +97,6 @@ export const AllStates: Story = {
   render: () => (
     <div style={{ display: 'grid', gap: '20px 28px', gridTemplateColumns: 'repeat(2, 300px)' }}>
       <Recaptcha state="default" />
-      <Recaptcha state="hover" />
       <Recaptcha state="checked" />
       <Recaptcha state="loading" />
       <Recaptcha state="error" />

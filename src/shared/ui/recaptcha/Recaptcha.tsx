@@ -6,7 +6,7 @@ import type { KeyboardEvent } from 'react'
 import { Icon } from '../icon'
 import styles from './recaptcha.module.css'
 
-export type RecaptchaState = 'default' | 'hover' | 'checked' | 'loading' | 'error' | 'expired'
+export type RecaptchaState = 'default' | 'checked' | 'loading' | 'error' | 'expired'
 
 export type RecaptchaProps = {
   state: RecaptchaState
