@@ -15,7 +15,7 @@ type Params = {
   oauthError: string | null
 }
 
-const getOAuthCallbackError = ({ code, oauthError }: Params) => {
+const getInitialSignInError = ({ code, oauthError }: Pick<Params, 'code' | 'oauthError'>) => {
   if (oauthError) {
     return oauthError
   }
@@ -30,14 +30,14 @@ const getOAuthCallbackError = ({ code, oauthError }: Params) => {
 export const useGoogleOAuthCallback = ({ code, oauthError, state }: Params) => {
   const router = useRouter()
   const hasSubmittedRef = useRef(false)
-  const [callbackError, setCallbackError] = useState<string | null>(() =>
-    getOAuthCallbackError({ code, oauthError, state })
+  const [signInError, setSignInError] = useState<string | null>(() =>
+    getInitialSignInError({ code, oauthError })
   )
 
   const exchangeMutation = useMutation({
     mutationFn: (payload: GoogleOAuthSignInPayload) => signInWithGoogleCode(payload),
     onError: (error) => {
-      setCallbackError(error instanceof Error ? error.message : 'Google OAuth sign in failed.')
+      setSignInError(error instanceof Error ? error.message : 'Google OAuth sign in failed.')
     },
     onSuccess: () => {
       router.replace(ROUTES.home)
@@ -45,16 +45,17 @@ export const useGoogleOAuthCallback = ({ code, oauthError, state }: Params) => {
   })
 
   useEffect(() => {
-    if (callbackError || hasSubmittedRef.current || !code) {
+    if (signInError) {
+      router.replace(ROUTES.signIn)
+
+      return
+    }
+
+    if (hasSubmittedRef.current || !code) {
       return
     }
 
     hasSubmittedRef.current = true
     exchangeMutation.mutate({ code, state: state ?? undefined })
-  }, [callbackError, code, exchangeMutation, state])
-
-  return {
-    error: callbackError,
-    isPending: exchangeMutation.isPending || exchangeMutation.isSuccess,
-  }
+  }, [code, exchangeMutation, router, signInError, state])
 }

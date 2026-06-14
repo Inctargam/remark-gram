@@ -3,7 +3,6 @@ type OAuthSearchParam = string | string[] | undefined
 type GoogleOAuthCallbackSearchParams = {
   code?: OAuthSearchParam
   error?: OAuthSearchParam
-  error_description?: OAuthSearchParam
   state?: OAuthSearchParam
 }
 
@@ -15,42 +14,30 @@ type ParsedGoogleOAuthCallbackParams = {
 
 const INVALID_CALLBACK_PARAMS_ERROR = 'Google sign in failed. Please try again.'
 
-const parseSingleSearchParam = (value: OAuthSearchParam) => {
-  if (Array.isArray(value)) {
-    return {
-      error: INVALID_CALLBACK_PARAMS_ERROR,
-      value: null,
-    }
-  }
-
-  return {
-    error: null,
-    value: value ?? null,
-  }
-}
+const createInvalidCallbackParams = (): ParsedGoogleOAuthCallbackParams => ({
+  code: null,
+  oauthError: INVALID_CALLBACK_PARAMS_ERROR,
+  state: null,
+})
 
 export const parseGoogleOAuthCallbackParams = (
   params: GoogleOAuthCallbackSearchParams
 ): ParsedGoogleOAuthCallbackParams => {
-  const code = parseSingleSearchParam(params.code)
-  const state = parseSingleSearchParam(params.state)
-  const oauthError = parseSingleSearchParam(params.error)
-  const oauthErrorDescription = parseSingleSearchParam(params.error_description)
+  if (Array.isArray(params.code) || Array.isArray(params.state) || Array.isArray(params.error)) {
+    return createInvalidCallbackParams()
+  }
 
-  const invalidParamsError =
-    code.error ?? state.error ?? oauthError.error ?? oauthErrorDescription.error
+  const code = params.code ?? null
+  const state = params.state ?? null
+  const oauthError = params.error ?? null
 
-  if (invalidParamsError) {
-    return {
-      code: null,
-      oauthError: invalidParamsError,
-      state: null,
-    }
+  if (code && oauthError) {
+    return createInvalidCallbackParams()
   }
 
   return {
-    code: code.value,
-    oauthError: oauthErrorDescription.value ?? oauthError.value,
-    state: state.value,
+    code,
+    oauthError,
+    state,
   }
 }

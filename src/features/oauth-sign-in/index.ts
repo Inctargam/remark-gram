@@ -8,3 +8,4 @@ export type {
 } from './model/types'
 export { useGoogleOAuthCallback } from './model/useGoogleOAuthCallback'
 export { useOAuthSignIn } from './model/useOAuthSignIn'
+export { GoogleOAuthCallbackProcessor } from './ui/GoogleOAuthCallbackProcessor'
