@@ -65,7 +65,7 @@ export const ForgotPasswordForm = () => {
         {!submittedEmail && (
           <Recaptcha
             className={styles.recaptcha}
-            onVerify={recaptchaVerifyHandler}
+            onVerifyRequest={recaptchaVerifyHandler}
             state={recaptchaState}
           />
         )}

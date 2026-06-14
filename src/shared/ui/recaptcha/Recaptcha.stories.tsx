@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
+import { useState } from 'react'
 import { expect, fn, userEvent, waitFor } from 'storybook/test'
 
-import { Recaptcha } from './Recaptcha'
+import { Recaptcha, type RecaptchaState } from './Recaptcha'
 
 const meta = {
   title: 'shared/ui/Recaptcha',
@@ -28,7 +29,9 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
-  args: {},
+  args: {
+    state: 'default',
+  },
 }
 
 export const Hover: Story = {
@@ -63,14 +66,28 @@ export const Expired: Story = {
 
 export const Interactive: Story = {
   args: {
-    loadingDuration: 300,
-    onVerify: fn(),
+    onVerifyRequest: fn(),
+    state: 'default',
+  },
+  render: ({ onVerifyRequest, state }) => {
+    const [recaptchaState, setRecaptchaState] = useState<RecaptchaState>(state)
+
+    const verifyRequestHandler = () => {
+      onVerifyRequest?.()
+      setRecaptchaState('loading')
+
+      setTimeout(() => {
+        setRecaptchaState('checked')
+      }, 300)
+    }
+
+    return <Recaptcha state={recaptchaState} onVerifyRequest={verifyRequestHandler} />
   },
   play: async ({ args, canvas }) => {
     const recaptcha = canvas.getByRole('checkbox', { name: "I'm not a robot" })
 
     await userEvent.click(recaptcha)
-    await expect(args.onVerify).toHaveBeenCalled()
+    await expect(args.onVerifyRequest).toHaveBeenCalled()
     await expect(recaptcha).toHaveAttribute('aria-checked', 'false')
 
     await waitFor(async () => {
@@ -80,9 +97,12 @@ export const Interactive: Story = {
 }
 
 export const AllStates: Story = {
+  args: {
+    state: 'default',
+  },
   render: () => (
     <div style={{ display: 'grid', gap: '20px 28px', gridTemplateColumns: 'repeat(2, 300px)' }}>
-      <Recaptcha />
+      <Recaptcha state="default" />
       <Recaptcha state="hover" />
       <Recaptcha state="checked" />
       <Recaptcha state="loading" />

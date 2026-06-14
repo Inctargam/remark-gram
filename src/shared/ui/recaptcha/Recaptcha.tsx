@@ -2,7 +2,6 @@
 
 import clsx from 'clsx'
 import type { KeyboardEvent } from 'react'
-import { useEffect, useRef, useState } from 'react'
 
 import { Icon } from '../icon'
 import styles from './recaptcha.module.css'
@@ -10,14 +9,12 @@ import styles from './recaptcha.module.css'
 export type RecaptchaState = 'default' | 'hover' | 'checked' | 'loading' | 'error' | 'expired'
 
 export type RecaptchaProps = {
-  state?: RecaptchaState
-  defaultState?: RecaptchaState
+  state: RecaptchaState
   label?: string
   errorMessage?: string
   expiredMessage?: string
-  loadingDuration?: number
   className?: string
-  onVerify?: () => void
+  onVerifyRequest?: () => void
 }
 
 const ERROR_MESSAGES: Partial<Record<RecaptchaState, string>> = {
@@ -27,47 +24,24 @@ const ERROR_MESSAGES: Partial<Record<RecaptchaState, string>> = {
 
 export const Recaptcha = ({
   state,
-  defaultState = 'default',
   label = "I'm not a robot",
   errorMessage = ERROR_MESSAGES.error,
   expiredMessage = ERROR_MESSAGES.expired,
-  loadingDuration = 1000,
   className,
-  onVerify,
+  onVerifyRequest,
 }: RecaptchaProps) => {
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const [internalState, setInternalState] = useState<RecaptchaState>(defaultState)
-
-  const visualState = state ?? internalState
-  const isControlled = state !== undefined
-  const isChecked = visualState === 'checked'
-  const isLoading = visualState === 'loading'
-  const hasOuterError = visualState === 'error'
-  const topMessage = visualState === 'expired' ? expiredMessage : undefined
-  const bottomMessage = visualState === 'error' ? errorMessage : undefined
-
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current)
-      }
-    }
-  }, [])
+  const isChecked = state === 'checked'
+  const isLoading = state === 'loading'
+  const hasOuterError = state === 'error'
+  const topMessage = state === 'expired' ? expiredMessage : undefined
+  const bottomMessage = state === 'error' ? errorMessage : undefined
 
   const verifyHandler = () => {
     if (isLoading || isChecked) {
       return
     }
 
-    if (!isControlled) {
-      setInternalState('loading')
-
-      timeoutRef.current = setTimeout(() => {
-        setInternalState('checked')
-      }, loadingDuration)
-    }
-
-    onVerify?.()
+    onVerifyRequest?.()
   }
 
   const keyDownHandler = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -85,7 +59,7 @@ export const Recaptcha = ({
         aria-checked={isChecked}
         aria-disabled={isLoading ? 'true' : undefined}
         aria-label={label}
-        className={clsx(styles.root, styles[visualState])}
+        className={clsx(styles.root, styles[state])}
         onClick={verifyHandler}
         onKeyDown={keyDownHandler}
         role="checkbox"
