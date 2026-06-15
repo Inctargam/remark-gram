@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --hostname dev.it-incubator.ru --port 3000 --experimental-https",
     "build": "next build",
     "build:production": "pnpm build",
     "start": "next start",
