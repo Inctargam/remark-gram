@@ -4,6 +4,41 @@
 
 ## Unreleased
 
+### 2026-06-15
+
+#### Auth
+
+- Добавлены unit-тесты на OAuth authorize endpoint helper, Google authorize URL builder и real Google OAuth exchange.
+- Frontend OAuth API adapter и типы переименованы с sign-in терминологии на exchange терминологию: `exchangeOAuthCode`, `OAuthExchangePayload`, `OAuthExchangeResult`.
+
+- Social-кнопки Google и GitHub на форме входа переведены на shared `Button` на базе Base UI; временный `aria-busy` для Google OAuth убран, а disabled-состояние синхронизировано с Base UI `data-disabled`.
+- Social-кнопки Google и GitHub на форме регистрации также переведены на shared `Button` с тем же локальным поведением hover/active.
+- Social-кнопки Google и GitHub на форме регистрации теперь запускают тот же OAuth redirect-flow, что и форма входа.
+- OAuth-кнопки на формах входа и регистрации теперь запускают `/authorize` через нативный `href` внутри Base UI `Button`, чтобы возврат через browser Back после внешнего Google/GitHub redirect не зависел от восстановленных React click handlers.
+- Добавлен mock GitHub OAuth backend рядом с Google flow: `/api/mock/auth/oauth/github/authorize` создает `state`, ставит HttpOnly cookie и редиректит на GitHub authorize URL, а `/api/mock/auth/oauth/github/exchange` валидирует `code/state`, выставляет mock session cookies и очищает state cookie.
+- GitHub OAuth exchange теперь работает в гибридном режиме как Google: mock authorization code возвращает mock-пользователя, а реальный GitHub `code` обменивается на access token, загружает профиль `/user` и при необходимости берет primary verified email через `/user/emails`.
+- Общая часть mock OAuth backend вынесена в общий каркас для state cookie и exchange handler, чтобы Google и GitHub использовали один механизм проверки `code/state`, установки session cookies и обработки ошибок.
+- Frontend OAuth-flow теперь запускает GitHub через конфигурируемый mock authorize endpoint, а новый route `/auth/github/callback` разбирает callback params и отправляет `code/state` в GitHub mock exchange endpoint.
+- Frontend callback-логика Google и GitHub объединена: два callback URL сохранены, но parser, API client, hook и spinner processor теперь общие и выбирают exchange endpoint по provider.
+- GitHub OAuth client id и secret добавлены в локальный `.env.local`; исходный код продолжает читать значения через переменные окружения.
+- Для GitHub OAuth добавлены unit-тесты API клиента, callback parser, state cookie, exchange handler и реального GitHub OAuth client exchange.
+
+#### Verification
+
+- `pnpm exec eslint app/api/mock/auth/oauth src/features/oauth-sign-in src/features/sign-in src/features/sign-up src/pages/oauth-callback "app/(auth)/auth/google/callback" "app/(auth)/auth/github/callback"` прошел успешно.
+- `pnpm exec vitest run --project unit` прошел успешно: 9 файлов, 42 теста.
+
+- `pnpm exec eslint app/api/mock/auth/oauth src/features/oauth-sign-in src/pages/github-oauth-callback "app/(auth)/auth/github/callback" src/shared/config` прошел успешно.
+- `pnpm exec eslint src/features/sign-in src/features/oauth-sign-in src/shared/ui/button` прошел успешно.
+- `pnpm exec eslint src/features/sign-up src/features/sign-in src/shared/ui/button` прошел успешно.
+- `pnpm exec eslint src/features/sign-up src/features/sign-in src/features/oauth-sign-in` прошел успешно.
+- `pnpm exec eslint "app/(auth)/auth/google/callback" "app/(auth)/auth/github/callback" src/features/oauth-sign-in src/pages/oauth-callback` прошел успешно.
+- `pnpm exec eslint src/features/oauth-sign-in src/features/sign-in` прошел успешно.
+- `pnpm exec vitest run --project unit` прошел успешно: 7 файлов, 35 тестов.
+- `pnpm exec tsc --noEmit` прошел успешно.
+- `pnpm build` прошел успешно.
+- Storybook tests не запускались, потому что stories и shared UI-компоненты не изменялись.
+
 ### 2026-06-14
 
 #### Auth

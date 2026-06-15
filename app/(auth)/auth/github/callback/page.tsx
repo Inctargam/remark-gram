@@ -12,8 +12,8 @@ type Props = {
 export default async function Page({ searchParams }: Props) {
   const params = await searchParams
   const parsedParams = parseOAuthCallbackParams(params, {
-    invalidCallbackMessage: 'Google sign in failed. Please try again.',
+    invalidCallbackMessage: 'GitHub sign in failed. Please try again.',
   })
 
-  return <OAuthCallbackProcessor provider="google" {...parsedParams} />
+  return <OAuthCallbackProcessor provider="github" {...parsedParams} />
 }

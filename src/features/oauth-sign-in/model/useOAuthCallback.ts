@@ -6,38 +6,52 @@ import { useEffect, useRef, useState } from 'react'
 
 import { ROUTES } from '@/shared/config'
 
-import { signInWithGoogleCode } from '../api/googleOAuthApi'
-import type { GoogleOAuthSignInPayload } from './types'
+import { exchangeOAuthCode } from '../api/oauthApi'
+import type { OAuthExchangePayload, OAuthProvider } from './types'
 
 type Params = {
   code: string | null
   state: string | null
   oauthError: string | null
+  provider: OAuthProvider
 }
 
-const getInitialSignInError = ({ code, oauthError }: Pick<Params, 'code' | 'oauthError'>) => {
+const PROVIDER_LABELS = {
+  github: 'GitHub',
+  google: 'Google',
+} as const
+
+const getInitialSignInError = ({
+  code,
+  oauthError,
+  provider,
+}: Pick<Params, 'code' | 'oauthError' | 'provider'>) => {
   if (oauthError) {
     return oauthError
   }
 
   if (!code) {
-    return 'Google OAuth code is missing.'
+    return `${PROVIDER_LABELS[provider]} OAuth code is missing.`
   }
 
   return null
 }
 
-export const useGoogleOAuthCallback = ({ code, oauthError, state }: Params) => {
+export const useOAuthCallback = ({ code, oauthError, provider, state }: Params) => {
   const router = useRouter()
   const hasSubmittedRef = useRef(false)
   const [signInError, setSignInError] = useState<string | null>(() =>
-    getInitialSignInError({ code, oauthError })
+    getInitialSignInError({ code, oauthError, provider })
   )
 
   const exchangeMutation = useMutation({
-    mutationFn: (payload: GoogleOAuthSignInPayload) => signInWithGoogleCode(payload),
+    mutationFn: (payload: OAuthExchangePayload) => exchangeOAuthCode(provider, payload),
     onError: (error) => {
-      setSignInError(error instanceof Error ? error.message : 'Google OAuth sign in failed.')
+      setSignInError(
+        error instanceof Error
+          ? error.message
+          : `${PROVIDER_LABELS[provider]} OAuth sign in failed.`
+      )
     },
     onSuccess: () => {
       router.replace(ROUTES.home)

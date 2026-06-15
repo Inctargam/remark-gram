@@ -4,7 +4,7 @@ export type OAuthProvider = Exclude<AuthProvider, 'email'>
 
 export type OAuthMockScenario = 'new-user' | 'existing-user' | 'error'
 
-export type GoogleOAuthSignInPayload = {
+export type OAuthExchangePayload = {
   code: string
   state?: string
   scenario?: OAuthMockScenario
@@ -19,7 +19,7 @@ export type OAuthUser = {
   providers: AuthProvider[]
 }
 
-export type GoogleOAuthSignInResult = {
+export type OAuthExchangeResult = {
   status: OAuthExchangeStatus
   user: OAuthUser
 }

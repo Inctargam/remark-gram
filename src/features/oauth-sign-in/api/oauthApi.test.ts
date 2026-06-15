@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { OAUTH_CONFIG } from '@/shared/config'
 
-import { signInWithGoogleCode } from './googleOAuthApi'
+import { exchangeOAuthCode } from './oauthApi'
 
 const createJsonResponse = (payload: unknown, init?: ResponseInit) =>
   new Response(JSON.stringify(payload), {
@@ -13,58 +13,61 @@ const createJsonResponse = (payload: unknown, init?: ResponseInit) =>
     statusText: init?.statusText,
   })
 
-describe('signInWithGoogleCode', () => {
+describe('exchangeOAuthCode', () => {
   afterEach(() => {
     vi.restoreAllMocks()
   })
 
-  it('sends google code and state to the exchange endpoint', async () => {
+  it.each([
+    ['google' as const, OAUTH_CONFIG.googleMockExchangeEndpoint],
+    ['github' as const, OAUTH_CONFIG.githubMockExchangeEndpoint],
+  ])('sends %s code and state to the provider exchange endpoint', async (provider, endpoint) => {
     const result = {
       status: 'authenticated',
       user: {
-        id: 'google-user-id',
-        email: 'user@gmail.com',
-        username: 'googleUser',
-        providers: ['google'],
+        id: `${provider}-user-id`,
+        email: `user@${provider}.example`,
+        username: `${provider}User`,
+        providers: [provider],
       },
     }
     const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(createJsonResponse(result))
 
     await expect(
-      signInWithGoogleCode({
-        code: 'google-code',
-        state: 'google-state',
+      exchangeOAuthCode(provider, {
+        code: `${provider}-code`,
+        state: `${provider}-state`,
       })
     ).resolves.toEqual(result)
 
-    expect(fetchMock).toHaveBeenCalledWith(OAUTH_CONFIG.googleMockExchangeEndpoint, {
+    expect(fetchMock).toHaveBeenCalledWith(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        code: 'google-code',
-        state: 'google-state',
+        code: `${provider}-code`,
+        state: `${provider}-state`,
       }),
     })
   })
 
   it('throws backend error message when exchange endpoint rejects the request', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-      createJsonResponse({ message: 'Google OAuth state is invalid.' }, { status: 400 })
+      createJsonResponse({ message: 'OAuth state is invalid.' }, { status: 400 })
     )
 
-    await expect(signInWithGoogleCode({ code: 'google-code' })).rejects.toThrow(
-      'Google OAuth state is invalid.'
+    await expect(exchangeOAuthCode('github', { code: 'github-code' })).rejects.toThrow(
+      'OAuth state is invalid.'
     )
   })
 
-  it('throws fallback error when exchange endpoint rejects with non-json response', async () => {
+  it('throws provider fallback error when exchange endpoint rejects with non-json response', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(
       new Response('Internal Server Error', { status: 500 })
     )
 
-    await expect(signInWithGoogleCode({ code: 'google-code' })).rejects.toThrow(
+    await expect(exchangeOAuthCode('google', { code: 'google-code' })).rejects.toThrow(
       'Google OAuth sign in failed.'
     )
   })

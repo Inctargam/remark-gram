@@ -1,11 +1,11 @@
+export { getOAuthAuthorizeEndpoint } from './model/getOAuthAuthorizeEndpoint'
 export type {
-  GoogleOAuthSignInPayload,
-  GoogleOAuthSignInResult,
+  OAuthExchangePayload,
+  OAuthExchangeResult,
   OAuthExchangeStatus,
   OAuthMockScenario,
   OAuthProvider,
   OAuthUser,
 } from './model/types'
-export { useGoogleOAuthCallback } from './model/useGoogleOAuthCallback'
-export { useOAuthSignIn } from './model/useOAuthSignIn'
-export { GoogleOAuthCallbackProcessor } from './ui/GoogleOAuthCallbackProcessor'
+export { useOAuthCallback } from './model/useOAuthCallback'
+export { OAuthCallbackProcessor } from './ui/OAuthCallbackProcessor'
