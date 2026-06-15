@@ -1,5 +1,5 @@
 import { useRouter } from 'next/navigation'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 
 import { ApiError } from '@/shared/api/baseApi'
 import { ROUTES } from '@/shared/config'
@@ -15,14 +15,15 @@ export const useSignInForm = () => {
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors, isValid },
-    watch,
     setError,
   } = useForm<SignInFormValues>({ mode: 'onBlur' })
 
   const { mutate, isPending } = useLoginMutation()
 
-  const { email, password } = watch()
+  const email = useWatch({ control, name: 'email' })
+  const password = useWatch({ control, name: 'password' })
 
   const hasAllValues = Boolean(email) && Boolean(password)
 
