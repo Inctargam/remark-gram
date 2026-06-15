@@ -17,7 +17,7 @@ const LANGUAGE_OPTIONS: SelectOption<string>[] = [
   { label: 'Russian', value: 'ru' },
 ]
 
-const IS_AUTHENTICATED_MOCK = true
+const IS_AUTHENTICATED_MOCK = false
 
 export const metadata: Metadata = {
   title: 'Inctagram',
