@@ -33,8 +33,7 @@
   cursor: default;
 }
 
-.root:hover,
-.hover {
+.root:hover {
   border-color: var(--color-dark-300);
 }
 
@@ -63,7 +62,6 @@
   background-color: transparent;
 }
 
-.hover .checkbox,
 .default:hover .checkbox,
 .error:hover .checkbox,
 .expired:hover .checkbox {

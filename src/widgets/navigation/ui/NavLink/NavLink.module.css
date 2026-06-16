@@ -1,9 +1,9 @@
 .item {
   display: inline-flex;
   align-items: center;
-  background: transparent;
   border: 0;
   border-radius: 2px;
+  background: transparent;
   color: var(--color-light-100);
   font-family: var(--font-base), sans-serif;
   font-size: var(--font-size-medium-14);
@@ -14,13 +14,13 @@
   transition: color 0.15s;
 }
 
-.item:hover {
-  color: var(--color-primary-100);
-}
-
 .item:focus-visible {
   outline: 2px solid var(--color-primary-700);
   outline-offset: 2px;
+}
+
+.item:not(.active, .disabled):hover {
+  color: var(--color-primary-100);
 }
 
 .active {
