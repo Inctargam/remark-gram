@@ -3,7 +3,7 @@ import '@/app/styles/globals.css'
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 
-import { QueryProvider } from '@/app/providers/QueryProvider'
+import { QueryProvider } from '@/app/providers'
 import { LogoutButton } from '@/features/logout'
 import type { SelectOption } from '@/shared/ui/select'
 import { Select } from '@/shared/ui/select'

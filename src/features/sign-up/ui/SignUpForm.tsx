@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { Controller } from 'react-hook-form'
 
+import { getOAuthAuthorizeEndpoint } from '@/features/oauth-sign-in'
 import { ROUTES } from '@/shared/config'
 import { Button } from '@/shared/ui/button'
 import { Card } from '@/shared/ui/card'
@@ -37,12 +38,22 @@ export const SignUpForm = () => {
       <form className={styles.form} onSubmit={submitHandler}>
         <h1 className={styles.title}>Sign Up</h1>
         <div className={styles.socials} aria-label="Social sign up options">
-          <button className={styles.socialButton} type="button" aria-label="Sign up with Google">
+          <Button
+            className={styles.socialButton}
+            nativeButton={false}
+            render={<a href={getOAuthAuthorizeEndpoint('google')} />}
+            variant="text"
+            aria-label="Sign up with Google">
             <Icon iconId="icon-google" width={36} height={36} />
-          </button>
-          <button className={styles.socialButton} type="button" aria-label="Sign up with GitHub">
+          </Button>
+          <Button
+            className={styles.socialButton}
+            nativeButton={false}
+            render={<a href={getOAuthAuthorizeEndpoint('github')} />}
+            variant="text"
+            aria-label="Sign up with GitHub">
             <Icon iconId="icon-github" width={36} height={36} />
-          </button>
+          </Button>
         </div>
         <div className={styles.fields}>
           <Input
