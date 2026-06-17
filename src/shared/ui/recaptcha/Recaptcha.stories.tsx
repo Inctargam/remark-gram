@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
+import { useState } from 'react'
 import { expect, fn, userEvent, waitFor } from 'storybook/test'
 
-import { Recaptcha } from './Recaptcha'
+import { Recaptcha, type RecaptchaState } from './Recaptcha'
 
 const meta = {
   title: 'shared/ui/Recaptcha',
@@ -13,7 +14,7 @@ const meta = {
   argTypes: {
     state: {
       control: 'select',
-      options: ['default', 'hover', 'checked', 'loading', 'error', 'expired'],
+      options: ['default', 'checked', 'loading', 'error', 'expired'],
       description: 'Визуальное состояние reCAPTCHA',
     },
     label: {
@@ -28,12 +29,8 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
-  args: {},
-}
-
-export const Hover: Story = {
   args: {
-    state: 'hover',
+    state: 'default',
   },
 }
 
@@ -63,14 +60,28 @@ export const Expired: Story = {
 
 export const Interactive: Story = {
   args: {
-    loadingDuration: 300,
-    onVerify: fn(),
+    onVerifyRequest: fn(),
+    state: 'default',
+  },
+  render: ({ onVerifyRequest, state }) => {
+    const [recaptchaState, setRecaptchaState] = useState<RecaptchaState>(state)
+
+    const verifyRequestHandler = () => {
+      onVerifyRequest?.()
+      setRecaptchaState('loading')
+
+      setTimeout(() => {
+        setRecaptchaState('checked')
+      }, 300)
+    }
+
+    return <Recaptcha state={recaptchaState} onVerifyRequest={verifyRequestHandler} />
   },
   play: async ({ args, canvas }) => {
     const recaptcha = canvas.getByRole('checkbox', { name: "I'm not a robot" })
 
     await userEvent.click(recaptcha)
-    await expect(args.onVerify).toHaveBeenCalled()
+    await expect(args.onVerifyRequest).toHaveBeenCalled()
     await expect(recaptcha).toHaveAttribute('aria-checked', 'false')
 
     await waitFor(async () => {
@@ -80,10 +91,12 @@ export const Interactive: Story = {
 }
 
 export const AllStates: Story = {
+  args: {
+    state: 'default',
+  },
   render: () => (
     <div style={{ display: 'grid', gap: '20px 28px', gridTemplateColumns: 'repeat(2, 300px)' }}>
-      <Recaptcha />
-      <Recaptcha state="hover" />
+      <Recaptcha state="default" />
       <Recaptcha state="checked" />
       <Recaptcha state="loading" />
       <Recaptcha state="error" />
