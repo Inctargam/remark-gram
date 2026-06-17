@@ -67,6 +67,16 @@ type Story = StoryObj<typeof meta>
 /** Пункт в неактивном состоянии — иконка outline, цвет light-100. */
 export const Inactive: Story = {}
 
+/** Hover красит неактивный пункт в primary-100, не переключая его в active. */
+export const Hover: Story = {
+  play: async ({ canvas }) => {
+    const link = canvas.getByRole('link', { name: 'Home' })
+
+    await userEvent.hover(link)
+    await expect(link).not.toHaveAttribute('aria-current')
+  },
+}
+
 /**
  * Пункт в активном состоянии — filled-иконка, цвет primary-500, aria-current="page".
  * NavLink переключает icon → activeIcon автоматически.
@@ -119,5 +129,6 @@ export const KeyboardFocus: Story = {
 
     await userEvent.tab()
     await expect(link).toHaveFocus()
+    await expect(link).not.toHaveAttribute('aria-current')
   },
 }

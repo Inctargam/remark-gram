@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 
+import { getOAuthAuthorizeEndpoint } from '@/features/oauth-sign-in'
 import { ROUTES } from '@/shared/config'
 import { Button } from '@/shared/ui/button'
 import { Card } from '@/shared/ui/card'
@@ -21,12 +22,22 @@ export const SignInForm = () => {
         <h1 className={styles.title}>Sign In</h1>
 
         <div className={styles.socials} aria-label="Social sign in options">
-          <button className={styles.socialButton} type="button" aria-label="Sign in with Google">
+          <Button
+            className={styles.socialButton}
+            nativeButton={false}
+            render={<a href={getOAuthAuthorizeEndpoint('google')} />}
+            variant="text"
+            aria-label="Sign in with Google">
             <Icon iconId="icon-google" width={36} height={36} />
-          </button>
-          <button className={styles.socialButton} type="button" aria-label="Sign in with GitHub">
+          </Button>
+          <Button
+            className={styles.socialButton}
+            nativeButton={false}
+            render={<a href={getOAuthAuthorizeEndpoint('github')} />}
+            variant="text"
+            aria-label="Sign in with GitHub">
             <Icon iconId="icon-github" width={36} height={36} />
-          </button>
+          </Button>
         </div>
 
         <div className={styles.fields}>

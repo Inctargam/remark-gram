@@ -142,7 +142,7 @@ Write and maintain all `CHANGELOG.md` entries in Russian.
 Rules:
 
 - Update `CHANGELOG.md` after meaningful code, UI, configuration, architecture, dependency, documentation, or test changes.
-- When finishing a task that changes tracked project files, Codex must consider whether `CHANGELOG.md` needs an entry and update it in the same turn unless the user explicitly asks not to.
+- When finishing a task that changes tracked project files or adds new project files, Codex must consider whether `CHANGELOG.md` needs an entry and update it in the same turn unless the user explicitly asks not to.
 - Do not update it for purely exploratory work, failed attempts, temporary debugging, formatting-only churn, or personal local activity.
 - Do not copy raw command logs, personal local notes, local activity files, or temporary debugging traces into `CHANGELOG.md`.
 - Write entries as concise team-facing summaries: more detailed than a commit title, shorter than a PR description.
