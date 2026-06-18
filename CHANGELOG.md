@@ -4,6 +4,19 @@
 
 ## Unreleased
 
+### 2026-06-18
+
+#### Tooling
+
+- Docker-сборка закреплена на `pnpm@10.24.0`, чтобы Jenkins не использовал плавающий `pnpm@latest` и не падал на политике approved builds для `esbuild`.
+- Storybook stories исключены из production TypeScript-проверки Next.js, потому что они проверяются Storybook toolchain и не должны блокировать Docker build приложения.
+
+#### Verification
+
+- `$env:CI='true'; pnpm install --frozen-lockfile` прошел успешно.
+- `pnpm build` прошел успешно.
+- `docker version` не запускался: Docker CLI недоступен в локальном окружении.
+
 ### 2026-06-15
 
 #### Auth
