@@ -1,0 +1,34 @@
+.frame {
+  padding: 24px;
+  background-color: var(--color-dark-900);
+}
+
+.hoverState label {
+  --radio-item-state-background: var(--color-dark-300);
+}
+
+.focusState label {
+  --radio-item-state-background: var(--color-dark-500);
+}
+
+.activeState label {
+  --radio-item-state-background: var(--color-dark-100);
+}
+
+.allStates {
+  display: grid;
+  grid-template-columns: repeat(2, max-content);
+  gap: 24px 40px;
+  align-items: start;
+}
+
+.state {
+  display: grid;
+  gap: 8px;
+}
+
+.stateLabel {
+  color: var(--color-light-900);
+  font-size: 14px;
+  line-height: 24px;
+}

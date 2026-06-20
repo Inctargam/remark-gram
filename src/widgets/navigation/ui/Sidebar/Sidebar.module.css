@@ -1,0 +1,33 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 220px;
+  min-height: calc(100vh - 60px);
+  padding: 72px 0 36px;
+  border-right: 1px solid var(--color-dark-300);
+  background-color: var(--color-dark-700);
+  color: var(--color-light-100);
+  font-family: var(--font-base), sans-serif;
+}
+
+.navList {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Layout injected into NavLink via className prop */
+.navItem {
+  gap: 12px;
+  height: 24px;
+  margin-left: 60px;
+}
+
+.separatedNavItem {
+  margin-top: 36px;
+}
+
+.footer {
+  margin-left: 60px;
+}

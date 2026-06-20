@@ -1,0 +1,18 @@
+export const ROUTES = {
+  home: '/',
+  create: '/create',
+  profile: '/profile',
+  messenger: '/messenger',
+  search: '/search',
+  statistics: '/statistics',
+  favorites: '/favorites',
+  signIn: '/sign-in',
+  signUp: '/sign-up',
+  googleOAuthCallback: '/auth/google/callback',
+  forgotPassword: '/forgot-password',
+  passwordRecovery: '/password-recovery',
+  createNewPassword: '/create-new-password',
+  termsOfService: '/terms-of-service',
+  privacyPolicy: '/privacy-policy',
+  confirmEmail: '/confirm-email',
+} as const

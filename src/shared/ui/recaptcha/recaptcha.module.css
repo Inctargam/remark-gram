@@ -1,0 +1,152 @@
+.wrapper {
+  position: relative;
+  display: inline-block;
+  width: 300px;
+  font-family: Roboto, var(--font-base), sans-serif;
+}
+
+.wrapperError {
+  box-sizing: border-box;
+  width: 314px;
+  min-height: 124px;
+  padding: 8px 7px 34px;
+  border: 1px solid var(--color-danger-300);
+}
+
+.root {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 300px;
+  min-height: 79px;
+  padding: 12px 20px;
+  border: 1px solid var(--color-dark-300);
+  border-radius: 2px;
+  background-color: var(--color-dark-500);
+  color: var(--color-light-100);
+  font: inherit;
+  cursor: pointer;
+}
+
+.root[aria-disabled='true'] {
+  cursor: default;
+}
+
+.root:hover {
+  border-color: var(--color-dark-300);
+}
+
+.challenge {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.checkbox {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+  justify-content: center;
+  align-items: center;
+  width: 20px;
+  height: 20px;
+  border: 1px solid #b7b7b7;
+  border-radius: 1px;
+  background-color: var(--color-light-100);
+}
+
+.checked .checkbox,
+.loading .checkbox {
+  border-color: transparent;
+  background-color: transparent;
+}
+
+.default:hover .checkbox,
+.error:hover .checkbox,
+.expired:hover .checkbox {
+  border-color: #9d9d9d;
+}
+
+.label {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: normal;
+  white-space: nowrap;
+}
+
+.brand {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: center;
+  width: 50px;
+  color: var(--color-light-100);
+  line-height: normal;
+}
+
+.logo {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.brandName {
+  font-size: 8px;
+  font-weight: 500;
+}
+
+.links {
+  margin-top: 1px;
+  font-size: 6px;
+  font-weight: 500;
+}
+
+.checkmark {
+  position: absolute;
+  color: #14b34b;
+}
+
+.spinner {
+  width: 17px;
+  height: 17px;
+  border: 3px solid transparent;
+  border-top-color: var(--color-primary-500);
+  border-left-color: var(--color-primary-500);
+  border-radius: 50%;
+  transform: rotate(45deg);
+  animation: spin 0.9s linear infinite;
+}
+
+.topMessage {
+  position: absolute;
+  top: 3px;
+  left: 16px;
+  display: block;
+  max-width: 190px;
+  color: var(--color-danger-300);
+  font-size: 10px;
+  font-weight: 400;
+  line-height: normal;
+  text-align: left;
+}
+
+.expired {
+  align-items: flex-end;
+}
+
+.bottomMessage {
+  position: absolute;
+  bottom: 11px;
+  left: 8px;
+  margin: 0;
+  color: var(--color-danger-300);
+  font-size: 10px;
+  font-weight: 400;
+  line-height: normal;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(405deg);
+  }
+}

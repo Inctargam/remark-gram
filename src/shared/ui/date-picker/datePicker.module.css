@@ -1,0 +1,113 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.label {
+  color: var(--color-light-900);
+  font-family: var(--font-base);
+  font-size: var(--font-size-regular-14);
+  font-weight: var(--font-weight-regular-14);
+  line-height: var(--line-height-regular-14);
+}
+
+.triggerWrapper {
+  position: relative;
+}
+
+.trigger {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 158px;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--color-dark-300);
+  border-radius: 2px;
+  background: transparent;
+  color: var(--color-light-100);
+  font-family: var(--font-base);
+  font-size: var(--font-size-regular-16);
+  font-weight: var(--font-weight-regular-16);
+  line-height: var(--line-height-regular-16);
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background-color 0.15s,
+    box-shadow 0.15s;
+
+  &:focus-visible {
+    border-color: var(--color-primary-500);
+    box-shadow: 0 0 0 1px var(--color-primary-500);
+    outline: none;
+  }
+
+  &:disabled {
+    border-color: var(--color-dark-100);
+    color: var(--color-dark-100);
+    cursor: not-allowed;
+  }
+
+  &:hover:not(:disabled) {
+    border-color: var(--color-light-900);
+  }
+
+  &.triggerRange {
+    width: 262px;
+    background-color: var(--color-dark-500);
+  }
+}
+
+.value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.placeholder {
+  color: var(--color-light-900);
+}
+
+.valueError {
+  color: var(--color-danger-500);
+}
+
+.triggerError {
+  border-color: var(--color-danger-500);
+
+  &:focus-visible {
+    border-color: var(--color-danger-500);
+    box-shadow: 0 0 0 1px var(--color-danger-500);
+  }
+}
+
+.icon {
+  flex-shrink: 0;
+  color: var(--color-light-100);
+}
+
+.iconError {
+  color: var(--color-danger-500);
+}
+
+.trigger:disabled .icon {
+  color: var(--color-dark-100);
+}
+
+.popup {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 1000;
+  border: 1px solid var(--color-dark-300);
+  border-radius: 2px;
+}
+
+.error {
+  color: var(--color-danger-500);
+  font-family: var(--font-base);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-small);
+  line-height: var(--line-height-small);
+}

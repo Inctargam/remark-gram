@@ -1,0 +1,17 @@
+.text {
+    margin: 0 0 30px;
+    color: var(--color-light-100);
+    font-size: var(--font-size-medium-14);
+    line-height: var(--line-height-medium-14);
+}
+
+.actions {
+    display: flex;
+    justify-content: end;
+    gap: 24px;
+}
+
+.actions button {
+    width: 96px;
+    height: 36px;
+}

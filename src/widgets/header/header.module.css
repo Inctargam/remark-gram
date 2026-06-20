@@ -1,0 +1,67 @@
+.header {
+  width: 100%;
+  background-color: var(--color-dark-700);
+  border-bottom: 1px solid var(--color-dark-300);
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 60px;
+}
+
+.logo {
+  font-family: var(--font-base);
+  font-size: var(--font-size-large);
+  font-weight: var(--font-weight-large);
+  line-height: var(--line-height-large);
+  color: var(--color-light-100);
+  /* globals.css задаёт a { color: primary; text-decoration: underline } — сбрасываем */
+  text-decoration: none;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.bell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-light-100);
+  cursor: pointer;
+}
+
+.bell:focus-visible {
+  outline: 2px solid var(--color-primary-700);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  background-color: var(--color-danger-500);
+  border-radius: 8px;
+  font-family: var(--font-base);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold-small);
+  line-height: var(--line-height-small);
+  color: var(--color-light-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

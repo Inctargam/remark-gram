@@ -1,0 +1,201 @@
+
+.root {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.arrow {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: transparent;
+    color: var(--color-light-100, #fff);
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+}
+
+.arrowIcon {
+    color: #fff;
+}
+
+.list {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 2px;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    background: transparent;
+    color: var(--color-light-100, #fff);
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+}
+
+.pageActive {
+    background: #fff;
+    color: #000;
+    border-color: #fff;
+}
+
+.pageActive:hover {
+    background: #fff;
+    color: #000;
+    border-color: #fff;
+}
+
+.selectTrigger {
+    position: relative; /* Establish positioning context for dropdown */
+    display: flex;
+    justify-content: space-between; /* Ensures content and icon are spaced */
+    align-items: center;
+    width: 50px; /* Allow trigger to size based on content */
+    height: 24px;
+    padding: 4px;
+    border: 1px solid var(--color-dark-300, #4c4c4c);
+    border-radius: 2px;
+    background: var(--color-dark-500, #171717);
+    color: var(--color-light-100, #fff);
+    font-size: 14px;
+    cursor: pointer;
+    box-sizing: border-box; /* Ensure consistent sizing */
+}
+
+.page:focus-visible,
+.arrow:focus-visible,
+.selectTrigger:focus-visible {
+    outline: 2px solid var(--color-primary-500);
+    outline-offset: 2px;
+}
+
+.arrow:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.arrow:hover:not(:disabled) {
+    opacity: 0.7;
+}
+
+.page:hover:not(.pageActive) {
+    border-color: var(--color-dark-500, #4c4c4c);
+    background: var(--color-dark-500);
+    color: #fff;
+}
+
+.dots {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 24px;
+    height: 24px;
+    color: var(--color-dark-100, #aaa);
+    font-size: 14px;
+    user-select: none;
+}
+
+.perPage {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: 6px;
+}
+
+.perPageText {
+    color: var(--color-light-100, #fff);
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.selectIcon {
+    display: flex;
+    align-items: center;
+    width: 16px;
+    height: 16px;
+    color: var(--color-light-100, #fff);
+    transition: transform 0.15s ease;
+}
+
+.selectTrigger[data-popup-open] .selectIcon {
+    transform: rotate(180deg);
+}
+
+.selectPopup {
+    z-index: 50; /* Ensure it's above other elements */
+    width: 50px; /* Take full width of its parent (.positioner) */
+    border: 1px solid var(--color-dark-300, #4c4c4c);
+    border-radius: 2px;
+    background: var(--color-dark-500, #171717);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 50%);
+    outline: none;
+    box-sizing: border-box; /* Ensure consistent sizing */
+}
+
+.selectPopup[data-open] {
+    animation: popupIn 0.12s ease;
+}
+
+.selectPopup[data-closed] {
+    animation: popupOut 0.1s ease forwards;
+}
+
+@keyframes popup-in {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes popup-out {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+}
+
+.selectItem {
+    display: flex;
+    align-items: center;
+    padding: 6px;
+    color: var(--color-light-100, #fff);
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.1s ease;
+    font-family: inherit;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.selectItem[data-highlighted] {
+    background: var(--color-dark-300, rgb(255 255 255 / 6%));
+}
+
+.selectItem[data-selected] {
+    color: var(--color-primary-500);
+}

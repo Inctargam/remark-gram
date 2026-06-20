@@ -1,0 +1,39 @@
+.shell {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+.content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.sidebarSlot {
+  display: none;
+}
+
+.main {
+  flex: 1;
+}
+
+.languageSelector {
+  width: 163px;
+}
+
+@media (min-width: 768px) {
+  .content {
+    align-items: flex-start;
+    flex-direction: row;
+  }
+
+  .sidebarSlot {
+    display: block;
+    flex-shrink: 0;
+  }
+
+  .bottomBarSlot {
+    display: none;
+  }
+}
