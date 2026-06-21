@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 
+import { EMAIL_RULES, PASSWORD_LENGTH_RULES } from '@/entities/auth'
 import { getOAuthAuthorizeEndpoint } from '@/features/oauth-sign-in'
 import { ROUTES } from '@/shared/config'
 import { Button } from '@/shared/ui/button'
@@ -10,7 +11,6 @@ import { Icon } from '@/shared/ui/icon'
 import { Input } from '@/shared/ui/input'
 
 import { useSignInForm } from '../model/useSignInForm'
-import { EMAIL_RULES, PASSWORD_RULES } from '../model/validationRules'
 import styles from './SignInForm.module.css'
 
 export const SignInForm = () => {
@@ -53,7 +53,7 @@ export const SignInForm = () => {
             placeholder="**********"
             type="password"
             error={errors.password?.message}
-            {...register('password', PASSWORD_RULES)}
+            {...register('password', PASSWORD_LENGTH_RULES)}
           />
         </div>
 

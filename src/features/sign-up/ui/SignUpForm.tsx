@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { Controller } from 'react-hook-form'
 
+import { EMAIL_RULES, PASSWORD_CREATION_RULES } from '@/entities/auth'
 import { getOAuthAuthorizeEndpoint } from '@/features/oauth-sign-in'
 import { ROUTES } from '@/shared/config'
 import { Button } from '@/shared/ui/button'
@@ -12,12 +13,7 @@ import { Icon } from '@/shared/ui/icon'
 import { Input } from '@/shared/ui/input'
 
 import { useSignUpForm } from '../model/useSignUpForm'
-import {
-  EMAIL_RULES,
-  PASSWORD_CONFIRMATION_RULES,
-  PASSWORD_RULES,
-  USERNAME_RULES,
-} from '../model/validationRules'
+import { PASSWORD_CONFIRMATION_RULES, USERNAME_RULES } from '../model/validationRules'
 import styles from './SignUpForm.module.css'
 import { SignUpSuccessModal } from './SignUpSuccessModal'
 
@@ -75,7 +71,7 @@ export const SignUpForm = () => {
             placeholder="******************"
             type="password"
             error={errors.password?.message}
-            {...register('password', PASSWORD_RULES)}
+            {...register('password', PASSWORD_CREATION_RULES)}
           />
           <Input
             label="Password confirmation"

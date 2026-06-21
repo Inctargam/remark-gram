@@ -31,8 +31,27 @@ export const Default: Story = {
 
     await userEvent.type(canvas.getByLabelText('New password'), '123456')
     await userEvent.type(canvas.getByLabelText('Password confirmation'), '654321')
+    await userEvent.tab()
 
-    await expect(canvas.getByText('The passwords must match')).toBeInTheDocument()
+    await expect(
+      canvas.getByText(
+        'Password must contain 0-9, a-z, A-Z, ! " # $ % & \' ( ) * + , - . / : ; < = > ? @ [ \\ ] ^ _ { | } ~'
+      )
+    ).toBeInTheDocument()
+    await expect(canvas.getByText('Passwords must match')).toBeInTheDocument()
+    await expect(submitButton).toBeDisabled()
+  },
+}
+
+export const WithoutPasswordConfirmation: Story = {
+  play: async ({ canvas }) => {
+    const submitButton = canvas.getByRole('button', { name: 'Create new password' })
+
+    await userEvent.type(canvas.getByLabelText('New password'), 'Password1')
+    await userEvent.click(canvas.getByLabelText('Password confirmation'))
+    await userEvent.tab()
+
+    await expect(canvas.queryByText('Passwords must match')).not.toBeInTheDocument()
     await expect(submitButton).toBeDisabled()
   },
 }
