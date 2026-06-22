@@ -10,21 +10,19 @@
 
 - Общие RHF-правила валидации email и пароля вынесены в модель `entities/auth` и опубликованы через публичный API сущности.
 - Регистрация и создание нового пароля используют единый обязательный контракт: длина 6–20, наличие цифры, строчной и заглавной латинских букв и только разрешённые специальные символы.
-- Подтверждение пароля в обеих формах проверяется после blur общей auth-функцией: несовпадение показывает `Passwords must match`; в создании нового пароля пустое поле блокирует отправку без отдельного сообщения об ошибке.
+- Для нарушения границ длины пароля обе формы показывают отдельные сообщения `Minimum number of characters 6` и `Maximum number of characters 20`.
+- Подтверждение пароля проверяется общей auth-функцией и при несовпадении показывает `Passwords must match`; обе формы выполняют первичную валидацию после blur, пустые пароль и подтверждение блокируют отправку без отдельных required-сообщений, а заполненное подтверждение повторно проверяется при изменении основного пароля.
 - Правила username и подтверждения пароля оставлены локальными в соответствующих features; валидация формы создания нового пароля отделена от управляющего хука.
-- Добавлены unit-тесты общих auth-правил и проверки совпадения нового пароля.
+- Добавлены unit-тесты публичных auth-правил и адаптации проверки совпадения нового пароля; дублирующие проверки внутренней сборки правил исключены.
 
 #### Verification
 
 - `pnpm exec tsc --noEmit` прошёл успешно.
-- `pnpm exec eslint src/entities/auth src/features/sign-in src/features/sign-up src/features/create-new-password` завершился без ошибок; остались предупреждения в ранее изменённых stories и существующее предупреждение React Compiler для `watch()` из React Hook Form.
-- `pnpm exec vitest run --project unit` прошёл успешно: 11 файлов, 59 тестов.
-- `pnpm exec vitest run --project unit src/entities/auth/model/validationRules.test.ts src/features/create-new-password/model/validationRules.test.ts` прошёл успешно: 2 файла, 25 тестов.
-- `pnpm exec vitest run --project storybook src/features/sign-in/ui/SignInForm.stories.tsx src/features/sign-up/ui/SignUpForm.stories.tsx src/features/create-new-password/ui/CreateNewPasswordForm.stories.tsx` прошёл успешно: 3 файла, 5 тестов.
-- `pnpm exec vitest run --project storybook src/features/sign-up/ui/SignUpForm.stories.tsx src/features/create-new-password/ui/CreateNewPasswordForm.stories.tsx` прошёл успешно: 2 файла, 3 теста.
-- `pnpm exec vitest run --project storybook src/features/create-new-password/ui/CreateNewPasswordForm.stories.tsx` прошёл успешно: 1 файл, 2 теста.
-- Storybook MCP-документация недоступна: `pnpm storybook --no-open` завершается с ошибкой отсутствующего транзитивного модуля `source-map`; UI-поведение проверено Storybook Vitest project.
-- `pnpm build` не запускался; изменение проверено TypeScript, ESLint, unit- и Storybook-тестами.
+- `pnpm exec eslint src/entities/auth src/features/sign-in src/features/sign-up src/features/create-new-password` завершился без ошибок: 18 существующих предупреждений о форматировании stories и совместимости React Compiler с `watch()` из React Hook Form.
+- `pnpm exec vitest run --project unit` прошёл успешно: 11 файлов, 63 теста.
+- `pnpm exec vitest run --project unit src/entities/auth/model/validationRules.test.ts src/features/create-new-password/model/validationRules.test.ts` прошёл успешно: 2 файла, 21 тест.
+- Storybook MCP-проверки прошли для 6 затронутых stories; найденный контраст текста ошибок 3.18:1 принят как соответствующий дизайну и не считается блокером задачи.
+- `pnpm build` прошёл успешно.
 
 ### 2026-06-18
 

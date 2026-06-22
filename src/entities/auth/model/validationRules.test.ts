@@ -4,10 +4,8 @@ import {
   EMAIL_RULES,
   PASSWORD_CREATION_RULES,
   PASSWORD_LENGTH_RULES,
-  PASSWORD_REQUIRED_LENGTH_RULES,
-  PASSWORD_RULES,
   validatePasswordsMatch,
-} from './validationRules'
+} from '@/entities/auth'
 
 describe('auth validation rules', () => {
   describe('EMAIL_RULES', () => {
@@ -33,7 +31,20 @@ describe('auth validation rules', () => {
     })
   })
 
-  describe('PASSWORD_RULES', () => {
+  describe('PASSWORD_CREATION_RULES', () => {
+    it('requires a password without an error message', () => {
+      expect(PASSWORD_CREATION_RULES.required).toBe(true)
+    })
+
+    it('includes the password length validation', () => {
+      expect(PASSWORD_CREATION_RULES.validate.minLength('12345')).toBe(
+        'Minimum number of characters 6'
+      )
+      expect(PASSWORD_CREATION_RULES.validate.maxLength('123456789012345678901')).toBe(
+        'Maximum number of characters 20'
+      )
+    })
+
     const patternError =
       'Password must contain 0-9, a-z, A-Z, ! " # $ % & \' ( ) * + , - . / : ; < = > ? @ [ \\ ] ^ _ { | } ~'
 
@@ -44,38 +55,6 @@ describe('auth validation rules', () => {
       ['PASSWORD1', patternError],
       ['Password', patternError],
       ['Password1 ', patternError],
-    ])('validates the composition of %j', (value, expectedResult) => {
-      expect(PASSWORD_RULES.validate.pattern(value)).toBe(expectedResult)
-    })
-  })
-
-  describe('PASSWORD_REQUIRED_LENGTH_RULES', () => {
-    it('preserves the required password length configuration', () => {
-      expect(PASSWORD_REQUIRED_LENGTH_RULES).toEqual({
-        maxLength: {
-          message: 'Your password must be between 6 and 20 characters',
-          value: 20,
-        },
-        minLength: {
-          message: 'Your password must be between 6 and 20 characters',
-          value: 6,
-        },
-        required: 'Your password must be between 6 and 20 characters',
-      })
-    })
-  })
-
-  describe('PASSWORD_CREATION_RULES', () => {
-    it('requires a password between 6 and 20 characters', () => {
-      expect(PASSWORD_CREATION_RULES).toMatchObject(PASSWORD_REQUIRED_LENGTH_RULES)
-    })
-
-    it.each([
-      ['Password1', true],
-      [
-        'password1',
-        'Password must contain 0-9, a-z, A-Z, ! " # $ % & \' ( ) * + , - . / : ; < = > ? @ [ \\ ] ^ _ { | } ~',
-      ],
     ])('validates the composition of %j', (value, expectedResult) => {
       expect(PASSWORD_CREATION_RULES.validate.pattern(value)).toBe(expectedResult)
     })

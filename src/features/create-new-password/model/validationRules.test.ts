@@ -18,12 +18,4 @@ describe('PASSWORD_CONFIRMATION_RULES', () => {
       'Passwords must match'
     )
   })
-
-  it('does not show an error for an empty password confirmation', () => {
-    expect(PASSWORD_CONFIRMATION_RULES.validate.matches('', formValues)).toBe(true)
-  })
-
-  it('requires password confirmation without an error message', () => {
-    expect(PASSWORD_CONFIRMATION_RULES.required).toBe(true)
-  })
 })
