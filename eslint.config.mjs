@@ -35,7 +35,7 @@ const eslintConfig = defineConfig([
     files: ['**/*.stories.tsx', '**/*.stories.ts'],
     rules: {
       'storybook/no-renderer-packages': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',  // ← добавь сюда
+      '@typescript-eslint/no-unused-vars': 'off', // ← добавь сюда
     },
   },
 ])
