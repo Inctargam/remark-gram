@@ -34,7 +34,7 @@ export const useSignUpForm = () => {
     Boolean(email) &&
     Boolean(password) &&
     Boolean(passwordConfirmation) &&
-    agreeToTerms === true
+    agreeToTerms
 
   const isSubmitDisabled = !hasAllValues || !isValid || isPending
 

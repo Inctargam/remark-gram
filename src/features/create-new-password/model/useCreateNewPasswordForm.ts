@@ -1,21 +1,14 @@
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 
+import { PASSWORD_CREATION_RULES } from '@/entities/auth'
 import { ROUTES } from '@/shared/config'
 
-type CreateNewPasswordFormValues = {
-  newPassword: string
-  passwordConfirmation: string
-}
-
-const MIN_PASSWORD_LENGTH = 6
-const MAX_PASSWORD_LENGTH = 20
-const PASSWORD_LENGTH_ERROR = 'Your password must be between 6 and 20 characters'
-const PASSWORDS_MATCH_ERROR = 'The passwords must match'
+import type { CreateNewPasswordFormValues } from './createNewPasswordFormValues'
+import { PASSWORD_CONFIRMATION_RULES } from './validationRules'
 
 export const useCreateNewPasswordForm = () => {
   const router = useRouter()
-
   const {
     formState: { errors, isValid },
     getValues,
@@ -27,30 +20,19 @@ export const useCreateNewPasswordForm = () => {
       newPassword: '',
       passwordConfirmation: '',
     },
-    mode: 'onChange',
+    mode: 'onBlur',
   })
 
   const newPasswordField = register('newPassword', {
-    maxLength: {
-      message: PASSWORD_LENGTH_ERROR,
-      value: MAX_PASSWORD_LENGTH,
-    },
-    minLength: {
-      message: PASSWORD_LENGTH_ERROR,
-      value: MIN_PASSWORD_LENGTH,
-    },
+    ...PASSWORD_CREATION_RULES,
     onChange: () => {
       if (getValues('passwordConfirmation')) {
         void trigger('passwordConfirmation')
       }
     },
-    required: PASSWORD_LENGTH_ERROR,
   })
 
-  const passwordConfirmationField = register('passwordConfirmation', {
-    required: 'Password confirmation is required',
-    validate: (value) => value === getValues('newPassword') || PASSWORDS_MATCH_ERROR,
-  })
+  const passwordConfirmationField = register('passwordConfirmation', PASSWORD_CONFIRMATION_RULES)
 
   const submitFormHandler = () => {
     router.push(ROUTES.signIn)
