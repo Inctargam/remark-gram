@@ -4,6 +4,20 @@
 
 ## Unreleased
 
+### 2026-06-24
+
+#### Create Post
+
+- Добавлен route `/create` с тонким Next.js route-файлом и page-slice `pages/create-post`.
+- Реализован первый экран модального сценария `Add Photo` на существующих shared `Modal`, `Button` и `Icon`: placeholder, кнопка `Select from Computer` и кнопка `Open Draft`.
+
+#### Verification
+
+- `pnpm exec eslint 'app/(main)/create/page.tsx' src/pages/create-post` прошёл успешно.
+- `pnpm exec tsc --noEmit` прошёл успешно.
+- `pnpm build` был остановлен вручную после длительного зависания на этапе `Creating an optimized production build ...` без вывода ошибок.
+- Storybook tests не запускались, потому что stories не изменялись и Storybook MCP tools недоступны в текущей сессии.
+
 ### 2026-06-21
 
 #### Auth
