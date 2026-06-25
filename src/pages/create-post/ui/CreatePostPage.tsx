@@ -18,9 +18,12 @@ export const CreatePostPage = () => {
     selectedPhotoId,
     step,
     uploadError,
+    openCropStepHandler,
+    openFiltersStepHandler,
     updateSelectedPhotoAspectHandler,
     updateSelectedPhotoCropHandler,
     updateSelectedPhotoCroppedAreaHandler,
+    updateSelectedPhotoFilterHandler,
     updateSelectedPhotoHandler,
     updateSelectedPhotoZoomHandler,
   } = useCreatePostFlow()
@@ -38,8 +41,11 @@ export const CreatePostPage = () => {
       open={isOpen}
       onOpenChange={closeHandler}
       onAspectChange={updateSelectedPhotoAspectHandler}
+      onBackToCrop={openCropStepHandler}
       onCropChange={updateSelectedPhotoCropHandler}
       onCropComplete={updateSelectedPhotoCroppedAreaHandler}
+      onFilterChange={updateSelectedPhotoFilterHandler}
+      onNextFromCrop={openFiltersStepHandler}
       onPhotoSelect={updateSelectedPhotoHandler}
       onPhotosSelect={selectPhotosHandler}
       photos={photos}

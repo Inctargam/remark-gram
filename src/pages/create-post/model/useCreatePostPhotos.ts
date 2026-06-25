@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { createImagePreview } from '../lib/createImagePreview'
 import type { CreatePostAspectId, CreatePostCropArea, CreatePostPoint } from './createPostCrop'
 import type { CreatePostPhoto } from './createPostFile'
+import type { CreatePostFilterId } from './createPostFilter'
 
 export const useCreatePostPhotos = () => {
   const [photos, setPhotos] = useState<CreatePostPhoto[]>([])
@@ -80,6 +81,13 @@ export const useCreatePostPhotos = () => {
     [updateSelectedPhotoHandler]
   )
 
+  const updateSelectedPhotoFilterHandler = useCallback(
+    (filterId: CreatePostFilterId) => {
+      updateSelectedPhotoHandler((photo) => ({ ...photo, filterId }))
+    },
+    [updateSelectedPhotoHandler]
+  )
+
   return {
     photos,
     selectedPhoto,
@@ -89,6 +97,7 @@ export const useCreatePostPhotos = () => {
     updateSelectedPhotoAspectHandler,
     updateSelectedPhotoCropHandler,
     updateSelectedPhotoCroppedAreaHandler,
+    updateSelectedPhotoFilterHandler,
     updateSelectedPhotoZoomHandler,
   }
 }

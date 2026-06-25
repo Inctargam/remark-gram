@@ -3,7 +3,7 @@ import { useCallback, useState } from 'react'
 import { validateCreatePostFiles } from './createPostFile'
 import { useCreatePostPhotos } from './useCreatePostPhotos'
 
-type CreatePostStep = 'add-photo' | 'crop'
+type CreatePostStep = 'add-photo' | 'crop' | 'filters'
 
 export const useCreatePostFlow = () => {
   const [step, setStep] = useState<CreatePostStep>('add-photo')
@@ -17,6 +17,7 @@ export const useCreatePostFlow = () => {
     updateSelectedPhotoAspectHandler,
     updateSelectedPhotoCropHandler,
     updateSelectedPhotoCroppedAreaHandler,
+    updateSelectedPhotoFilterHandler,
     updateSelectedPhotoZoomHandler,
   } = useCreatePostPhotos()
 
@@ -40,16 +41,27 @@ export const useCreatePostFlow = () => {
     [addPhotosHandler, photos.length]
   )
 
+  const openCropStepHandler = useCallback(() => {
+    setStep('crop')
+  }, [])
+
+  const openFiltersStepHandler = useCallback(() => {
+    setStep('filters')
+  }, [])
+
   return {
     selectedPhoto,
     selectedPhotoId,
     step,
     photos,
     uploadError,
+    openCropStepHandler,
+    openFiltersStepHandler,
     selectPhotosHandler,
     updateSelectedPhotoAspectHandler,
     updateSelectedPhotoCropHandler,
     updateSelectedPhotoCroppedAreaHandler,
+    updateSelectedPhotoFilterHandler,
     updateSelectedPhotoHandler: selectPhotoHandler,
     updateSelectedPhotoZoomHandler,
   }

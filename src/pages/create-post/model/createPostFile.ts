@@ -1,4 +1,5 @@
 import type { CreatePostAspectId, CreatePostCropArea, CreatePostPoint } from './createPostCrop'
+import type { CreatePostFilterId } from './createPostFilter'
 
 export const MAX_CREATE_POST_PHOTOS = 10
 export const MAX_CREATE_POST_PHOTO_SIZE_BYTES = 20 * 1024 * 1024
@@ -16,6 +17,7 @@ export type CreatePostPhoto = {
   zoom: number
   aspectId: CreatePostAspectId
   croppedAreaPixels: CreatePostCropArea | null
+  filterId: CreatePostFilterId
 }
 
 type CreatePostFileCandidate = Pick<File, 'size' | 'type'>

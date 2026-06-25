@@ -21,6 +21,7 @@ type Props = {
   onAspectChange: (aspectId: CreatePostAspectId) => void
   onCropChange: (crop: Point) => void
   onCropComplete: (croppedAreaPixels: Area) => void
+  onNext: () => void
   onPhotoSelect: (photoId: string) => void
   onZoomChange: (zoom: number) => void
 }
@@ -32,6 +33,7 @@ export const CropPhotoStep = ({
   onAspectChange,
   onCropChange,
   onCropComplete,
+  onNext,
   onPhotoSelect,
   onZoomChange,
 }: Props) => {
@@ -101,7 +103,7 @@ export const CropPhotoStep = ({
           />
         </label>
 
-        <Button className={styles.nextButton} type="button" disabled>
+        <Button className={styles.nextButton} type="button" onClick={onNext}>
           Next
         </Button>
       </div>
