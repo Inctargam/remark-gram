@@ -1,97 +1,68 @@
-import Image from 'next/image'
-import type { ChangeEvent } from 'react'
-import { useRef } from 'react'
-
-import { Button } from '@/shared/ui/button'
-import { Icon } from '@/shared/ui/icon'
 import { Modal } from '@/shared/ui/modal'
 
+import type {
+  CreatePostAspectId,
+  CreatePostCropArea,
+  CreatePostPoint,
+} from '../model/createPostCrop'
 import type { CreatePostPhoto } from '../model/createPostFile'
+import { AddPhotoStep } from './AddPhotoStep'
 import styles from './createPostPage.module.css'
+import { CropPhotoStep } from './CropPhotoStep'
 
 type Props = {
   open: boolean
   onOpenChange: (open: boolean) => void
   photos: CreatePostPhoto[]
+  selectedPhoto: CreatePostPhoto | null
+  selectedPhotoId: string | null
+  step: 'add-photo' | 'crop'
   uploadError: string | null
+  onAspectChange: (aspectId: CreatePostAspectId) => void
+  onCropChange: (crop: CreatePostPoint) => void
+  onCropComplete: (croppedAreaPixels: CreatePostCropArea) => void
+  onPhotoSelect: (photoId: string) => void
   onPhotosSelect: (files: File[]) => void
+  onZoomChange: (zoom: number) => void
 }
 
 export const CreatePostModal = ({
   open,
   onOpenChange,
   photos,
+  selectedPhoto,
+  selectedPhotoId,
+  step,
   uploadError,
+  onAspectChange,
+  onCropChange,
+  onCropComplete,
+  onPhotoSelect,
   onPhotosSelect,
+  onZoomChange,
 }: Props) => {
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const firstPhoto = photos[0]
-  const hasPhotos = photos.length > 0
-
-  const selectFromComputerHandler = () => {
-    fileInputRef.current?.click()
-  }
-
-  const fileChangeHandler = (event: ChangeEvent<HTMLInputElement>) => {
-    const selectedFiles = Array.from(event.currentTarget.files ?? [])
-
-    onPhotosSelect(selectedFiles)
-    event.currentTarget.value = ''
-  }
+  const isCropStep = step === 'crop' && selectedPhoto
 
   return (
-    <Modal className={styles.modal} open={open} onOpenChange={onOpenChange} title="Add Photo">
-      <div className={styles.content}>
-        <input
-          ref={fileInputRef}
-          className={styles.fileInput}
-          type="file"
-          accept="image/jpeg,image/png"
-          multiple
-          onChange={fileChangeHandler}
+    <Modal
+      className={isCropStep ? styles.cropModal : styles.addPhotoModal}
+      open={open}
+      onOpenChange={onOpenChange}
+      title={isCropStep ? 'Cropping' : 'Add Photo'}>
+      {isCropStep ? (
+        <CropPhotoStep
+          photos={photos}
+          selectedPhoto={selectedPhoto}
+          selectedPhotoId={selectedPhotoId}
+          onAspectChange={onAspectChange}
+          onCropChange={onCropChange}
+          onCropComplete={onCropComplete}
+          onPhotoSelect={onPhotoSelect}
+          onZoomChange={onZoomChange}
         />
-
-        <div className={styles.placeholder} aria-live="polite">
-          {hasPhotos ? (
-            <Image
-              className={styles.preview}
-              src={firstPhoto.previewUrl}
-              alt="Selected publication preview"
-              width={222}
-              height={228}
-              unoptimized
-            />
-          ) : (
-            <Icon
-              className={styles.placeholderIcon}
-              iconId="icon-image-outline"
-              width={48}
-              height={48}
-            />
-          )}
-        </div>
-
-        {hasPhotos && (
-          <p className={styles.selectionStatus}>
-            {photos.length === 1 ? '1 photo selected' : `${photos.length} photos selected`}
-          </p>
-        )}
-
-        {uploadError && (
-          <p className={styles.uploadError} role="alert">
-            {uploadError}
-          </p>
-        )}
-
-        <div className={styles.actions}>
-          <Button type="button" onClick={selectFromComputerHandler}>
-            Select from Computer
-          </Button>
-          <Button className={styles.openDraftButton} type="button" variant="outline">
-            Open Draft
-          </Button>
-        </div>
-      </div>
+      ) : (
+        <AddPhotoStep uploadError={uploadError} onPhotosSelect={onPhotosSelect} />
+      )}
     </Modal>
   )
 }
