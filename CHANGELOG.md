@@ -4,6 +4,23 @@
 
 ## Unreleased
 
+### 2026-06-25
+
+#### Create Post
+
+- В модальный сценарий `Add Photo` добавлен скрытый file input для выбора JPEG/PNG-фотографий с поддержкой multiple upload.
+- Добавлена page-local модель валидации файлов публикации: до 10 фото, JPEG/PNG, размер каждого файла не больше 20 MB.
+- После успешного выбора создаются object URL preview, показывается первое выбранное фото и количество выбранных фото; object URL освобождаются при размонтировании сценария.
+- Для ошибок выбора файла добавлен alert в модалке, включая отдельное сообщение для превышения лимита количества фото.
+
+#### Verification
+
+- `pnpm exec eslint 'app/(main)/create/page.tsx' src/pages/create-post` прошёл успешно.
+- `pnpm exec vitest run --project unit src/pages/create-post/model/createPostFile.test.ts` прошёл успешно: 1 файл, 7 тестов.
+- `pnpm exec tsc --noEmit` прошёл успешно.
+- `pnpm build` не запускался повторно: на предыдущем этапе команда зависала на `Creating an optimized production build ...` без вывода ошибок.
+- Storybook tests не запускались, потому что stories не изменялись и Storybook MCP tools недоступны в текущей сессии.
+
 ### 2026-06-24
 
 #### Create Post
