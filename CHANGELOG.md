@@ -17,13 +17,14 @@
 - Реализованы cropper, переключатели `1:1`, `4:5`, `16:9`, zoom slider и thumbnail strip для переключения между выбранными фотографиями без потери настроек.
 - Управление выбранными фотографиями, текущей фотографией, crop-настройками и cleanup object URL вынесено из общего flow-hook в отдельный `useCreatePostPhotos`.
 - Добавлен шаг `Filters`: выбор фильтра сохраняется отдельно для каждой фотографии, preview применяет CSS-filter, а `Back` возвращает пользователя на crop-step.
+- Добавлен шаг `Publication` с preview выбранной фотографии, полем `Description`, ограничением описания до 500 символов и счётчиком символов; `Publish` оставлен неактивным до этапа mock publish.
 
 #### Verification
 
 - `pnpm exec eslint 'app/(main)/create/page.tsx' src/pages/create-post` прошёл успешно.
 - `pnpm exec vitest run --project unit src/pages/create-post/model/createPostFile.test.ts` прошёл успешно: 1 файл, 7 тестов.
 - `pnpm exec eslint src/pages/create-post` прошёл успешно.
-- `pnpm exec vitest run --project unit src/pages/create-post/model` прошёл успешно: 2 файла, 9 тестов.
+- `pnpm exec vitest run --project unit src/pages/create-post/model` прошёл успешно: 3 файла, 11 тестов.
 - `pnpm exec tsc --noEmit` прошёл успешно.
 - `pnpm build` не запускался повторно: на предыдущем этапе команда зависала на `Creating an optimized production build ...` без вывода ошибок.
 - Storybook tests не запускались, потому что stories не изменялись и Storybook MCP tools недоступны в текущей сессии.

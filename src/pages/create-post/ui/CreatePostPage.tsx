@@ -12,6 +12,7 @@ export const CreatePostPage = () => {
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(true)
   const {
+    description,
     photos,
     selectPhotosHandler,
     selectedPhoto,
@@ -20,6 +21,8 @@ export const CreatePostPage = () => {
     uploadError,
     openCropStepHandler,
     openFiltersStepHandler,
+    openPublicationStepHandler,
+    updateDescriptionHandler,
     updateSelectedPhotoAspectHandler,
     updateSelectedPhotoCropHandler,
     updateSelectedPhotoCroppedAreaHandler,
@@ -42,13 +45,17 @@ export const CreatePostPage = () => {
       onOpenChange={closeHandler}
       onAspectChange={updateSelectedPhotoAspectHandler}
       onBackToCrop={openCropStepHandler}
+      onBackToFilters={openFiltersStepHandler}
       onCropChange={updateSelectedPhotoCropHandler}
       onCropComplete={updateSelectedPhotoCroppedAreaHandler}
+      onDescriptionChange={updateDescriptionHandler}
       onFilterChange={updateSelectedPhotoFilterHandler}
       onNextFromCrop={openFiltersStepHandler}
+      onNextFromFilters={openPublicationStepHandler}
       onPhotoSelect={updateSelectedPhotoHandler}
       onPhotosSelect={selectPhotosHandler}
       photos={photos}
+      description={description}
       selectedPhoto={selectedPhoto}
       selectedPhotoId={selectedPhotoId}
       step={step}

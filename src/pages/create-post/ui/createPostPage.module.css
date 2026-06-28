@@ -208,7 +208,8 @@
   background-color: var(--color-dark-900);
 }
 
-.filterPreviewImage {
+.filterPreviewImage,
+.publicationPreviewImage {
   width: 100%;
   height: 100%;
   object-fit: contain;
@@ -284,6 +285,42 @@
   margin-top: auto;
 }
 
+.publicationContent {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 24px;
+}
+
+.publicationPreviewFrame {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: clamp(360px, calc(100vh - 260px), 492px);
+  overflow: hidden;
+  border-radius: 2px;
+  background-color: var(--color-dark-900);
+}
+
+.publicationForm {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.descriptionField {
+  width: 100%;
+}
+
+.descriptionCounter {
+  margin: 6px 0 0;
+  color: var(--color-light-900);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-small);
+  line-height: var(--line-height-small);
+  text-align: right;
+}
+
 @media (width <= 560px) {
   .addPhotoModal,
   .editorModal {
@@ -299,12 +336,14 @@
   }
 
   .cropContent,
-  .filterContent {
+  .filterContent,
+  .publicationContent {
     grid-template-columns: 1fr;
   }
 
   .cropperFrame,
-  .filterPreviewFrame {
+  .filterPreviewFrame,
+  .publicationPreviewFrame {
     height: clamp(280px, calc(100vh - 360px), 420px);
   }
 }

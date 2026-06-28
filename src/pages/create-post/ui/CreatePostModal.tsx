@@ -11,27 +11,33 @@ import { AddPhotoStep } from './AddPhotoStep'
 import styles from './createPostPage.module.css'
 import { CropPhotoStep } from './CropPhotoStep'
 import { FilterPhotoStep } from './FilterPhotoStep'
+import { PublicationStep } from './PublicationStep'
 
 type Props = {
+  description: string
   open: boolean
   onOpenChange: (open: boolean) => void
   photos: CreatePostPhoto[]
   selectedPhoto: CreatePostPhoto | null
   selectedPhotoId: string | null
-  step: 'add-photo' | 'crop' | 'filters'
+  step: 'add-photo' | 'crop' | 'filters' | 'publication'
   uploadError: string | null
   onAspectChange: (aspectId: CreatePostAspectId) => void
   onBackToCrop: () => void
+  onBackToFilters: () => void
   onCropChange: (crop: CreatePostPoint) => void
   onCropComplete: (croppedAreaPixels: CreatePostCropArea) => void
+  onDescriptionChange: (description: string) => void
   onFilterChange: (filterId: CreatePostFilterId) => void
   onNextFromCrop: () => void
+  onNextFromFilters: () => void
   onPhotoSelect: (photoId: string) => void
   onPhotosSelect: (files: File[]) => void
   onZoomChange: (zoom: number) => void
 }
 
 export const CreatePostModal = ({
+  description,
   open,
   onOpenChange,
   photos,
@@ -41,22 +47,34 @@ export const CreatePostModal = ({
   uploadError,
   onAspectChange,
   onBackToCrop,
+  onBackToFilters,
   onCropChange,
   onCropComplete,
+  onDescriptionChange,
   onFilterChange,
   onNextFromCrop,
+  onNextFromFilters,
   onPhotoSelect,
   onPhotosSelect,
   onZoomChange,
 }: Props) => {
-  const isEditorStep = (step === 'crop' || step === 'filters') && selectedPhoto
+  const isEditorStep =
+    (step === 'crop' || step === 'filters' || step === 'publication') && selectedPhoto
+  const modalTitle =
+    step === 'publication'
+      ? 'Publication'
+      : step === 'filters'
+        ? 'Filters'
+        : step === 'crop'
+          ? 'Cropping'
+          : 'Add Photo'
 
   return (
     <Modal
       className={isEditorStep ? styles.editorModal : styles.addPhotoModal}
       open={open}
       onOpenChange={onOpenChange}
-      title={step === 'filters' ? 'Filters' : step === 'crop' ? 'Cropping' : 'Add Photo'}>
+      title={modalTitle}>
       {step === 'crop' && selectedPhoto ? (
         <CropPhotoStep
           photos={photos}
@@ -76,7 +94,15 @@ export const CreatePostModal = ({
           selectedPhotoId={selectedPhotoId}
           onBack={onBackToCrop}
           onFilterChange={onFilterChange}
+          onNext={onNextFromFilters}
           onPhotoSelect={onPhotoSelect}
+        />
+      ) : step === 'publication' && selectedPhoto ? (
+        <PublicationStep
+          description={description}
+          selectedPhoto={selectedPhoto}
+          onBack={onBackToFilters}
+          onDescriptionChange={onDescriptionChange}
         />
       ) : (
         <AddPhotoStep uploadError={uploadError} onPhotosSelect={onPhotosSelect} />

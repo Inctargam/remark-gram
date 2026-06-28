@@ -17,6 +17,7 @@ type Props = {
   selectedPhotoId: string | null
   onBack: () => void
   onFilterChange: (filterId: CreatePostFilterId) => void
+  onNext: () => void
   onPhotoSelect: (photoId: string) => void
 }
 
@@ -26,6 +27,7 @@ export const FilterPhotoStep = ({
   selectedPhotoId,
   onBack,
   onFilterChange,
+  onNext,
   onPhotoSelect,
 }: Props) => {
   const selectedFilterCss = getCreatePostFilterCss(selectedPhoto.filterId)
@@ -85,7 +87,7 @@ export const FilterPhotoStep = ({
           <Button type="button" variant="outline" onClick={onBack}>
             Back
           </Button>
-          <Button type="button" disabled>
+          <Button type="button" onClick={onNext}>
             Next
           </Button>
         </div>
