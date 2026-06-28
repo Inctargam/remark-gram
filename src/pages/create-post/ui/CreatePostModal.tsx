@@ -16,6 +16,7 @@ import { PublicationStep } from './PublicationStep'
 
 type Props = {
   description: string
+  hasDraft: boolean
   open: boolean
   onOpenChange: (open: boolean) => void
   photos: CreatePostPhoto[]
@@ -31,6 +32,7 @@ type Props = {
   onCropChange: (crop: CreatePostPoint) => void
   onCropComplete: (croppedAreaPixels: CreatePostCropArea) => void
   onDescriptionChange: (description: string) => void
+  onDraftOpen: () => void
   onFilterChange: (filterId: CreatePostFilterId) => void
   onImageSizeChange: (imageSize: CreatePostImageSize) => void
   onNextFromCrop: () => void
@@ -43,6 +45,7 @@ type Props = {
 
 export const CreatePostModal = ({
   description,
+  hasDraft,
   open,
   onOpenChange,
   photos,
@@ -58,6 +61,7 @@ export const CreatePostModal = ({
   onCropChange,
   onCropComplete,
   onDescriptionChange,
+  onDraftOpen,
   onFilterChange,
   onImageSizeChange,
   onNextFromCrop,
@@ -121,7 +125,12 @@ export const CreatePostModal = ({
           onPublish={onPublish}
         />
       ) : (
-        <AddPhotoStep uploadError={uploadError} onPhotosSelect={onPhotosSelect} />
+        <AddPhotoStep
+          hasDraft={hasDraft}
+          uploadError={uploadError}
+          onDraftOpen={onDraftOpen}
+          onPhotosSelect={onPhotosSelect}
+        />
       )}
     </Modal>
   )

@@ -7,11 +7,13 @@ import { Icon } from '@/shared/ui/icon'
 import styles from './createPostPage.module.css'
 
 type Props = {
+  hasDraft: boolean
   uploadError: string | null
+  onDraftOpen: () => void
   onPhotosSelect: (files: File[]) => void
 }
 
-export const AddPhotoStep = ({ uploadError, onPhotosSelect }: Props) => {
+export const AddPhotoStep = ({ hasDraft, uploadError, onDraftOpen, onPhotosSelect }: Props) => {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const selectFromComputerHandler = () => {
@@ -55,7 +57,12 @@ export const AddPhotoStep = ({ uploadError, onPhotosSelect }: Props) => {
         <Button type="button" onClick={selectFromComputerHandler}>
           Select from Computer
         </Button>
-        <Button className={styles.openDraftButton} type="button" variant="outline">
+        <Button
+          className={styles.openDraftButton}
+          type="button"
+          variant="outline"
+          disabled={!hasDraft}
+          onClick={onDraftOpen}>
           Open Draft
         </Button>
       </div>

@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { createImagePreview } from '../lib/createImagePreview'
+import {
+  createImagePreview,
+  type CreatePostPhotoPreviewSource,
+  restoreImagePreview,
+} from '../lib/createImagePreview'
 import {
   type CreatePostAspectId,
   type CreatePostCropArea,
@@ -11,6 +15,12 @@ import {
 } from './createPostCrop'
 import type { CreatePostPhoto } from './createPostFile'
 import type { CreatePostFilterId } from './createPostFilter'
+
+const revokePhotoPreviewUrls = (photos: CreatePostPhoto[]) => {
+  photos.forEach(({ previewUrl }) => {
+    URL.revokeObjectURL(previewUrl)
+  })
+}
 
 export const useCreatePostPhotos = () => {
   const [photos, setPhotos] = useState<CreatePostPhoto[]>([])
@@ -26,9 +36,7 @@ export const useCreatePostPhotos = () => {
 
   useEffect(
     () => () => {
-      photosRef.current.forEach(({ previewUrl }) => {
-        URL.revokeObjectURL(previewUrl)
-      })
+      revokePhotoPreviewUrls(photosRef.current)
     },
     []
   )
@@ -48,12 +56,28 @@ export const useCreatePostPhotos = () => {
   }, [])
 
   const selectFirstPhotoHandler = useCallback(() => {
-    setPhotos((currentPhotos) => {
-      setSelectedPhotoId(currentPhotos[0]?.id ?? null)
-
-      return currentPhotos
-    })
+    setSelectedPhotoId(photosRef.current[0]?.id ?? null)
   }, [])
+
+  const resetPhotosHandler = useCallback(() => {
+    revokePhotoPreviewUrls(photosRef.current)
+    setPhotos([])
+    setSelectedPhotoId(null)
+  }, [])
+
+  const restorePhotosHandler = useCallback(
+    (draftPhotos: CreatePostPhotoPreviewSource[], draftSelectedPhotoId: string | null) => {
+      const restoredPhotos = draftPhotos.map(restoreImagePreview)
+      const hasDraftSelectedPhoto = restoredPhotos.some(({ id }) => id === draftSelectedPhotoId)
+
+      revokePhotoPreviewUrls(photosRef.current)
+      setPhotos(restoredPhotos)
+      setSelectedPhotoId(
+        hasDraftSelectedPhoto ? draftSelectedPhotoId : (restoredPhotos[0]?.id ?? null)
+      )
+    },
+    []
+  )
 
   const updateSelectedPhotoHandler = useCallback(
     (updatePhoto: (photo: CreatePostPhoto) => CreatePostPhoto) => {
@@ -121,6 +145,8 @@ export const useCreatePostPhotos = () => {
     selectedPhoto,
     selectedPhotoId: effectiveSelectedPhotoId,
     addPhotosHandler,
+    resetPhotosHandler,
+    restorePhotosHandler,
     selectFirstPhotoHandler,
     selectPhotoHandler,
     updateSelectedPhotoAspectHandler,

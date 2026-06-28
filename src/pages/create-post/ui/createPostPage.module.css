@@ -62,6 +62,10 @@
   width: 100%;
 }
 
+.openDraftButton:disabled {
+  cursor: not-allowed;
+}
+
 .cropContent {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 260px;
@@ -408,6 +412,30 @@
   font-size: var(--font-size-regular-14);
   font-weight: var(--font-weight-regular-14);
   line-height: var(--line-height-regular-14);
+}
+
+.closeConfirmModal {
+  width: min(438px, calc(100vw - 32px));
+}
+
+.closeConfirmContent {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.closeConfirmText {
+  margin: 0;
+  color: var(--color-light-100);
+  font-size: var(--font-size-regular-16);
+  font-weight: var(--font-weight-regular-16);
+  line-height: var(--line-height-regular-24);
+}
+
+.closeConfirmActions {
+  display: flex;
+  gap: 24px;
+  justify-content: flex-end;
 }
 
 @media (width <= 560px) {
