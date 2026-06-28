@@ -14,5 +14,6 @@ export const createImagePreview = (file: File): CreatePostPhoto => ({
   zoom: DEFAULT_CREATE_POST_ZOOM,
   aspectId: DEFAULT_CREATE_POST_ASPECT_ID,
   croppedAreaPixels: null,
+  imageSize: null,
   filterId: DEFAULT_CREATE_POST_FILTER_ID,
 })

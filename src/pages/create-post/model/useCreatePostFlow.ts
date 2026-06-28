@@ -1,5 +1,7 @@
 import { useCallback, useState } from 'react'
 
+import { usePublishPostMutation } from '../api/usePublishPostMutation'
+import { exportEditedImage } from '../lib/exportEditedImage'
 import { normalizeCreatePostDescription } from './createPostDescription'
 import { validateCreatePostFiles } from './createPostFile'
 import { useCreatePostPhotos } from './useCreatePostPhotos'
@@ -9,7 +11,9 @@ type CreatePostStep = 'add-photo' | 'crop' | 'filters' | 'publication'
 export const useCreatePostFlow = () => {
   const [step, setStep] = useState<CreatePostStep>('add-photo')
   const [description, setDescription] = useState('')
+  const [publishError, setPublishError] = useState<string | null>(null)
   const [uploadError, setUploadError] = useState<string | null>(null)
+  const publishPostMutation = usePublishPostMutation()
   const {
     photos,
     selectedPhoto,
@@ -20,6 +24,7 @@ export const useCreatePostFlow = () => {
     updateSelectedPhotoCropHandler,
     updateSelectedPhotoCroppedAreaHandler,
     updateSelectedPhotoFilterHandler,
+    updateSelectedPhotoImageSizeHandler,
     updateSelectedPhotoZoomHandler,
   } = useCreatePostPhotos()
 
@@ -59,8 +64,33 @@ export const useCreatePostFlow = () => {
     setDescription(normalizeCreatePostDescription(descriptionValue))
   }, [])
 
+  const publishPostHandler = useCallback(
+    async (onSuccess: () => void) => {
+      setPublishError(null)
+
+      try {
+        const editedPhotos = await Promise.all(photos.map(exportEditedImage))
+
+        publishPostMutation.mutate(
+          { description, photos: editedPhotos },
+          {
+            onSuccess,
+            onError: () => {
+              setPublishError('Failed to publish the post. Please try again.')
+            },
+          }
+        )
+      } catch {
+        setPublishError('Failed to prepare photos for publication.')
+      }
+    },
+    [description, photos, publishPostMutation]
+  )
+
   return {
     description,
+    isPublishing: publishPostMutation.isPending,
+    publishError,
     selectedPhoto,
     selectedPhotoId,
     step,
@@ -69,12 +99,14 @@ export const useCreatePostFlow = () => {
     openCropStepHandler,
     openFiltersStepHandler,
     openPublicationStepHandler,
+    publishPostHandler,
     selectPhotosHandler,
     updateDescriptionHandler,
     updateSelectedPhotoAspectHandler,
     updateSelectedPhotoCropHandler,
     updateSelectedPhotoCroppedAreaHandler,
     updateSelectedPhotoFilterHandler,
+    updateSelectedPhotoImageSizeHandler,
     updateSelectedPhotoHandler: selectPhotoHandler,
     updateSelectedPhotoZoomHandler,
   }

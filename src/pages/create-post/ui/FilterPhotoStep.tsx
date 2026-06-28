@@ -3,12 +3,9 @@ import Image from 'next/image'
 import { Button } from '@/shared/ui/button'
 
 import type { CreatePostPhoto } from '../model/createPostFile'
-import {
-  CREATE_POST_FILTERS,
-  type CreatePostFilterId,
-  getCreatePostFilterCss,
-} from '../model/createPostFilter'
+import { CREATE_POST_FILTERS, type CreatePostFilterId } from '../model/createPostFilter'
 import styles from './createPostPage.module.css'
+import { EditedPhotoPreview } from './EditedPhotoPreview'
 import { SelectedPhotosList } from './SelectedPhotosList'
 
 type Props = {
@@ -30,21 +27,11 @@ export const FilterPhotoStep = ({
   onNext,
   onPhotoSelect,
 }: Props) => {
-  const selectedFilterCss = getCreatePostFilterCss(selectedPhoto.filterId)
-
   return (
     <div className={styles.filterContent}>
       <div className={styles.filterPreviewPanel}>
         <div className={styles.filterPreviewFrame}>
-          <Image
-            className={styles.filterPreviewImage}
-            src={selectedPhoto.previewUrl}
-            alt="Filtered publication preview"
-            width={492}
-            height={492}
-            style={{ filter: selectedFilterCss }}
-            unoptimized
-          />
+          <EditedPhotoPreview photo={selectedPhoto} alt="Filtered publication preview" />
         </div>
 
         <SelectedPhotosList

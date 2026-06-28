@@ -1,4 +1,9 @@
-import type { CreatePostAspectId, CreatePostCropArea, CreatePostPoint } from './createPostCrop'
+import type {
+  CreatePostAspectId,
+  CreatePostCropArea,
+  CreatePostImageSize,
+  CreatePostPoint,
+} from './createPostCrop'
 import type { CreatePostFilterId } from './createPostFilter'
 
 export const MAX_CREATE_POST_PHOTOS = 10
@@ -17,6 +22,7 @@ export type CreatePostPhoto = {
   zoom: number
   aspectId: CreatePostAspectId
   croppedAreaPixels: CreatePostCropArea | null
+  imageSize: CreatePostImageSize | null
   filterId: CreatePostFilterId
 }
 

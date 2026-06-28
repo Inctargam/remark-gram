@@ -1,5 +1,5 @@
 import type { ChangeEvent } from 'react'
-import Cropper, { type Area, type Point } from 'react-easy-crop'
+import Cropper, { type Area, type MediaSize, type Point } from 'react-easy-crop'
 
 import { Button } from '@/shared/ui/button'
 
@@ -7,6 +7,7 @@ import {
   CREATE_POST_ASPECTS,
   CREATE_POST_ZOOM_STEP,
   type CreatePostAspectId,
+  type CreatePostImageSize,
   MAX_CREATE_POST_ZOOM,
   MIN_CREATE_POST_ZOOM,
 } from '../model/createPostCrop'
@@ -21,6 +22,7 @@ type Props = {
   onAspectChange: (aspectId: CreatePostAspectId) => void
   onCropChange: (crop: Point) => void
   onCropComplete: (croppedAreaPixels: Area) => void
+  onImageSizeChange: (imageSize: CreatePostImageSize) => void
   onNext: () => void
   onPhotoSelect: (photoId: string) => void
   onZoomChange: (zoom: number) => void
@@ -33,12 +35,16 @@ export const CropPhotoStep = ({
   onAspectChange,
   onCropChange,
   onCropComplete,
+  onImageSizeChange,
   onNext,
   onPhotoSelect,
   onZoomChange,
 }: Props) => {
   const selectedAspect =
     CREATE_POST_ASPECTS.find(({ id }) => id === selectedPhoto.aspectId) ?? CREATE_POST_ASPECTS[0]
+  const selectedAspectValue =
+    selectedAspect.value ??
+    (selectedPhoto.imageSize ? selectedPhoto.imageSize.width / selectedPhoto.imageSize.height : 1)
 
   const cropCompleteHandler = (_croppedArea: Area, croppedAreaPixels: Area) => {
     onCropComplete(croppedAreaPixels)
@@ -46,6 +52,13 @@ export const CropPhotoStep = ({
 
   const zoomChangeHandler = (event: ChangeEvent<HTMLInputElement>) => {
     onZoomChange(Number(event.currentTarget.value))
+  }
+
+  const mediaLoadedHandler = (mediaSize: MediaSize) => {
+    onImageSizeChange({
+      width: mediaSize.naturalWidth,
+      height: mediaSize.naturalHeight,
+    })
   }
 
   return (
@@ -56,11 +69,12 @@ export const CropPhotoStep = ({
             image={selectedPhoto.previewUrl}
             crop={selectedPhoto.crop}
             zoom={selectedPhoto.zoom}
-            aspect={selectedAspect.value}
+            aspect={selectedAspectValue}
             minZoom={MIN_CREATE_POST_ZOOM}
             maxZoom={MAX_CREATE_POST_ZOOM}
             onCropChange={onCropChange}
             onCropComplete={cropCompleteHandler}
+            onMediaLoaded={mediaLoadedHandler}
             onZoomChange={onZoomChange}
           />
         </div>

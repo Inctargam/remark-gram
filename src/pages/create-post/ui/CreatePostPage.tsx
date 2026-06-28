@@ -13,7 +13,10 @@ export const CreatePostPage = () => {
   const [isOpen, setIsOpen] = useState(true)
   const {
     description,
+    isPublishing,
     photos,
+    publishError,
+    publishPostHandler,
     selectPhotosHandler,
     selectedPhoto,
     selectedPhotoId,
@@ -28,6 +31,7 @@ export const CreatePostPage = () => {
     updateSelectedPhotoCroppedAreaHandler,
     updateSelectedPhotoFilterHandler,
     updateSelectedPhotoHandler,
+    updateSelectedPhotoImageSizeHandler,
     updateSelectedPhotoZoomHandler,
   } = useCreatePostFlow()
 
@@ -37,6 +41,12 @@ export const CreatePostPage = () => {
     if (!open) {
       router.replace(ROUTES.profile)
     }
+  }
+
+  const publishHandler = () => {
+    void publishPostHandler(() => {
+      closeHandler(false)
+    })
   }
 
   return (
@@ -50,12 +60,16 @@ export const CreatePostPage = () => {
       onCropComplete={updateSelectedPhotoCroppedAreaHandler}
       onDescriptionChange={updateDescriptionHandler}
       onFilterChange={updateSelectedPhotoFilterHandler}
+      onImageSizeChange={updateSelectedPhotoImageSizeHandler}
       onNextFromCrop={openFiltersStepHandler}
       onNextFromFilters={openPublicationStepHandler}
       onPhotoSelect={updateSelectedPhotoHandler}
       onPhotosSelect={selectPhotosHandler}
+      onPublish={publishHandler}
       photos={photos}
       description={description}
+      isPublishing={isPublishing}
+      publishError={publishError}
       selectedPhoto={selectedPhoto}
       selectedPhotoId={selectedPhotoId}
       step={step}

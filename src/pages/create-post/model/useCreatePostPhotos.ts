@@ -1,7 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { createImagePreview } from '../lib/createImagePreview'
-import type { CreatePostAspectId, CreatePostCropArea, CreatePostPoint } from './createPostCrop'
+import {
+  type CreatePostAspectId,
+  type CreatePostCropArea,
+  type CreatePostImageSize,
+  type CreatePostPoint,
+  DEFAULT_CREATE_POST_CROP,
+  DEFAULT_CREATE_POST_ZOOM,
+} from './createPostCrop'
 import type { CreatePostPhoto } from './createPostFile'
 import type { CreatePostFilterId } from './createPostFilter'
 
@@ -69,7 +76,13 @@ export const useCreatePostPhotos = () => {
 
   const updateSelectedPhotoAspectHandler = useCallback(
     (aspectId: CreatePostAspectId) => {
-      updateSelectedPhotoHandler((photo) => ({ ...photo, aspectId, croppedAreaPixels: null }))
+      updateSelectedPhotoHandler((photo) => ({
+        ...photo,
+        aspectId,
+        crop: { ...DEFAULT_CREATE_POST_CROP },
+        zoom: DEFAULT_CREATE_POST_ZOOM,
+        croppedAreaPixels: null,
+      }))
     },
     [updateSelectedPhotoHandler]
   )
@@ -88,6 +101,13 @@ export const useCreatePostPhotos = () => {
     [updateSelectedPhotoHandler]
   )
 
+  const updateSelectedPhotoImageSizeHandler = useCallback(
+    (imageSize: CreatePostImageSize) => {
+      updateSelectedPhotoHandler((photo) => ({ ...photo, imageSize }))
+    },
+    [updateSelectedPhotoHandler]
+  )
+
   return {
     photos,
     selectedPhoto,
@@ -98,6 +118,7 @@ export const useCreatePostPhotos = () => {
     updateSelectedPhotoCropHandler,
     updateSelectedPhotoCroppedAreaHandler,
     updateSelectedPhotoFilterHandler,
+    updateSelectedPhotoImageSizeHandler,
     updateSelectedPhotoZoomHandler,
   }
 }

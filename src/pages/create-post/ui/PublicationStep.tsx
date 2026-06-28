@@ -1,4 +1,3 @@
-import Image from 'next/image'
 import type { ChangeEvent } from 'react'
 
 import { Button } from '@/shared/ui/button'
@@ -9,24 +8,28 @@ import {
   normalizeCreatePostDescription,
 } from '../model/createPostDescription'
 import type { CreatePostPhoto } from '../model/createPostFile'
-import { getCreatePostFilterCss } from '../model/createPostFilter'
 import styles from './createPostPage.module.css'
+import { EditedPhotoPreview } from './EditedPhotoPreview'
 
 type Props = {
   description: string
+  isPublishing: boolean
+  publishError: string | null
   selectedPhoto: CreatePostPhoto
   onBack: () => void
   onDescriptionChange: (description: string) => void
+  onPublish: () => void
 }
 
 export const PublicationStep = ({
   description,
+  isPublishing,
+  publishError,
   selectedPhoto,
   onBack,
   onDescriptionChange,
+  onPublish,
 }: Props) => {
-  const selectedFilterCss = getCreatePostFilterCss(selectedPhoto.filterId)
-
   const descriptionChangeHandler = (event: ChangeEvent<HTMLInputElement>) => {
     onDescriptionChange(normalizeCreatePostDescription(event.currentTarget.value))
   }
@@ -34,15 +37,7 @@ export const PublicationStep = ({
   return (
     <div className={styles.publicationContent}>
       <div className={styles.publicationPreviewFrame}>
-        <Image
-          className={styles.publicationPreviewImage}
-          src={selectedPhoto.previewUrl}
-          alt="Publication preview"
-          width={492}
-          height={492}
-          style={{ filter: selectedFilterCss }}
-          unoptimized
-        />
+        <EditedPhotoPreview photo={selectedPhoto} alt="Publication preview" />
       </div>
 
       <div className={styles.publicationForm}>
@@ -58,12 +53,18 @@ export const PublicationStep = ({
           {description.length}/{CREATE_POST_DESCRIPTION_MAX_LENGTH}
         </p>
 
+        {publishError && (
+          <p className={styles.publishError} role="alert">
+            {publishError}
+          </p>
+        )}
+
         <div className={styles.stepActions}>
-          <Button type="button" variant="outline" onClick={onBack}>
+          <Button type="button" variant="outline" disabled={isPublishing} onClick={onBack}>
             Back
           </Button>
-          <Button type="button" disabled>
-            Publish
+          <Button type="button" disabled={isPublishing} onClick={onPublish}>
+            {isPublishing ? 'Publishing...' : 'Publish'}
           </Button>
         </div>
       </div>

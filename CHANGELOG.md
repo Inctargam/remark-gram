@@ -15,16 +15,19 @@
 - Добавлена pinned-зависимость `react-easy-crop@6.0.2` для настройки обрезки фотографий.
 - После успешной загрузки wizard переходит на шаг `Cropping`, где для каждой фотографии отдельно сохраняются crop position, zoom, aspect ratio и crop area в пикселях.
 - Реализованы cropper, переключатели `1:1`, `4:5`, `16:9`, zoom slider и thumbnail strip для переключения между выбранными фотографиями без потери настроек.
+- В cropper добавлен формат `Original`, который выбран по умолчанию и сохраняет исходное соотношение сторон фотографии без принудительной обрезки.
 - Управление выбранными фотографиями, текущей фотографией, crop-настройками и cleanup object URL вынесено из общего flow-hook в отдельный `useCreatePostPhotos`.
 - Добавлен шаг `Filters`: выбор фильтра сохраняется отдельно для каждой фотографии, preview применяет CSS-filter, а `Back` возвращает пользователя на crop-step.
 - Добавлен шаг `Publication` с preview выбранной фотографии, полем `Description`, ограничением описания до 500 символов и счётчиком символов; `Publish` оставлен неактивным до этапа mock publish.
+- Кнопка `Publish` подключена к TanStack Query mock mutation: перед отправкой фотографии экспортируются через Canvas с учётом crop area и CSS-фильтра, после успешного mock publish форма закрывается с переходом на профиль.
+- Preview на шагах `Filters` и `Publication` синхронно строится по сохранённым crop area и исходному размеру фотографии, поэтому выбранные crop и filter видны без перескока с исходного размера.
 
 #### Verification
 
 - `pnpm exec eslint 'app/(main)/create/page.tsx' src/pages/create-post` прошёл успешно.
 - `pnpm exec vitest run --project unit src/pages/create-post/model/createPostFile.test.ts` прошёл успешно: 1 файл, 7 тестов.
 - `pnpm exec eslint src/pages/create-post` прошёл успешно.
-- `pnpm exec vitest run --project unit src/pages/create-post/model` прошёл успешно: 3 файла, 11 тестов.
+- `pnpm exec vitest run --project unit src/pages/create-post` прошёл успешно: 4 файла, 12 тестов.
 - `pnpm exec tsc --noEmit` прошёл успешно.
 - `pnpm build` не запускался повторно: на предыдущем этапе команда зависала на `Creating an optimized production build ...` без вывода ошибок.
 - Storybook tests не запускались, потому что stories не изменялись и Storybook MCP tools недоступны в текущей сессии.

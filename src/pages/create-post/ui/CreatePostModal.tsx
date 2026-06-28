@@ -3,6 +3,7 @@ import { Modal } from '@/shared/ui/modal'
 import type {
   CreatePostAspectId,
   CreatePostCropArea,
+  CreatePostImageSize,
   CreatePostPoint,
 } from '../model/createPostCrop'
 import type { CreatePostPhoto } from '../model/createPostFile'
@@ -18,6 +19,8 @@ type Props = {
   open: boolean
   onOpenChange: (open: boolean) => void
   photos: CreatePostPhoto[]
+  isPublishing: boolean
+  publishError: string | null
   selectedPhoto: CreatePostPhoto | null
   selectedPhotoId: string | null
   step: 'add-photo' | 'crop' | 'filters' | 'publication'
@@ -29,10 +32,12 @@ type Props = {
   onCropComplete: (croppedAreaPixels: CreatePostCropArea) => void
   onDescriptionChange: (description: string) => void
   onFilterChange: (filterId: CreatePostFilterId) => void
+  onImageSizeChange: (imageSize: CreatePostImageSize) => void
   onNextFromCrop: () => void
   onNextFromFilters: () => void
   onPhotoSelect: (photoId: string) => void
   onPhotosSelect: (files: File[]) => void
+  onPublish: () => void
   onZoomChange: (zoom: number) => void
 }
 
@@ -41,6 +46,8 @@ export const CreatePostModal = ({
   open,
   onOpenChange,
   photos,
+  isPublishing,
+  publishError,
   selectedPhoto,
   selectedPhotoId,
   step,
@@ -52,10 +59,12 @@ export const CreatePostModal = ({
   onCropComplete,
   onDescriptionChange,
   onFilterChange,
+  onImageSizeChange,
   onNextFromCrop,
   onNextFromFilters,
   onPhotoSelect,
   onPhotosSelect,
+  onPublish,
   onZoomChange,
 }: Props) => {
   const isEditorStep =
@@ -83,6 +92,7 @@ export const CreatePostModal = ({
           onAspectChange={onAspectChange}
           onCropChange={onCropChange}
           onCropComplete={onCropComplete}
+          onImageSizeChange={onImageSizeChange}
           onPhotoSelect={onPhotoSelect}
           onNext={onNextFromCrop}
           onZoomChange={onZoomChange}
@@ -100,9 +110,12 @@ export const CreatePostModal = ({
       ) : step === 'publication' && selectedPhoto ? (
         <PublicationStep
           description={description}
+          isPublishing={isPublishing}
+          publishError={publishError}
           selectedPhoto={selectedPhoto}
           onBack={onBackToFilters}
           onDescriptionChange={onDescriptionChange}
+          onPublish={onPublish}
         />
       ) : (
         <AddPhotoStep uploadError={uploadError} onPhotosSelect={onPhotosSelect} />
