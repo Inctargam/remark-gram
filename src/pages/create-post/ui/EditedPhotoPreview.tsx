@@ -1,8 +1,8 @@
 import Image from 'next/image'
 import type { CSSProperties } from 'react'
 
+import { useEditedPhotoPreview } from '../lib/useEditedPhotoPreview'
 import type { CreatePostPhoto } from '../model/createPostFile'
-import { getCreatePostFilterCss } from '../model/createPostFilter'
 import styles from './createPostPage.module.css'
 
 type Props = {
@@ -13,8 +13,7 @@ type Props = {
 export const EditedPhotoPreview = ({ alt, photo }: Props) => {
   const cropArea = photo.croppedAreaPixels
   const imageSize = photo.imageSize
-  const filterCss = getCreatePostFilterCss(photo.filterId)
-  const hasCropPreview = Boolean(cropArea && imageSize)
+  const previewUrl = useEditedPhotoPreview(photo)
   const viewportStyle: CSSProperties =
     cropArea && imageSize
       ? {
@@ -23,28 +22,19 @@ export const EditedPhotoPreview = ({ alt, photo }: Props) => {
           width: cropArea.width >= cropArea.height ? '100%' : undefined,
         }
       : { height: '100%', width: '100%' }
-  const imageStyle: CSSProperties | undefined =
-    cropArea && imageSize
-      ? {
-          filter: filterCss,
-          height: `${(imageSize.height / cropArea.height) * 100}%`,
-          left: `${(-cropArea.x / cropArea.width) * 100}%`,
-          top: `${(-cropArea.y / cropArea.height) * 100}%`,
-          width: `${(imageSize.width / cropArea.width) * 100}%`,
-        }
-      : { filter: filterCss }
 
   return (
     <div className={styles.editedPreviewViewport} style={viewportStyle}>
-      <Image
-        className={hasCropPreview ? styles.editedPreviewImageCropped : styles.editedPreviewImage}
-        src={photo.previewUrl}
-        alt={alt}
-        width={492}
-        height={492}
-        style={imageStyle}
-        unoptimized
-      />
+      {previewUrl && (
+        <Image
+          className={styles.editedPreviewImage}
+          src={previewUrl}
+          alt={alt}
+          width={Math.round(cropArea?.width ?? imageSize?.width ?? 492)}
+          height={Math.round(cropArea?.height ?? imageSize?.height ?? 492)}
+          unoptimized
+        />
+      )}
     </div>
   )
 }

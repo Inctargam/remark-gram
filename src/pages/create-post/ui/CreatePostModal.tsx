@@ -111,10 +111,13 @@ export const CreatePostModal = ({
         <PublicationStep
           description={description}
           isPublishing={isPublishing}
+          photos={photos}
           publishError={publishError}
           selectedPhoto={selectedPhoto}
+          selectedPhotoId={selectedPhotoId}
           onBack={onBackToFilters}
           onDescriptionChange={onDescriptionChange}
+          onPhotoSelect={onPhotoSelect}
           onPublish={onPublish}
         />
       ) : (

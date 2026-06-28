@@ -10,34 +10,53 @@ import {
 import type { CreatePostPhoto } from '../model/createPostFile'
 import styles from './createPostPage.module.css'
 import { EditedPhotoPreview } from './EditedPhotoPreview'
+import { SelectedPhotosList } from './SelectedPhotosList'
 
 type Props = {
   description: string
   isPublishing: boolean
+  photos: CreatePostPhoto[]
   publishError: string | null
   selectedPhoto: CreatePostPhoto
+  selectedPhotoId: string | null
   onBack: () => void
   onDescriptionChange: (description: string) => void
+  onPhotoSelect: (photoId: string) => void
   onPublish: () => void
 }
 
 export const PublicationStep = ({
   description,
   isPublishing,
+  photos,
   publishError,
   selectedPhoto,
+  selectedPhotoId,
   onBack,
   onDescriptionChange,
+  onPhotoSelect,
   onPublish,
 }: Props) => {
+  const hasSeveralPhotos = photos.length > 1
+
   const descriptionChangeHandler = (event: ChangeEvent<HTMLInputElement>) => {
     onDescriptionChange(normalizeCreatePostDescription(event.currentTarget.value))
   }
 
   return (
     <div className={styles.publicationContent}>
-      <div className={styles.publicationPreviewFrame}>
-        <EditedPhotoPreview photo={selectedPhoto} alt="Publication preview" />
+      <div className={styles.publicationPreviewPanel}>
+        <div className={styles.publicationPreviewFrame}>
+          <EditedPhotoPreview photo={selectedPhoto} alt="Publication preview" />
+        </div>
+
+        {hasSeveralPhotos && (
+          <SelectedPhotosList
+            photos={photos}
+            selectedPhotoId={selectedPhotoId}
+            onPhotoSelect={onPhotoSelect}
+          />
+        )}
       </div>
 
       <div className={styles.publicationForm}>
