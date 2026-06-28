@@ -10,7 +10,7 @@ import {
 import type { CreatePostPhoto } from '../model/createPostFile'
 import styles from './createPostPage.module.css'
 import { EditedPhotoPreview } from './EditedPhotoPreview'
-import { SelectedPhotosList } from './SelectedPhotosList'
+import { PhotoCarouselControls } from './PhotoCarouselControls'
 
 type Props = {
   description: string
@@ -37,8 +37,6 @@ export const PublicationStep = ({
   onPhotoSelect,
   onPublish,
 }: Props) => {
-  const hasSeveralPhotos = photos.length > 1
-
   const descriptionChangeHandler = (event: ChangeEvent<HTMLInputElement>) => {
     onDescriptionChange(normalizeCreatePostDescription(event.currentTarget.value))
   }
@@ -48,15 +46,12 @@ export const PublicationStep = ({
       <div className={styles.publicationPreviewPanel}>
         <div className={styles.publicationPreviewFrame}>
           <EditedPhotoPreview photo={selectedPhoto} alt="Publication preview" />
-        </div>
-
-        {hasSeveralPhotos && (
-          <SelectedPhotosList
+          <PhotoCarouselControls
             photos={photos}
             selectedPhotoId={selectedPhotoId}
             onPhotoSelect={onPhotoSelect}
           />
-        )}
+        </div>
       </div>
 
       <div className={styles.publicationForm}>

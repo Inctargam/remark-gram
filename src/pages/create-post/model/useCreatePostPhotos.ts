@@ -47,6 +47,14 @@ export const useCreatePostPhotos = () => {
     setSelectedPhotoId(photoId)
   }, [])
 
+  const selectFirstPhotoHandler = useCallback(() => {
+    setPhotos((currentPhotos) => {
+      setSelectedPhotoId(currentPhotos[0]?.id ?? null)
+
+      return currentPhotos
+    })
+  }, [])
+
   const updateSelectedPhotoHandler = useCallback(
     (updatePhoto: (photo: CreatePostPhoto) => CreatePostPhoto) => {
       if (!selectedPhoto) {
@@ -113,6 +121,7 @@ export const useCreatePostPhotos = () => {
     selectedPhoto,
     selectedPhotoId: effectiveSelectedPhotoId,
     addPhotosHandler,
+    selectFirstPhotoHandler,
     selectPhotoHandler,
     updateSelectedPhotoAspectHandler,
     updateSelectedPhotoCropHandler,

@@ -19,6 +19,7 @@ export const useCreatePostFlow = () => {
     selectedPhoto,
     selectedPhotoId,
     addPhotosHandler,
+    selectFirstPhotoHandler,
     selectPhotoHandler,
     updateSelectedPhotoAspectHandler,
     updateSelectedPhotoCropHandler,
@@ -53,12 +54,14 @@ export const useCreatePostFlow = () => {
   }, [])
 
   const openFiltersStepHandler = useCallback(() => {
+    selectFirstPhotoHandler()
     setStep('filters')
-  }, [])
+  }, [selectFirstPhotoHandler])
 
   const openPublicationStepHandler = useCallback(() => {
+    selectFirstPhotoHandler()
     setStep('publication')
-  }, [])
+  }, [selectFirstPhotoHandler])
 
   const updateDescriptionHandler = useCallback((descriptionValue: string) => {
     setDescription(normalizeCreatePostDescription(descriptionValue))

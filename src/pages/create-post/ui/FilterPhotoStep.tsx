@@ -6,7 +6,7 @@ import type { CreatePostPhoto } from '../model/createPostFile'
 import { CREATE_POST_FILTERS, type CreatePostFilterId } from '../model/createPostFilter'
 import styles from './createPostPage.module.css'
 import { EditedPhotoPreview } from './EditedPhotoPreview'
-import { SelectedPhotosList } from './SelectedPhotosList'
+import { PhotoCarouselControls } from './PhotoCarouselControls'
 
 type Props = {
   photos: CreatePostPhoto[]
@@ -32,13 +32,12 @@ export const FilterPhotoStep = ({
       <div className={styles.filterPreviewPanel}>
         <div className={styles.filterPreviewFrame}>
           <EditedPhotoPreview photo={selectedPhoto} alt="Filtered publication preview" />
+          <PhotoCarouselControls
+            photos={photos}
+            selectedPhotoId={selectedPhotoId}
+            onPhotoSelect={onPhotoSelect}
+          />
         </div>
-
-        <SelectedPhotosList
-          photos={photos}
-          selectedPhotoId={selectedPhotoId}
-          onPhotoSelect={onPhotoSelect}
-        />
       </div>
 
       <div className={styles.filterControls}>
