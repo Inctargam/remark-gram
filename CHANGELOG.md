@@ -4,6 +4,25 @@
 
 ## Unreleased
 
+### 2026-06-29
+
+#### Create Post
+
+- Добавлены Storybook stories для ключевых состояний create-post wizard: пустая загрузка, ошибка валидации, crop для одного и нескольких фото, filters, publication и отдельная story для confirm закрытия.
+- Для create-post modal stories отключён inline-render в Storybook Docs, чтобы открытые fixed-модалки рендерились в iframe и не накладывались друг на друга на странице документации.
+- Добавлены unit-тесты in-memory draft model: сохранение, восстановление редактируемого состояния без object URL и очистка черновика.
+
+#### Verification
+
+- `pnpm exec eslint src/pages/create-post/ui/CreatePostFlow.stories.tsx src/pages/create-post/ui/CloseCreationConfirm.stories.tsx src/pages/create-post/model/createPostDraft.test.ts` прошёл успешно.
+- `pnpm exec vitest run --project unit src/pages/create-post/model/createPostDraft.test.ts` прошёл успешно: 1 файл, 3 теста.
+- `pnpm exec vitest run --project storybook src/pages/create-post/ui/CreatePostFlow.stories.tsx src/pages/create-post/ui/CloseCreationConfirm.stories.tsx` прошёл успешно: 2 файла, 7 тестов.
+- Storybook Docs для `pages/CreatePostFlow` визуально проверен на `http://localhost:6006/?path=/docs/pages-createpostflow--docs`: stories рендерятся через iframe, наложений fixed-модалок в основном docs DOM не найдено.
+- `pnpm exec vitest run --project unit` прошёл успешно: 16 файлов, 78 тестов.
+- `pnpm build` прошёл успешно.
+- `pnpm lint` не прошёл из-за существующих несвязанных ошибок сортировки export в `src/shared/ui/alert/index.ts`, `src/shared/ui/icon/index.ts`, `src/shared/ui/select/index.ts`, `src/widgets/navigation/index.ts` и существующих prettier warnings вне изменённых файлов.
+- Storybook MCP tools не были доступны в текущем наборе инструментов Codex; затронутые Storybook tests запущены через `pnpm exec vitest run --project storybook`.
+
 ### 2026-06-25
 
 #### Create Post
