@@ -12,6 +12,7 @@ export const useRecaptchaWidget = () => {
   const [state, setState] = useState<RecaptchaWidgetState>('idle')
   const [token, setToken] = useState<string | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const widgetIdRef = useRef<number | null>(null)
 
   const isVerified = state === 'verified'
 
@@ -25,7 +26,7 @@ export const useRecaptchaWidget = () => {
       enterprise.ready(() => {
         if (!containerRef.current) return
 
-        enterprise.render(containerRef.current, {
+        widgetIdRef.current = enterprise.render(containerRef.current, {
           sitekey: RECAPTCHA_SITE_KEY,
           theme: 'dark',
           callback: (receivedToken: string) => {
@@ -74,6 +75,10 @@ export const useRecaptchaWidget = () => {
   const reset = useCallback(() => {
     setState('idle')
     setToken(null)
+
+    if (widgetIdRef.current !== null) {
+      window.grecaptcha?.enterprise?.reset(widgetIdRef.current)
+    }
   }, [])
 
   return { containerRef, state, token, isVerified, reset }
