@@ -6,7 +6,6 @@ import { ROUTES } from '@/shared/config'
 import { Button } from '@/shared/ui/button'
 import { Card } from '@/shared/ui/card'
 import { Input } from '@/shared/ui/input'
-import { Recaptcha } from '@/shared/ui/recaptcha'
 
 import { useForgotPasswordForm } from '../model/useForgotPasswordForm'
 import styles from './ForgotPasswordForm.module.css'
@@ -18,8 +17,7 @@ export const ForgotPasswordForm = () => {
     emailField,
     isConfirmationOpen,
     isSubmitDisabled,
-    recaptchaState,
-    recaptchaVerifyHandler,
+    recaptchaContainerRef,
     submitHandler,
     submittedEmail,
   } = useForgotPasswordForm()
@@ -62,13 +60,7 @@ export const ForgotPasswordForm = () => {
           Back to Sign In
         </Link>
 
-        {!submittedEmail && (
-          <Recaptcha
-            className={styles.recaptcha}
-            onVerifyRequest={recaptchaVerifyHandler}
-            state={recaptchaState}
-          />
-        )}
+        {!submittedEmail && <div className={styles.recaptcha} ref={recaptchaContainerRef} />}
       </form>
 
       <EmailSentModal
