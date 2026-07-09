@@ -9,7 +9,8 @@
     "build:production": "pnpm build",
     "start": "next start",
     "lint": "eslint",
-    "api:generate": "openapi-typescript ./openapi/schema.yaml -o ./src/shared/api/openapi/schema.d.ts",
+    "api:generate": "openapi-typescript https://remark-gram.com/api/v1/docs-json -o ./src/shared/api/openapi/schema.d.ts --root-types",
+    "api:generate:insecure": "powershell -ExecutionPolicy Bypass -Command \"$env:NODE_TLS_REJECT_UNAUTHORIZED='0'; pnpm.cmd exec openapi-typescript https://remark-gram.com/api/v1/docs-json -o ./src/shared/api/openapi/schema.d.ts --root-types\"",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },

@@ -9,12 +9,13 @@
 #### Shared API
 
 - Подключены `openapi-fetch` и `openapi-typescript` для постепенного перехода к типизированному OpenAPI-клиенту без изменения текущего `baseApi`.
-- Добавлена базовая OpenAPI-точка входа `src/shared/api/openapi` и команда `pnpm api:generate`, которая генерирует типы из `openapi/schema.yaml`.
-- Добавлена временная минимальная OpenAPI-схема; ее нужно заменить реальным backend-контрактом перед миграцией запросов.
+- Добавлена базовая OpenAPI-точка входа `src/shared/api/openapi` и команда `pnpm api:generate`, которая генерирует типы из backend OpenAPI-контракта.
+- Добавлена временная команда `pnpm api:generate:insecure` для локальной генерации типов при проблемном учебном TLS-сертификате backend; после настройки доверенного сертификата ее можно удалить из `package.json`.
+- Удалена временная локальная OpenAPI-заглушка `openapi/schema.yaml`, чтобы единственным источником типов был backend-контракт.
 
 #### Verification
 
-- `pnpm api:generate` прошел успешно.
+- `pnpm api:generate:insecure` прошел успешно локально после временного отключения проверки TLS-сертификата.
 - `pnpm exec tsc --noEmit` прошел успешно.
 - `pnpm exec eslint src/shared/api/openapi/client.ts src/shared/api/openapi/index.ts` прошел успешно.
 - Storybook tests не запускались, потому что UI и stories не изменялись.

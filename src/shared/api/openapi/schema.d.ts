@@ -3,15 +3,921 @@
  * Do not make direct changes to the file.
  */
 
-export type paths = Record<string, never>;
-export type webhooks = Record<string, never>;
-export interface components {
-    schemas: never;
-    responses: never;
-    parameters: never;
-    requestBodies: never;
-    headers: never;
-    pathItems: never;
+export interface paths {
+  '/api/v1/auth/registration': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Register a user and send an email confirmation link */
+    post: operations['register']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/auth/registration/confirmation': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Confirm registration using the code from the email link */
+    post: operations['confirmRegistration']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/auth/registration/resend-confirmation': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Send a new registration confirmation link */
+    post: operations['resendRegistrationConfirmation']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/auth/login': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Log in
+     * @description Returns an access token and stores the refresh token in an httpOnly cookie.
+     */
+    post: operations['login']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/auth/refresh-token': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Rotate the refresh token
+     * @description Returns a new access token and replaces the refresh token cookie.
+     */
+    post: operations['refreshToken']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/auth/password-reset/request': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Request a password reset email
+     * @description Accepts the request without revealing whether the email exists. If a reset email was sent recently, the backend keeps a 1 minute cooldown and does not send another email during that window. The client should disable the resend button for 1 minute after submitting this request.
+     */
+    post: operations['passwordReset']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/auth/password-reset/confirm': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Set a new password using a password reset token */
+    post: operations['confirmPasswordReset']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/auth/logout': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Log out from the current session */
+    post: operations['logout']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/security/sessions': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get the active sessions of the current user */
+    get: operations['getSessions']
+    put?: never
+    post?: never
+    /** Revoke all sessions except the current one */
+    delete: operations['deleteOtherSessions']
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/security/sessions/{sessionId}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    /** Revoke a selected session */
+    delete: operations['deleteSession']
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/testing/all-data': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    /** Delete all data from the user-accounts database */
+    delete: operations['deleteAllData']
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
 }
-export type $defs = Record<string, never>;
-export type operations = Record<string, never>;
+
+export type webhooks = Record<string, never>
+
+export interface components {
+  schemas: {
+    ApiErrorResponseDto: {
+      /** @description HTTP status code. */
+      statusCode: number
+      /** @description Stable machine-readable application error code. */
+      code: string
+      /** @description Human-readable diagnostic message. */
+      message: string
+    }
+    ValidationErrorResponseDto: {
+      /** @example 400 */
+      statusCode: number
+      /**
+       * @example [
+       *       "email must be an email"
+       *     ]
+       */
+      message: string[]
+      /** @example Bad Request */
+      error: string
+    }
+    RegistrationDto: {
+      /** @example user_123 */
+      username: string
+      /**
+       * Format: email
+       * @example user@example.com
+       */
+      email: string
+      /**
+       * @description Must contain at least one digit, one uppercase letter and one lowercase letter.
+       * @example Password1!
+       */
+      password: string
+    }
+    ConfirmRegistrationDto: {
+      /** @example 34c78352-97d1-4f2f-a0a2-41e28365d926 */
+      code: string
+    }
+    ResendRegistrationConfirmationDto: {
+      /**
+       * Format: email
+       * @example user@example.com
+       */
+      email: string
+    }
+    LoginDto: {
+      /**
+       * Format: email
+       * @example user@example.com
+       */
+      email: string
+      /**
+       * Format: password
+       * @example Password1!
+       */
+      password: string
+    }
+    AccessTokenResponseDto: {
+      /** @description JWT access token. */
+      accessToken: string
+    }
+    PasswordResetDto: {
+      /**
+       * Format: email
+       * @example user@example.com
+       */
+      email: string
+      /** @example recaptcha-reset-token */
+      recaptchaToken: string
+    }
+    PasswordResetResponse: {
+      /** @example If this email exists, password reset instructions were sent. */
+      message: string
+    }
+    ConfirmPasswordResetDto: {
+      /**
+       * @description Token from the password reset email. Invalid, expired, revoked or already used tokens return INVALID_PASSWORD_RESET_TOKEN.
+       * @example password-reset-token
+       */
+      token: string
+      /**
+       * @description Must contain at least one digit, one uppercase letter and one lowercase letter.
+       * @example NewPassword1!
+       */
+      newPassword: string
+    }
+    ConfirmPasswordResetResponseDto: {
+      /** @example Password has been changed successfully. */
+      message: string
+    }
+    SessionResponseDto: {
+      /**
+       * Format: uuid
+       * @example e3637e61-194b-4f79-9676-e59a20bb7c42
+       */
+      sessionId: string
+      /** @example Mozilla/5.0 */
+      deviceName: string
+      /** @example 127.0.0.1 */
+      ip: string
+      /**
+       * Format: date-time
+       * @example 2026-07-07T12:00:00.000Z
+       */
+      lastActiveAt: string
+      /** @example true */
+      isCurrent: boolean
+    }
+  }
+  responses: never
+  parameters: never
+  requestBodies: never
+  headers: never
+  pathItems: never
+}
+
+export type SchemaApiErrorResponseDto = components['schemas']['ApiErrorResponseDto']
+export type SchemaValidationErrorResponseDto = components['schemas']['ValidationErrorResponseDto']
+export type SchemaRegistrationDto = components['schemas']['RegistrationDto']
+export type SchemaConfirmRegistrationDto = components['schemas']['ConfirmRegistrationDto']
+export type SchemaResendRegistrationConfirmationDto =
+  components['schemas']['ResendRegistrationConfirmationDto']
+export type SchemaLoginDto = components['schemas']['LoginDto']
+export type SchemaAccessTokenResponseDto = components['schemas']['AccessTokenResponseDto']
+export type SchemaPasswordResetDto = components['schemas']['PasswordResetDto']
+export type SchemaPasswordResetResponse = components['schemas']['PasswordResetResponse']
+export type SchemaConfirmPasswordResetDto = components['schemas']['ConfirmPasswordResetDto']
+export type SchemaConfirmPasswordResetResponseDto =
+  components['schemas']['ConfirmPasswordResetResponseDto']
+export type SchemaSessionResponseDto = components['schemas']['SessionResponseDto']
+export type $defs = Record<string, never>
+
+export interface operations {
+  register: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['RegistrationDto']
+      }
+    }
+    responses: {
+      /** @description The user was registered and the confirmation email was sent. */
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description The request body is invalid. */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ValidationErrorResponseDto']
+        }
+      }
+      /** @description The username or email is already reserved. */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ApiErrorResponseDto']
+        }
+      }
+      /** @description The upstream service returned an unexpected error. */
+      502: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description The user-accounts service is unavailable. */
+      503: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  confirmRegistration: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ConfirmRegistrationDto']
+      }
+    }
+    responses: {
+      /** @description The email was confirmed. */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description The request body or confirmation code is invalid. */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json':
+            | components['schemas']['ApiErrorResponseDto']
+            | components['schemas']['ValidationErrorResponseDto']
+        }
+      }
+      /** @description The upstream service returned an unexpected error. */
+      502: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description The user-accounts service is unavailable. */
+      503: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  resendRegistrationConfirmation: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ResendRegistrationConfirmationDto']
+      }
+    }
+    responses: {
+      /** @description A new confirmation email was sent when resending was applicable. */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description The email is malformed or does not belong to a user. */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json':
+            | components['schemas']['ApiErrorResponseDto']
+            | components['schemas']['ValidationErrorResponseDto']
+        }
+      }
+      /** @description The email is already confirmed. */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ApiErrorResponseDto']
+        }
+      }
+      /** @description The upstream service returned an unexpected error. */
+      502: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description The user-accounts service is unavailable. */
+      503: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  login: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['LoginDto']
+      }
+    }
+    responses: {
+      /** @description Authentication succeeded. */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['AccessTokenResponseDto']
+        }
+      }
+      /** @description The request body is invalid. */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ValidationErrorResponseDto']
+        }
+      }
+      /** @description The email or password is incorrect. */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ApiErrorResponseDto']
+        }
+      }
+      /** @description The email is not confirmed or the session is already active. */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ApiErrorResponseDto']
+        }
+      }
+      /** @description The upstream service returned an unexpected error. */
+      502: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description The user-accounts service is unavailable. */
+      503: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  refreshToken: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description The token pair was rotated. */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['AccessTokenResponseDto']
+        }
+      }
+      /** @description The refresh token or its session is invalid. */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ApiErrorResponseDto']
+        }
+      }
+      /** @description The upstream service returned an unexpected error. */
+      502: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description The user-accounts service is unavailable. */
+      503: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  passwordReset: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PasswordResetDto']
+      }
+    }
+    responses: {
+      /** @description The request was accepted. A reset email is sent only when the email belongs to a confirmed user and the 1 minute resend cooldown is not active. */
+      202: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['PasswordResetResponse']
+        }
+      }
+      /** @description The email is invalid. */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ValidationErrorResponseDto']
+        }
+      }
+      /** @description The upstream service returned an unexpected error. */
+      502: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description The user-accounts service is unavailable. */
+      503: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  confirmPasswordReset: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** @description Password reset confirmation payload. The token is taken from the password reset link sent by email. */
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ConfirmPasswordResetDto']
+      }
+    }
+    responses: {
+      /** @description The password was changed and active sessions were revoked. */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ConfirmPasswordResetResponseDto']
+        }
+      }
+      /** @description The reset token or new password is invalid. */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json':
+            | components['schemas']['ApiErrorResponseDto']
+            | components['schemas']['ValidationErrorResponseDto']
+        }
+      }
+      /** @description The upstream service returned an unexpected error. */
+      502: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description The user-accounts service is unavailable. */
+      503: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  logout: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description The current session was revoked and the refresh cookie was cleared. */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description The refresh token or its session is invalid. */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ApiErrorResponseDto']
+        }
+      }
+      /** @description The upstream service returned an unexpected error. */
+      502: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description The user-accounts service is unavailable. */
+      503: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  getSessions: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Active, unexpired and non-revoked refresh sessions. */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['SessionResponseDto'][]
+        }
+      }
+      /** @description The refresh token or its session is invalid. */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description The upstream service returned an unexpected error. */
+      502: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description The user-accounts service is unavailable. */
+      503: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  deleteOtherSessions: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description All other sessions were revoked. */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description The refresh token or its session is invalid. */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description The upstream service returned an unexpected error. */
+      502: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description The user-accounts service is unavailable. */
+      503: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  deleteSession: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        /** @description Session identifier. */
+        sessionId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description The selected session was revoked. If the current session was selected, the refresh cookie was cleared. */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description The refresh token or its session is invalid. */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description The session does not exist or does not belong to the current user. */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ApiErrorResponseDto']
+        }
+      }
+      /** @description The upstream service returned an unexpected error. */
+      502: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description The user-accounts service is unavailable. */
+      503: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  deleteAllData: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description All user-accounts data was deleted. */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description The testing endpoint key is invalid. */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description The testing endpoint is disabled. */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description The upstream service returned an unexpected error. */
+      502: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description The user-accounts service is unavailable. */
+      503: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+}
