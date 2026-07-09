@@ -4,6 +4,21 @@
 
 ## Unreleased
 
+### 2026-07-09
+
+#### Shared API
+
+- Подключены `openapi-fetch` и `openapi-typescript` для постепенного перехода к типизированному OpenAPI-клиенту без изменения текущего `baseApi`.
+- Добавлена базовая OpenAPI-точка входа `src/shared/api/openapi` и команда `pnpm api:generate`, которая генерирует типы из `openapi/schema.yaml`.
+- Добавлена временная минимальная OpenAPI-схема; ее нужно заменить реальным backend-контрактом перед миграцией запросов.
+
+#### Verification
+
+- `pnpm api:generate` прошел успешно.
+- `pnpm exec tsc --noEmit` прошел успешно.
+- `pnpm exec eslint src/shared/api/openapi/client.ts src/shared/api/openapi/index.ts` прошел успешно.
+- Storybook tests не запускались, потому что UI и stories не изменялись.
+
 ### 2026-06-21
 
 #### Auth

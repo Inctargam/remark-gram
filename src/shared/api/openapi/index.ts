@@ -1,0 +1,1 @@
+export { openApiClient } from './client'
