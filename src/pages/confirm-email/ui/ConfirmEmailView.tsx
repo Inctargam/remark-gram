@@ -1,9 +1,11 @@
+import Image from 'next/image'
 import Link from 'next/link'
 
 import { ROUTES } from '@/shared/config'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 
+import emailConfirmationSuccess from '../assets/emailConfirmationSuccess.svg'
 import styles from './ConfirmEmailView.module.css'
 
 type Props = {
@@ -31,13 +33,23 @@ export const ConfirmEmailView = ({
 
   if (status === 'success') {
     return (
-      <div>
-        <h1>Congratulations!</h1>
-        <p>Your email has been confirmed</p>
-        <Link className={styles.signInLink} href={ROUTES.signIn}>
+      <section className={styles.success}>
+        <h1 className={styles.successTitle}>Congratulations!</h1>
+        <p className={styles.successMessage}>Your email has been confirmed</p>
+        <Button
+          className={styles.signInButton}
+          nativeButton={false}
+          render={<Link href={ROUTES.signIn} />}
+          variant="primary">
           Sign In
-        </Link>
-      </div>
+        </Button>
+        <Image
+          className={styles.successIllustration}
+          src={emailConfirmationSuccess}
+          alt="Email confirmation successful"
+          priority
+        />
+      </section>
     )
   }
 

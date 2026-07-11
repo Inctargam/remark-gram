@@ -4,7 +4,7 @@
   "private": true,
   "packageManager": "pnpm@10.24.0",
   "scripts": {
-    "dev": "next dev --hostname dev.remarkgram.com --port 3000 --experimental-https",
+    "dev": "next dev --hostname dev.remark-gram.com --port 3000 --experimental-https",
     "build": "next build",
     "build:production": "pnpm build",
     "start": "next start",

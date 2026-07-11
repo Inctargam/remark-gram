@@ -4,6 +4,31 @@
 
 ## Unreleased
 
+### 2026-07-11
+
+#### Auth
+
+- Успешное состояние подтверждения email приведено к desktop- и mobile-макетам Figma: добавлены адаптивная композиция, точные размеры и интервалы, полноширинная мобильная кнопка и центрирование на широких экранах.
+- Иллюстрация успешного подтверждения экспортирована из Figma в SVG и хранится локально в `assets` page-slice `confirm-email`; для изображения задано доступное текстовое описание.
+- Подтверждение регистрации переведено на типизированный `POST /api/v1/auth/registration/confirmation` через OpenAPI-клиент и TanStack Query mutation.
+- API-сценарий подтверждения хранится в локальном `api` page-slice `confirm-email`; страница автоматически отправляет полученный из URL код один раз и сохраняет прежние состояния интерфейса.
+- В mutation временно добавлено отклонение неуспешных HTTP-ответов до внедрения централизованной обработки ошибок в OpenAPI-клиенте.
+- Повторная отправка письма подтверждения хранится рядом с подтверждением в `src/pages/confirm-email/api` и использует типизированный `POST /api/v1/auth/registration/resend-confirmation` без устаревшего `baseUrl`.
+- Временная нормализация OpenAPI-ошибок регистрации, подтверждения и повторной отправки помечена единым `TODO(api-error-middleware)` для удаления после внедрения middleware.
+- Frontend-маршрут подтверждения регистрации приведён к backend-контракту `/auth/registration/confirmation`; старый моковый маршрут `/confirm-email` удалён без redirect.
+
+#### Verification
+
+- `pnpm exec eslint src/pages/confirm-email/ui/ConfirmEmailView.tsx` прошёл успешно.
+- `pnpm exec stylelint src/pages/confirm-email/ui/ConfirmEmailView.module.css` прошёл успешно.
+- `pnpm exec vitest run --project storybook src/pages/confirm-email/ui/ConfirmEmailView.stories.tsx` прошёл успешно: 1 файл, 5 тестов.
+- `pnpm exec tsc --noEmit` не прошёл из-за устаревших `.next/types`, которые ссылаются на уже удалённые route-файлы `registration-confirmation` и `resend-registration-email`; изменённый UI новых TypeScript-ошибок не добавил.
+- `pnpm exec next typegen` успешно обновил типы маршрутов.
+- `pnpm exec eslint src/pages/confirm-email` прошёл успешно после переноса API-хуков в page-slice.
+- Проверка ESLint для затронутой регистрации завершилась без ошибок; сохранено существующее предупреждение React Compiler о `watch()` из React Hook Form.
+- `pnpm exec tsc --noEmit` прошёл успешно.
+- Storybook tests не запускались, потому что UI-компоненты и stories не изменялись, а замена API transport ими не покрывается.
+
 ### 2026-07-09
 
 #### Shared API

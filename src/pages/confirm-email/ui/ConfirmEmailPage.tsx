@@ -1,11 +1,10 @@
 'use client'
 
-import { useMutation, useQuery } from '@tanstack/react-query'
 import { useSearchParams } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
-import { api, ApiError } from '@/shared/api/baseApi'
-
+import { useConfirmRegistrationMutation } from '../api/useConfirmRegistrationMutation'
+import { useResendRegistrationConfirmationMutation } from '../api/useResendRegistrationConfirmationMutation'
 import { ConfirmEmailView } from './ConfirmEmailView'
 
 export const ConfirmEmailPage = () => {
@@ -14,26 +13,29 @@ export const ConfirmEmailPage = () => {
 
   const [resendEmail, setResendEmail] = useState('')
   const [resendError, setResendError] = useState('')
+  const submittedCodeRef = useRef<string | null>(null)
 
-  const { isLoading, isSuccess } = useQuery({
-    queryKey: ['confirm-email', code],
-    queryFn: () => api.get(`/v1/auth/registration-confirmation?code=${encodeURIComponent(code)}`),
-    enabled: Boolean(code),
-    retry: false,
-  })
+  const {
+    isIdle: isConfirmationIdle,
+    isPending: isConfirmationPending,
+    isSuccess: isConfirmationSuccess,
+    mutate: confirmRegistration,
+  } = useConfirmRegistrationMutation()
 
-  const resendMutation = useMutation({
-    mutationFn: (email: string) =>
-      api.post('/v1/auth/resend-registration-email', {
-        email,
-        baseUrl: window.location.origin,
-      }),
-    onError: (error) => {
-      if (error instanceof ApiError && error.data) {
-        setResendError(error.data.message)
-      }
-    },
-  })
+  const {
+    isPending: isResendPending,
+    isSuccess: isResendSuccess,
+    mutate: resendRegistrationConfirmation,
+  } = useResendRegistrationConfirmationMutation()
+
+  useEffect(() => {
+    if (!code || submittedCodeRef.current === code) {
+      return
+    }
+
+    submittedCodeRef.current = code
+    confirmRegistration({ code })
+  }, [code, confirmRegistration])
 
   const resendHandler = () => {
     if (!resendEmail) {
@@ -41,18 +43,30 @@ export const ConfirmEmailPage = () => {
       return
     }
     setResendError('')
-    resendMutation.mutate(resendEmail)
+    resendRegistrationConfirmation(
+      { email: resendEmail },
+      {
+        onError: (error) => {
+          // TODO(api-error-middleware): Replace with the centralized API error type.
+          if (error instanceof Error) {
+            setResendError(error.message)
+          }
+        },
+      }
+    )
   }
 
-  const status = !code || isLoading ? 'loading' : isSuccess ? 'success' : 'expired'
+  const isConfirmationLoading = isConfirmationIdle || isConfirmationPending
+  const status =
+    !code || isConfirmationLoading ? 'loading' : isConfirmationSuccess ? 'success' : 'expired'
 
   return (
     <ConfirmEmailView
       status={status}
       resendEmail={resendEmail}
       resendError={resendError}
-      isResendPending={resendMutation.isPending}
-      isResendSuccess={resendMutation.isSuccess}
+      isResendPending={isResendPending}
+      isResendSuccess={isResendSuccess}
       onResendEmailChange={setResendEmail}
       onResend={resendHandler}
     />
