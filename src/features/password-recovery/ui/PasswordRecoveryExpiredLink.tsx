@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { EmailSentModal } from '@/entities/auth'
 import { Button } from '@/shared/ui/button'
 
-import timeManagementRafiki from '../assets/timeManagementRafiki.png'
+import timeManagementRafiki from '../../../shared/assets/timeManagementRafiki.png'
 import styles from './PasswordRecoveryExpiredLink.module.css'
 
 type Props = {

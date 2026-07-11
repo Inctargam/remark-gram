@@ -4,6 +4,23 @@
 
 ## Unreleased
 
+### 2026-07-12
+
+#### Auth
+
+- Состояние истёкшей ссылки подтверждения email приведено к desktop- и mobile-макетам Figma; на мобильном экране сохранено поле email и разрешён вертикальный скролл без перекрытия элементов.
+- После успешной повторной отправки expired-экран остаётся открытым, а результат показывается общей `EmailSentModal` с введённым адресом, кнопкой `OK` и закрытием по крестику или backdrop.
+- Дублирующая `SignUpSuccessModal` удалена: регистрация использует `entities/auth/EmailSentModal` через публичный API, сохраняя запрет закрытия по backdrop с помощью `disablePointerDismissal`.
+- Общая иллюстрация `timeManagementRafiki.png` перенесена из feature-слайса восстановления пароля в `src/shared/assets` для корректного переиспользования независимыми FSD-слайсами.
+
+#### Verification
+
+- ESLint прошёл для обновлённых auth, sign-up, confirm-email и password-recovery компонентов и stories.
+- `pnpm exec stylelint src/pages/confirm-email/ui/ConfirmEmailView.module.css src/entities/auth/ui/EmailSentModal.module.css` прошёл успешно.
+- Focused Storybook-проверка `EmailSentModal`, `SignUpForm`, `ConfirmEmailView` и `PasswordRecoveryExpiredLink` прошла успешно: 4 файла, 9 тестов.
+- `pnpm exec next typegen` успешно обновил типы маршрутов после удаления устаревших route-файлов.
+- `pnpm exec tsc --noEmit` прошёл успешно.
+
 ### 2026-07-11
 
 #### Auth

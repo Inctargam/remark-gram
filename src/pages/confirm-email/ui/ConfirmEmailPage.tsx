@@ -13,6 +13,7 @@ export const ConfirmEmailPage = () => {
 
   const [resendEmail, setResendEmail] = useState('')
   const [resendError, setResendError] = useState('')
+  const [isResendModalOpen, setIsResendModalOpen] = useState(false)
   const submittedCodeRef = useRef<string | null>(null)
 
   const {
@@ -22,11 +23,8 @@ export const ConfirmEmailPage = () => {
     mutate: confirmRegistration,
   } = useConfirmRegistrationMutation()
 
-  const {
-    isPending: isResendPending,
-    isSuccess: isResendSuccess,
-    mutate: resendRegistrationConfirmation,
-  } = useResendRegistrationConfirmationMutation()
+  const { isPending: isResendPending, mutate: resendRegistrationConfirmation } =
+    useResendRegistrationConfirmationMutation()
 
   useEffect(() => {
     if (!code || submittedCodeRef.current === code) {
@@ -46,6 +44,7 @@ export const ConfirmEmailPage = () => {
     resendRegistrationConfirmation(
       { email: resendEmail },
       {
+        onSuccess: () => setIsResendModalOpen(true),
         onError: (error) => {
           // TODO(api-error-middleware): Replace with the centralized API error type.
           if (error instanceof Error) {
@@ -66,9 +65,10 @@ export const ConfirmEmailPage = () => {
       resendEmail={resendEmail}
       resendError={resendError}
       isResendPending={isResendPending}
-      isResendSuccess={isResendSuccess}
+      isResendModalOpen={isResendModalOpen}
       onResendEmailChange={setResendEmail}
       onResend={resendHandler}
+      onResendModalOpenChange={setIsResendModalOpen}
     />
   )
 }

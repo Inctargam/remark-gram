@@ -1,10 +1,12 @@
 import Image from 'next/image'
 import Link from 'next/link'
 
+import { EmailSentModal } from '@/entities/auth'
 import { ROUTES } from '@/shared/config'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 
+import timeManagementRafiki from '../../../shared/assets/timeManagementRafiki.png'
 import emailConfirmationSuccess from '../assets/emailConfirmationSuccess.svg'
 import styles from './ConfirmEmailView.module.css'
 
@@ -13,9 +15,10 @@ type Props = {
   resendEmail: string
   resendError: string
   isResendPending: boolean
-  isResendSuccess: boolean
+  isResendModalOpen: boolean
   onResendEmailChange: (email: string) => void
   onResend: () => void
+  onResendModalOpenChange: (open: boolean) => void
 }
 
 export const ConfirmEmailView = ({
@@ -23,9 +26,10 @@ export const ConfirmEmailView = ({
   resendEmail,
   resendError,
   isResendPending,
-  isResendSuccess,
+  isResendModalOpen,
   onResendEmailChange,
   onResend,
+  onResendModalOpenChange,
 }: Props) => {
   if (status === 'loading') {
     return <p>Loading...</p>
@@ -53,25 +57,40 @@ export const ConfirmEmailView = ({
     )
   }
 
-  // status === 'expired'
-  if (isResendSuccess) {
-    return <p>A new verification link has been sent. Please check your email.</p>
-  }
-
   return (
-    <div>
-      <h1>Looks like the verification link has expired...</h1>
-      <p>Please enter your email to receive a new verification link.</p>
+    <section className={styles.expired}>
+      <h1 className={styles.expiredTitle}>Email verification link expired</h1>
+      <p className={styles.expiredMessage}>
+        Looks like the verification link has expired. Not to worry, we can send the link again
+      </p>
       <Input
+        className={styles.resendInput}
         label="Email"
+        placeholder="Epam@epam.com"
         type="email"
         value={resendEmail}
         onChange={(e) => onResendEmailChange(e.target.value)}
         error={resendError}
       />
-      <Button variant="primary" type="button" disabled={isResendPending} onClick={onResend}>
+      <Button
+        className={styles.resendButton}
+        variant="primary"
+        type="button"
+        disabled={isResendPending}
+        onClick={onResend}>
         Resend verification link
       </Button>
-    </div>
+      <Image
+        className={styles.expiredIllustration}
+        src={timeManagementRafiki}
+        alt="Email verification link expired"
+        priority
+      />
+      <EmailSentModal
+        email={resendEmail}
+        open={isResendModalOpen}
+        onOpenChange={onResendModalOpenChange}
+      />
+    </section>
   )
 }

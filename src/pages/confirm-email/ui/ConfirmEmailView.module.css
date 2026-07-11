@@ -33,6 +33,49 @@
   margin-top: 46px;
 }
 
+.expired {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: calc(100dvh - 60px);
+  padding: 17px 15px 28px;
+  text-align: center;
+}
+
+.expiredTitle {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 24px;
+}
+
+.expiredMessage {
+  width: min(100%, 330px);
+  margin-top: 13px;
+  font-size: var(--font-size-regular-16);
+  line-height: var(--line-height-regular-16);
+}
+
+.resendInput {
+  order: 3;
+  width: min(100%, 330px);
+  margin-top: 30px;
+  text-align: left;
+}
+
+.expiredIllustration {
+  order: 4;
+  width: min(100%, 330px);
+  height: auto;
+  margin-top: 24px;
+}
+
+.resendButton {
+  order: 5;
+  width: min(100%, 330px);
+  min-height: 48px;
+  margin-top: 42px;
+}
+
 @media (width >= 768px) {
   .success {
     padding-top: 35px;
@@ -59,5 +102,38 @@
     order: 4;
     width: 432px;
     margin-top: 72px;
+  }
+
+  .expired {
+    padding-top: 35px;
+    padding-bottom: 45px;
+  }
+
+  .expiredTitle {
+    font-size: 20px;
+    line-height: 36px;
+  }
+
+  .expiredMessage {
+    width: 294px;
+    margin-top: 19px;
+  }
+
+  .resendInput {
+    width: 229px;
+    margin-top: 30px;
+  }
+
+  .resendButton {
+    order: 4;
+    width: 229px;
+    min-height: 36px;
+    margin-top: 24px;
+  }
+
+  .expiredIllustration {
+    order: 5;
+    width: 473px;
+    margin-top: 36px;
   }
 }
