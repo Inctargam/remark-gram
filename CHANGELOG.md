@@ -4,10 +4,29 @@
 
 ## Unreleased
 
+### 2026-07-13
+
+#### Auth
+
+- Auth transport переведён на middleware единственного OpenAPI-клиента: Bearer добавляется только при наличии access token, `401` запускает один общий refresh и один retry, а refresh/logout используют тот же типизированный client с опцией `auth: false`.
+- Фабрики middleware и refresh-flow получают зависимости при сборке клиента, поэтому циклические импорты и второй raw client не требуются.
+
+#### Verification
+
+- `pnpm exec vitest run --project unit` прошёл успешно: 15 файлов, 73 теста.
+- `pnpm exec tsc --noEmit` и focused ESLint для auth/API файлов прошли успешно.
+
 ### 2026-07-12
 
 #### Auth
 
+- Самописное memory-хранилище access token и React Context заменены на единый vanilla Zustand store в `shared/auth`; стартовый refresh и очистка TanStack Query cache вынесены в `SessionBootstrap` уровня `app`.
+- Добавлена зафиксированная зависимость `zustand` версии `5.0.14` без persist и devtools middleware; access token по-прежнему хранится только в памяти вкладки.
+- Авторизация переведена с layout-мока на клиентскую сессию: при загрузке выполняется `POST /api/v1/auth/refresh-token`, access token хранится только в памяти, а shell переключается между loading, authenticated и guest состояниями.
+- OpenAPI-клиент отправляет credential cookie, добавляет Bearer token и после `401` выполняет один общий refresh для параллельных запросов с однократным повтором исходного запроса; auth-ручки исключены из retry-цикла.
+- Login сохраняет выданный access token, а logout вызывает backend, очищает локальную сессию и весь React Query cache даже при ошибке запроса.
+- Добавлены unit-тесты refresh/retry flow и Storybook-состояния `AppShellView`; trigger `Select` получил доступное имя без визуального изменения.
+- Login mutation переведена на типизированный `POST /api/v1/auth/login` через OpenAPI-клиент: payload использует `SchemaLoginDto`, успешный результат возвращает `SchemaAccessTokenResponseDto`, а HTTP-ошибки отклоняются до внедрения общего API middleware.
 - Состояние истёкшей ссылки подтверждения email приведено к desktop- и mobile-макетам Figma; на мобильном экране сохранено поле email и разрешён вертикальный скролл без перекрытия элементов.
 - После успешной повторной отправки expired-экран остаётся открытым, а результат показывается общей `EmailSentModal` с введённым адресом, кнопкой `OK` и закрытием по крестику или backdrop.
 - Дублирующая `SignUpSuccessModal` удалена: регистрация использует `entities/auth/EmailSentModal` через публичный API, сохраняя запрет закрытия по backdrop с помощью `disablePointerDismissal`.
@@ -15,6 +34,11 @@
 
 #### Verification
 
+- `pnpm exec vitest run --project unit` прошёл успешно: 15 файлов, 73 теста.
+- `pnpm exec tsc --noEmit` и `pnpm build` прошли успешно.
+- Focused ESLint и Stylelint для изменённых auth/session/app-shell файлов прошли; общий `pnpm lint` не прошёл из-за существующей сортировки экспортов в public API `alert`, `icon`, `select` и `navigation`.
+- Все Storybook stories прошли функциональные тесты; focused a11y-проверка нового shell сохраняет существующее нарушение контраста primary-кнопки `Sign up`, визуальные стили не изменялись.
+- `pnpm exec eslint src/features/sign-in/api/useLoginMutation.ts` прошёл успешно.
 - ESLint прошёл для обновлённых auth, sign-up, confirm-email и password-recovery компонентов и stories.
 - `pnpm exec stylelint src/pages/confirm-email/ui/ConfirmEmailView.module.css src/entities/auth/ui/EmailSentModal.module.css` прошёл успешно.
 - Focused Storybook-проверка `EmailSentModal`, `SignUpForm`, `ConfirmEmailView` и `PasswordRecoveryExpiredLink` прошла успешно: 4 файла, 9 тестов.

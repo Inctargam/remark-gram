@@ -1,9 +1,14 @@
 import createClient from 'openapi-fetch'
 
+import { createAuthMiddleware, createRefreshAccessToken } from '../auth'
+import { API_BASE_URL } from './config'
 import type { paths } from './schema'
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? ''
 
 export const apiClient = createClient<paths>({
   baseUrl: API_BASE_URL,
+  credentials: 'include',
 })
+
+export const refreshAccessToken = createRefreshAccessToken(apiClient)
+
+apiClient.use(createAuthMiddleware({ refreshAccessToken }))

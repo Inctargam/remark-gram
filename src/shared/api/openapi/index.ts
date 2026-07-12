@@ -1,1 +1,1 @@
-export { apiClient } from './client'
+export { apiClient, refreshAccessToken } from './client'
