@@ -4,17 +4,33 @@
 
 ## Unreleased
 
+### 2026-07-14
+
+#### Auth
+
+- Управление восстановлением сессии перенесено из `shared/api/auth` в целевой сегмент `shared/auth` и переименовано в `refreshSession`; OpenAPI-клиент теперь отвечает только за транспорт.
+- Устаревший каталог `src/shared/api/auth` удалён, а app bootstrap получает store и операцию восстановления сессии через единый публичный API `shared/auth`.
+
+#### Verification
+
+- `pnpm exec vitest run --project unit` прошёл успешно: 14 файлов, 69 тестов.
+- `pnpm exec tsc --noEmit` прошёл успешно.
+- Focused ESLint для изменённых auth/API/app файлов прошёл успешно.
+- Storybook tests не запускались, потому что UI и stories не изменялись.
+
 ### 2026-07-13
 
 #### Auth
 
-- Auth transport переведён на middleware единственного OpenAPI-клиента: Bearer добавляется только при наличии access token, `401` запускает один общий refresh и один retry, а refresh/logout используют тот же типизированный client с опцией `auth: false`.
-- Фабрики middleware и refresh-flow получают зависимости при сборке клиента, поэтому циклические импорты и второй raw client не требуются.
+- Автоматическое добавление Bearer token и повтор запросов после `401` отложены до интеграции первого защищённого endpoint, чтобы не поддерживать невостребованный replay-flow заранее.
+- OpenAPI-клиент пока отвечает только за типизированные запросы и отправку credential cookie; стартовый refresh сохраняет защиту от параллельных вызовов через общий promise.
 
 #### Verification
 
-- `pnpm exec vitest run --project unit` прошёл успешно: 15 файлов, 73 теста.
-- `pnpm exec tsc --noEmit` и focused ESLint для auth/API файлов прошли успешно.
+- `pnpm exec vitest run --project unit` прошёл успешно: 14 файлов, 69 тестов.
+- `pnpm exec tsc --noEmit` прошёл успешно.
+- Focused ESLint для изменённых auth/API файлов прошёл успешно.
+- Storybook tests не запускались, потому что UI и stories не изменялись.
 
 ### 2026-07-12
 

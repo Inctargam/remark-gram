@@ -4,8 +4,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
 import { useEffect } from 'react'
 
-import { refreshAccessToken } from '@/shared/api/openapi'
-import { sessionStore } from '@/shared/auth'
+import { refreshSession, sessionStore } from '@/shared/auth'
 
 type Props = {
   children: ReactNode
@@ -22,7 +21,7 @@ export const SessionBootstrap = ({ children }: Props) => {
       }
     })
 
-    void refreshAccessToken()
+    void refreshSession()
 
     return unsubscribe
   }, [queryClient])

@@ -5,7 +5,7 @@ import { sessionStore } from '@/shared/auth'
 
 export const logout = async () => {
   try {
-    await apiClient.POST('/api/v1/auth/logout', { auth: false })
+    await apiClient.POST('/api/v1/auth/logout')
   } catch {
     // Local logout must finish even when the backend cannot revoke the refresh session.
   } finally {

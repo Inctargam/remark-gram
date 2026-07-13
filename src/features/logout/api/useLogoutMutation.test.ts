@@ -17,7 +17,7 @@ describe('logout', () => {
     const postMock = vi.spyOn(apiClient, 'POST').mockRejectedValue(logoutError)
 
     await expect(logout()).resolves.toBeUndefined()
-    expect(postMock).toHaveBeenCalledWith('/api/v1/auth/logout', { auth: false })
+    expect(postMock).toHaveBeenCalledWith('/api/v1/auth/logout')
     expect(sessionStore.getState()).toMatchObject({ accessToken: null, status: 'guest' })
   })
 })

@@ -1,18 +1,18 @@
 import type { Client } from 'openapi-fetch'
 
+import { apiClient } from '@/shared/api/openapi'
 import type { paths } from '@/shared/api/openapi/schema'
-import { sessionStore } from '@/shared/auth'
 
-type ApiClient = Pick<Client<paths>, 'POST'>
+import { sessionStore } from './sessionStore'
 
-export const createRefreshAccessToken = (apiClient: ApiClient) => {
+type SessionApiClient = Pick<Client<paths>, 'POST'>
+
+export const createRefreshSession = (client: SessionApiClient) => {
   let refreshPromise: Promise<string | null> | null = null
 
   const requestAccessToken = async (): Promise<string | null> => {
     try {
-      const { data, response } = await apiClient.POST('/api/v1/auth/refresh-token', {
-        auth: false,
-      })
+      const { data, response } = await client.POST('/api/v1/auth/refresh-token')
 
       if (!response.ok || !data?.accessToken) {
         // TODO(auth-error-state): Distinguish an invalid session from network and backend failures.
@@ -44,3 +44,5 @@ export const createRefreshAccessToken = (apiClient: ApiClient) => {
     return refreshPromise
   }
 }
+
+export const refreshSession = createRefreshSession(apiClient)
