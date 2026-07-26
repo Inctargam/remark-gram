@@ -7,10 +7,20 @@ type Props = {
   email?: string | null
   onOpenChange: (open: boolean) => void
   open: boolean
+  disablePointerDismissal?: boolean
 }
 
-export const EmailSentModal = ({ email, onOpenChange, open }: Props) => (
-  <Modal open={open} onOpenChange={onOpenChange} title="Email sent">
+export const EmailSentModal = ({
+  email,
+  onOpenChange,
+  open,
+  disablePointerDismissal = false,
+}: Props) => (
+  <Modal
+    open={open}
+    onOpenChange={onOpenChange}
+    title="Email sent"
+    disablePointerDismissal={disablePointerDismissal}>
     <p className={styles.text}>We have sent a link to confirm your email to {email}</p>
     <div className={styles.actions}>
       <Button onClick={() => onOpenChange(false)} type="button">
