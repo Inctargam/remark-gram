@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import type {
   CreatePostAspectId,
@@ -66,13 +66,18 @@ const CreatePostFlowStory = ({
   )
   const [selectedPhotoId, setSelectedPhotoId] = useState(photos[0]?.id ?? null)
   const [description, setDescription] = useState(initialDescription)
+  const photosRef = useRef(photos)
   const selectedPhoto = photos.find(({ id }) => id === selectedPhotoId) ?? photos[0] ?? null
+
+  useEffect(() => {
+    photosRef.current = photos
+  }, [photos])
 
   useEffect(
     () => () => {
-      photos.forEach(({ previewUrl }) => URL.revokeObjectURL(previewUrl))
+      photosRef.current.forEach(({ previewUrl }) => URL.revokeObjectURL(previewUrl))
     },
-    [photos]
+    []
   )
 
   const updateSelectedPhotoHandler = (updatePhoto: (photo: CreatePostPhoto) => CreatePostPhoto) => {

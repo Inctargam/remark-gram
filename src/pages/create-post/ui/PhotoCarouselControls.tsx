@@ -1,3 +1,5 @@
+import clsx from 'clsx'
+
 import { Icon } from '@/shared/ui/icon'
 
 import type { CreatePostPhoto } from '../model/createPostFile'
@@ -23,7 +25,7 @@ export const PhotoCarouselControls = ({ photos, selectedPhotoId, onPhotoSelect }
     <>
       {previousPhoto && (
         <button
-          className={`${styles.carouselArrowButton} ${styles.carouselArrowButtonPrevious}`}
+          className={clsx(styles.carouselArrowButton, styles.carouselArrowButtonPrevious)}
           type="button"
           aria-label="Show previous photo"
           onClick={() => onPhotoSelect(previousPhoto.id)}>
@@ -33,7 +35,7 @@ export const PhotoCarouselControls = ({ photos, selectedPhotoId, onPhotoSelect }
 
       {nextPhoto && (
         <button
-          className={`${styles.carouselArrowButton} ${styles.carouselArrowButtonNext}`}
+          className={clsx(styles.carouselArrowButton, styles.carouselArrowButtonNext)}
           type="button"
           aria-label="Show next photo"
           onClick={() => onPhotoSelect(nextPhoto.id)}>

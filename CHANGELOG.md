@@ -4,6 +4,19 @@
 
 ## Unreleased
 
+### 2026-07-28
+
+#### Create Post
+
+- В carousel controls create-post заменена ручная склейка CSS module classes на `clsx`, чтобы соответствовать принятому паттерну условных className.
+- В Storybook story create-post flow исправлен cleanup object URL: preview URL больше не отзываются при каждом изменении состояния story и очищаются при unmount.
+
+#### Verification
+
+- `pnpm exec eslint src/pages/create-post/ui/PhotoCarouselControls.tsx src/pages/create-post/ui/CreatePostFlow.stories.tsx` прошёл успешно.
+- `pnpm exec vitest run src/pages/create-post` прошёл успешно: 7 файлов, 22 теста.
+- `pnpm exec vitest run --project storybook src/pages/create-post/ui/CreatePostFlow.stories.tsx src/pages/create-post/ui/CloseCreationConfirm.stories.tsx` прошёл успешно: 2 файла, 7 тестов.
+
 ### 2026-06-29
 
 #### Create Post
