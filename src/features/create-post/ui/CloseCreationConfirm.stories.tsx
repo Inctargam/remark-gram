@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { CloseCreationConfirm } from './CloseCreationConfirm'
 
 const meta = {
-  title: 'pages/CreatePostFlow/CloseCreationConfirm',
+  title: 'features/CreatePostFlow/CloseCreationConfirm',
   component: CloseCreationConfirm,
   tags: ['autodocs'],
   parameters: {

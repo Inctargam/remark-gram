@@ -3,7 +3,7 @@ import type { CSSProperties } from 'react'
 
 import { useEditedPhotoPreview } from '../lib/useEditedPhotoPreview'
 import type { CreatePostPhoto } from '../model/createPostFile'
-import styles from './createPostPage.module.css'
+import styles from './createPost.module.css'
 
 type Props = {
   alt: string

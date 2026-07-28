@@ -12,7 +12,7 @@ import {
   MIN_CREATE_POST_ZOOM,
 } from '../model/createPostCrop'
 import type { CreatePostPhoto } from '../model/createPostFile'
-import styles from './createPostPage.module.css'
+import styles from './createPost.module.css'
 import { SelectedPhotosList } from './SelectedPhotosList'
 
 type Props = {

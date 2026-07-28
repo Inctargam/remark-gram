@@ -8,14 +8,18 @@
 
 #### Create Post
 
+- Create-post wizard перенесён из page slice в `features/create-post`, потому что сценарий будет запускаться не только route `/create`, но и действием `Create` в sidebar.
+- Page slice `pages/create-post` оставлен тонкой композицией route-entry: он задаёт поведение закрытия через `router.replace`, а сам flow опубликован через public API feature.
+- Storybook stories create-post перенесены в feature slice, а CSS module переименован с page-specific имени на `createPost.module.css`.
 - В carousel controls create-post заменена ручная склейка CSS module classes на `clsx`, чтобы соответствовать принятому паттерну условных className.
 - В Storybook story create-post flow исправлен cleanup object URL: preview URL больше не отзываются при каждом изменении состояния story и очищаются при unmount.
 
 #### Verification
 
-- `pnpm exec eslint src/pages/create-post/ui/PhotoCarouselControls.tsx src/pages/create-post/ui/CreatePostFlow.stories.tsx` прошёл успешно.
-- `pnpm exec vitest run src/pages/create-post` прошёл успешно: 7 файлов, 22 теста.
-- `pnpm exec vitest run --project storybook src/pages/create-post/ui/CreatePostFlow.stories.tsx src/pages/create-post/ui/CloseCreationConfirm.stories.tsx` прошёл успешно: 2 файла, 7 тестов.
+- `pnpm exec eslint 'app/(main)/create/page.tsx' src/pages/create-post src/features/create-post` прошёл успешно.
+- `pnpm exec tsc --noEmit` прошёл успешно.
+- `pnpm exec vitest run src/features/create-post` прошёл успешно: 7 файлов, 22 теста.
+- `pnpm exec vitest run --project storybook src/features/create-post/ui/CreatePostFlow.stories.tsx src/features/create-post/ui/CloseCreationConfirm.stories.tsx` прошёл успешно: 2 файла, 7 тестов.
 
 ### 2026-06-29
 

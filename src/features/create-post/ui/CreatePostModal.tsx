@@ -9,7 +9,7 @@ import type {
 import type { CreatePostPhoto } from '../model/createPostFile'
 import type { CreatePostFilterId } from '../model/createPostFilter'
 import { AddPhotoStep } from './AddPhotoStep'
-import styles from './createPostPage.module.css'
+import styles from './createPost.module.css'
 import { CropPhotoStep } from './CropPhotoStep'
 import { FilterPhotoStep } from './FilterPhotoStep'
 import { PublicationStep } from './PublicationStep'

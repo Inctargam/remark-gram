@@ -147,7 +147,7 @@ const CreatePostFlowStory = ({
 }
 
 const meta = {
-  title: 'pages/CreatePostFlow',
+  title: 'features/CreatePostFlow',
   component: CreatePostModal,
   tags: ['autodocs'],
   parameters: {

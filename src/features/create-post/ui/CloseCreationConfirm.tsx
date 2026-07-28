@@ -1,7 +1,7 @@
 import { Button } from '@/shared/ui/button'
 import { Modal } from '@/shared/ui/modal'
 
-import styles from './createPostPage.module.css'
+import styles from './createPost.module.css'
 
 type Props = {
   open: boolean

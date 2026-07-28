@@ -3,7 +3,7 @@ import clsx from 'clsx'
 import { Icon } from '@/shared/ui/icon'
 
 import type { CreatePostPhoto } from '../model/createPostFile'
-import styles from './createPostPage.module.css'
+import styles from './createPost.module.css'
 
 type Props = {
   photos: CreatePostPhoto[]
