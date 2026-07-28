@@ -6,12 +6,12 @@ import type {
   CreatePostCropArea,
   CreatePostImageSize,
   CreatePostPoint,
-} from '../model/createPostCrop'
-import type { CreatePostPhoto } from '../model/createPostFile'
-import { CREATE_POST_FILE_ERROR } from '../model/createPostFile'
-import type { CreatePostFilterId } from '../model/createPostFilter'
-import type { CreatePostStep } from '../model/createPostFlow'
-import { CreatePostModal } from './CreatePostModal'
+} from '../../model/createPostCrop'
+import type { CreatePostPhoto } from '../../model/createPostFile'
+import { CREATE_POST_FILE_ERROR } from '../../model/createPostFile'
+import type { CreatePostFilterId } from '../../model/createPostFilter'
+import type { CreatePostStep } from '../../model/createPostFlow'
+import { CreatePostModal } from '../CreatePostModal'
 
 type StoryState = {
   description?: string

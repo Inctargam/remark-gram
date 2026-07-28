@@ -6,9 +6,9 @@ import { TextArea } from '@/shared/ui/textarea'
 import {
   CREATE_POST_DESCRIPTION_MAX_LENGTH,
   normalizeCreatePostDescription,
-} from '../model/createPostDescription'
-import type { CreatePostPhoto } from '../model/createPostFile'
-import styles from './createPost.module.css'
+} from '../../model/createPostDescription'
+import type { CreatePostPhoto } from '../../model/createPostFile'
+import styles from '../createPost.module.css'
 import { EditedPhotoPreview } from './EditedPhotoPreview'
 import { PhotoCarouselControls } from './PhotoCarouselControls'
 

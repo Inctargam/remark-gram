@@ -1,9 +1,9 @@
 import Image from 'next/image'
 import type { CSSProperties } from 'react'
 
-import { useEditedPhotoPreview } from '../lib/useEditedPhotoPreview'
-import type { CreatePostPhoto } from '../model/createPostFile'
-import styles from './createPost.module.css'
+import { useEditedPhotoPreview } from '../../lib/useEditedPhotoPreview'
+import type { CreatePostPhoto } from '../../model/createPostFile'
+import styles from '../createPost.module.css'
 
 type Props = {
   alt: string

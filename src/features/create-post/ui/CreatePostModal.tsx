@@ -8,11 +8,11 @@ import type {
 } from '../model/createPostCrop'
 import type { CreatePostPhoto } from '../model/createPostFile'
 import type { CreatePostFilterId } from '../model/createPostFilter'
-import { AddPhotoStep } from './AddPhotoStep'
+import { AddPhotoStep } from './add-photo/AddPhotoStep'
 import styles from './createPost.module.css'
-import { CropPhotoStep } from './CropPhotoStep'
-import { FilterPhotoStep } from './FilterPhotoStep'
-import { PublicationStep } from './PublicationStep'
+import { CropPhotoStep } from './crop-photo/CropPhotoStep'
+import { FilterPhotoStep } from './filter-photo/FilterPhotoStep'
+import { PublicationStep } from './publication/PublicationStep'
 
 type Props = {
   description: string

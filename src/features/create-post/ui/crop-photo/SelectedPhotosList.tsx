@@ -1,7 +1,7 @@
 import Image from 'next/image'
 
-import type { CreatePostPhoto } from '../model/createPostFile'
-import styles from './createPost.module.css'
+import type { CreatePostPhoto } from '../../model/createPostFile'
+import styles from '../createPost.module.css'
 
 type Props = {
   photos: CreatePostPhoto[]

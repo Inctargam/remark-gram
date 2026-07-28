@@ -2,11 +2,11 @@ import Image from 'next/image'
 
 import { Button } from '@/shared/ui/button'
 
-import type { CreatePostPhoto } from '../model/createPostFile'
-import { CREATE_POST_FILTERS, type CreatePostFilterId } from '../model/createPostFilter'
-import styles from './createPost.module.css'
-import { EditedPhotoPreview } from './EditedPhotoPreview'
-import { PhotoCarouselControls } from './PhotoCarouselControls'
+import type { CreatePostPhoto } from '../../model/createPostFile'
+import { CREATE_POST_FILTERS, type CreatePostFilterId } from '../../model/createPostFilter'
+import styles from '../createPost.module.css'
+import { EditedPhotoPreview } from '../publication/EditedPhotoPreview'
+import { PhotoCarouselControls } from '../publication/PhotoCarouselControls'
 
 type Props = {
   photos: CreatePostPhoto[]

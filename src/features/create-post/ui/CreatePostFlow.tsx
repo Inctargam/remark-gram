@@ -3,7 +3,7 @@
 import { useState } from 'react'
 
 import { useCreatePostFlow } from '../model/useCreatePostFlow'
-import { CloseCreationConfirm } from './CloseCreationConfirm'
+import { CloseCreationConfirm } from './close-creation/CloseCreationConfirm'
 import { CreatePostModal } from './CreatePostModal'
 
 type Props = {

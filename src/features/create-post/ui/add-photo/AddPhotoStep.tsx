@@ -4,7 +4,7 @@ import { useRef } from 'react'
 import { Button } from '@/shared/ui/button'
 import { Icon } from '@/shared/ui/icon'
 
-import styles from './createPost.module.css'
+import styles from '../createPost.module.css'
 
 type Props = {
   hasDraft: boolean
