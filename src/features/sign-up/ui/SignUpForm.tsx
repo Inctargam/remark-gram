@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { Controller } from 'react-hook-form'
 
-import { EMAIL_RULES, PASSWORD_CREATION_RULES } from '@/entities/auth'
+import { EMAIL_RULES, EmailSentModal, PASSWORD_CREATION_RULES } from '@/entities/auth'
 import { getOAuthAuthorizeEndpoint } from '@/features/oauth-sign-in'
 import { ROUTES } from '@/shared/config'
 import { Button } from '@/shared/ui/button'
@@ -15,7 +15,6 @@ import { Input } from '@/shared/ui/input'
 import { useSignUpForm } from '../model/useSignUpForm'
 import { PASSWORD_CONFIRMATION_RULES, USERNAME_RULES } from '../model/validationRules'
 import styles from './SignUpForm.module.css'
-import { SignUpSuccessModal } from './SignUpSuccessModal'
 
 export const SignUpForm = () => {
   const {
@@ -119,10 +118,15 @@ export const SignUpForm = () => {
           </Link>
         </div>
       </form>
-      <SignUpSuccessModal
+      <EmailSentModal
         open={isSuccessModalOpen}
         email={registeredEmail}
-        onClose={closeModalHandler}
+        onOpenChange={(open) => {
+          if (!open) {
+            closeModalHandler()
+          }
+        }}
+        disablePointerDismissal
       />
     </Card>
   )

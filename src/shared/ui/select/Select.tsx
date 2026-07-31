@@ -35,7 +35,7 @@ export const Select = <T extends string | number = string>({
       {label && <label className={styles.label}>{label}</label>}
 
       <BaseSelect.Root {...rootProps}>
-        <BaseSelect.Trigger className={styles.trigger}>
+        <BaseSelect.Trigger className={styles.trigger} aria-label={label ?? placeholder}>
           <BaseSelect.Value className={styles.value} placeholder={placeholder} />
           <BaseSelect.Icon className={styles.icon}>
             <Icon iconId="icon-arrow-ios-down-outline" width={16} height={16} />

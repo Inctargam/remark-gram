@@ -22,9 +22,10 @@ const meta = {
     resendEmail: '',
     resendError: '',
     isResendPending: false,
-    isResendSuccess: false,
+    isResendModalOpen: false,
     onResendEmailChange: fn(),
     onResend: fn(),
+    onResendModalOpenChange: fn(),
   },
 } satisfies Meta<typeof ConfirmEmailView>
 
@@ -59,6 +60,7 @@ export const ExpiredWithError: Story = {
 export const ResendSuccess: Story = {
   args: {
     status: 'expired',
-    isResendSuccess: true,
+    isResendModalOpen: true,
+    resendEmail: 'epam@epam.com',
   },
 }

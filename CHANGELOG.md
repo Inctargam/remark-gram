@@ -88,6 +88,103 @@
 - `pnpm exec tsc --noEmit` прошёл успешно.
 - `pnpm build` был остановлен вручную после длительного зависания на этапе `Creating an optimized production build ...` без вывода ошибок.
 - Storybook tests не запускались, потому что stories не изменялись и Storybook MCP tools недоступны в текущей сессии.
+### 2026-07-14
+
+#### Auth
+
+- Управление восстановлением сессии перенесено из `shared/api/auth` в целевой сегмент `shared/auth` и переименовано в `refreshSession`; OpenAPI-клиент теперь отвечает только за транспорт.
+- Устаревший каталог `src/shared/api/auth` удалён, а app bootstrap получает store и операцию восстановления сессии через единый публичный API `shared/auth`.
+
+#### Verification
+
+- `pnpm exec vitest run --project unit` прошёл успешно: 14 файлов, 69 тестов.
+- `pnpm exec tsc --noEmit` прошёл успешно.
+- Focused ESLint для изменённых auth/API/app файлов прошёл успешно.
+- Storybook tests не запускались, потому что UI и stories не изменялись.
+
+### 2026-07-13
+
+#### Auth
+
+- Автоматическое добавление Bearer token и повтор запросов после `401` отложены до интеграции первого защищённого endpoint, чтобы не поддерживать невостребованный replay-flow заранее.
+- OpenAPI-клиент пока отвечает только за типизированные запросы и отправку credential cookie; стартовый refresh сохраняет защиту от параллельных вызовов через общий promise.
+
+#### Verification
+
+- `pnpm exec vitest run --project unit` прошёл успешно: 14 файлов, 69 тестов.
+- `pnpm exec tsc --noEmit` прошёл успешно.
+- Focused ESLint для изменённых auth/API файлов прошёл успешно.
+- Storybook tests не запускались, потому что UI и stories не изменялись.
+
+### 2026-07-12
+
+#### Auth
+
+- Самописное memory-хранилище access token и React Context заменены на единый vanilla Zustand store в `shared/auth`; стартовый refresh и очистка TanStack Query cache вынесены в `SessionBootstrap` уровня `app`.
+- Добавлена зафиксированная зависимость `zustand` версии `5.0.14` без persist и devtools middleware; access token по-прежнему хранится только в памяти вкладки.
+- Авторизация переведена с layout-мока на клиентскую сессию: при загрузке выполняется `POST /api/v1/auth/refresh-token`, access token хранится только в памяти, а shell переключается между loading, authenticated и guest состояниями.
+- OpenAPI-клиент отправляет credential cookie, добавляет Bearer token и после `401` выполняет один общий refresh для параллельных запросов с однократным повтором исходного запроса; auth-ручки исключены из retry-цикла.
+- Login сохраняет выданный access token, а logout вызывает backend, очищает локальную сессию и весь React Query cache даже при ошибке запроса.
+- Добавлены unit-тесты refresh/retry flow и Storybook-состояния `AppShellView`; trigger `Select` получил доступное имя без визуального изменения.
+- Login mutation переведена на типизированный `POST /api/v1/auth/login` через OpenAPI-клиент: payload использует `SchemaLoginDto`, успешный результат возвращает `SchemaAccessTokenResponseDto`, а HTTP-ошибки отклоняются до внедрения общего API middleware.
+- Состояние истёкшей ссылки подтверждения email приведено к desktop- и mobile-макетам Figma; на мобильном экране сохранено поле email и разрешён вертикальный скролл без перекрытия элементов.
+- После успешной повторной отправки expired-экран остаётся открытым, а результат показывается общей `EmailSentModal` с введённым адресом, кнопкой `OK` и закрытием по крестику или backdrop.
+- Дублирующая `SignUpSuccessModal` удалена: регистрация использует `entities/auth/EmailSentModal` через публичный API, сохраняя запрет закрытия по backdrop с помощью `disablePointerDismissal`.
+- Общая иллюстрация `timeManagementRafiki.png` перенесена из feature-слайса восстановления пароля в `src/shared/assets` для корректного переиспользования независимыми FSD-слайсами.
+
+#### Verification
+
+- `pnpm exec vitest run --project unit` прошёл успешно: 15 файлов, 73 теста.
+- `pnpm exec tsc --noEmit` и `pnpm build` прошли успешно.
+- Focused ESLint и Stylelint для изменённых auth/session/app-shell файлов прошли; общий `pnpm lint` не прошёл из-за существующей сортировки экспортов в public API `alert`, `icon`, `select` и `navigation`.
+- Все Storybook stories прошли функциональные тесты; focused a11y-проверка нового shell сохраняет существующее нарушение контраста primary-кнопки `Sign up`, визуальные стили не изменялись.
+- `pnpm exec eslint src/features/sign-in/api/useLoginMutation.ts` прошёл успешно.
+- ESLint прошёл для обновлённых auth, sign-up, confirm-email и password-recovery компонентов и stories.
+- `pnpm exec stylelint src/pages/confirm-email/ui/ConfirmEmailView.module.css src/entities/auth/ui/EmailSentModal.module.css` прошёл успешно.
+- Focused Storybook-проверка `EmailSentModal`, `SignUpForm`, `ConfirmEmailView` и `PasswordRecoveryExpiredLink` прошла успешно: 4 файла, 9 тестов.
+- `pnpm exec next typegen` успешно обновил типы маршрутов после удаления устаревших route-файлов.
+- `pnpm exec tsc --noEmit` прошёл успешно.
+
+### 2026-07-11
+
+#### Auth
+
+- Успешное состояние подтверждения email приведено к desktop- и mobile-макетам Figma: добавлены адаптивная композиция, точные размеры и интервалы, полноширинная мобильная кнопка и центрирование на широких экранах.
+- Иллюстрация успешного подтверждения экспортирована из Figma в SVG и хранится локально в `assets` page-slice `confirm-email`; для изображения задано доступное текстовое описание.
+- Подтверждение регистрации переведено на типизированный `POST /api/v1/auth/registration/confirmation` через OpenAPI-клиент и TanStack Query mutation.
+- API-сценарий подтверждения хранится в локальном `api` page-slice `confirm-email`; страница автоматически отправляет полученный из URL код один раз и сохраняет прежние состояния интерфейса.
+- В mutation временно добавлено отклонение неуспешных HTTP-ответов до внедрения централизованной обработки ошибок в OpenAPI-клиенте.
+- Повторная отправка письма подтверждения хранится рядом с подтверждением в `src/pages/confirm-email/api` и использует типизированный `POST /api/v1/auth/registration/resend-confirmation` без устаревшего `baseUrl`.
+- Временная нормализация OpenAPI-ошибок регистрации, подтверждения и повторной отправки помечена единым `TODO(api-error-middleware)` для удаления после внедрения middleware.
+- Frontend-маршрут подтверждения регистрации приведён к backend-контракту `/auth/registration/confirmation`; старый моковый маршрут `/confirm-email` удалён без redirect.
+
+#### Verification
+
+- `pnpm exec eslint src/pages/confirm-email/ui/ConfirmEmailView.tsx` прошёл успешно.
+- `pnpm exec stylelint src/pages/confirm-email/ui/ConfirmEmailView.module.css` прошёл успешно.
+- `pnpm exec vitest run --project storybook src/pages/confirm-email/ui/ConfirmEmailView.stories.tsx` прошёл успешно: 1 файл, 5 тестов.
+- `pnpm exec tsc --noEmit` не прошёл из-за устаревших `.next/types`, которые ссылаются на уже удалённые route-файлы `registration-confirmation` и `resend-registration-email`; изменённый UI новых TypeScript-ошибок не добавил.
+- `pnpm exec next typegen` успешно обновил типы маршрутов.
+- `pnpm exec eslint src/pages/confirm-email` прошёл успешно после переноса API-хуков в page-slice.
+- Проверка ESLint для затронутой регистрации завершилась без ошибок; сохранено существующее предупреждение React Compiler о `watch()` из React Hook Form.
+- `pnpm exec tsc --noEmit` прошёл успешно.
+- Storybook tests не запускались, потому что UI-компоненты и stories не изменялись, а замена API transport ими не покрывается.
+
+### 2026-07-09
+
+#### Shared API
+
+- Подключены `openapi-fetch` и `openapi-typescript` для постепенного перехода к типизированному OpenAPI-клиенту без изменения текущего `baseApi`.
+- Добавлена базовая OpenAPI-точка входа `src/shared/api/openapi` и команда `pnpm api:generate`, которая генерирует типы из backend OpenAPI-контракта.
+- Добавлена временная команда `pnpm api:generate:insecure` для локальной генерации типов при проблемном учебном TLS-сертификате backend; после настройки доверенного сертификата ее можно удалить из `package.json`.
+- Удалена временная локальная OpenAPI-заглушка `openapi/schema.yaml`, чтобы единственным источником типов был backend-контракт.
+
+#### Verification
+
+- `pnpm api:generate:insecure` прошел успешно локально после временного отключения проверки TLS-сертификата.
+- `pnpm exec tsc --noEmit` прошел успешно.
+- `pnpm exec eslint src/shared/api/openapi/client.ts src/shared/api/openapi/index.ts` прошел успешно.
+- Storybook tests не запускались, потому что UI и stories не изменялись.
 
 ### 2026-06-21
 

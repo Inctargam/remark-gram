@@ -4,11 +4,13 @@
   "private": true,
   "packageManager": "pnpm@10.24.0",
   "scripts": {
-    "dev": "next dev --hostname dev.remarkgram.com --port 3000 --experimental-https",
+    "dev": "next dev --hostname dev.remark-gram.com --port 3000 --experimental-https",
     "build": "next build",
     "build:production": "pnpm build",
     "start": "next start",
     "lint": "eslint",
+    "api:generate": "openapi-typescript https://remark-gram.com/api/v1/docs-json -o ./src/shared/api/openapi/schema.d.ts --root-types",
+    "api:generate:insecure": "powershell -ExecutionPolicy Bypass -Command \"$env:NODE_TLS_REJECT_UNAUTHORIZED='0'; pnpm.cmd exec openapi-typescript https://remark-gram.com/api/v1/docs-json -o ./src/shared/api/openapi/schema.d.ts --root-types\"",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
@@ -17,10 +19,12 @@
     "@tanstack/react-query": "5.100.13",
     "clsx": "2.1.1",
     "next": "16.2.6",
+    "openapi-fetch": "0.17.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-easy-crop": "6.0.2",
-    "react-hook-form": "7.76.1"
+    "react-hook-form": "7.76.1",
+    "zustand": "5.0.14"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "5.2.1",
@@ -42,6 +46,7 @@
     "eslint-plugin-prettier": "5.5.5",
     "eslint-plugin-simple-import-sort": "13.0.0",
     "eslint-plugin-storybook": "10.4.1",
+    "openapi-typescript": "7.13.0",
     "playwright": "1.60.0",
     "prettier": "3.8.3",
     "storybook": "10.4.1",
