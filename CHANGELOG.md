@@ -4,6 +4,90 @@
 
 ## Unreleased
 
+### 2026-07-28
+
+#### Create Post
+
+- Create-post wizard перенесён из page slice в `features/create-post`, потому что сценарий будет запускаться не только route `/create`, но и действием `Create` в sidebar.
+- Page slice `pages/create-post` оставлен тонкой композицией route-entry: он задаёт поведение закрытия через `router.replace`, а сам flow опубликован через public API feature.
+- UI create-post feature сгруппирован по шагам wizard: `add-photo`, `crop-photo`, `filter-photo`, `publication`, `close-creation` и `stories`; корневой `ui` оставлен для orchestration-компонентов.
+- Storybook stories create-post перенесены в feature slice, а CSS module переименован с page-specific имени на `createPost.module.css`.
+- В carousel controls create-post заменена ручная склейка CSS module classes на `clsx`, чтобы соответствовать принятому паттерну условных className.
+- В Storybook story create-post flow исправлен cleanup object URL: preview URL больше не отзываются при каждом изменении состояния story и очищаются при unmount.
+
+#### Verification
+
+- `pnpm exec eslint 'app/(main)/create/page.tsx' src/pages/create-post src/features/create-post` прошёл успешно.
+- `pnpm exec tsc --noEmit` прошёл успешно.
+- `pnpm exec vitest run src/features/create-post` прошёл успешно: 7 файлов, 22 теста.
+- `pnpm exec vitest run --project storybook src/features/create-post/ui/stories/CreatePostFlow.stories.tsx src/features/create-post/ui/close-creation/CloseCreationConfirm.stories.tsx` прошёл успешно: 2 файла, 7 тестов.
+
+### 2026-06-29
+
+#### Create Post
+
+- Добавлены Storybook stories для ключевых состояний create-post wizard: пустая загрузка, ошибка валидации, crop для одного и нескольких фото, filters, publication и отдельная story для confirm закрытия.
+- Для create-post modal stories отключён inline-render в Storybook Docs, чтобы открытые fixed-модалки рендерились в iframe и не накладывались друг на друга на странице документации.
+- Добавлены unit-тесты in-memory draft model: сохранение, восстановление редактируемого состояния без object URL и очистка черновика.
+
+#### Verification
+
+- `pnpm exec eslint src/pages/create-post/ui/CreatePostFlow.stories.tsx src/pages/create-post/ui/CloseCreationConfirm.stories.tsx src/pages/create-post/model/createPostDraft.test.ts` прошёл успешно.
+- `pnpm exec vitest run --project unit src/pages/create-post/model/createPostDraft.test.ts` прошёл успешно: 1 файл, 3 теста.
+- `pnpm exec vitest run --project storybook src/pages/create-post/ui/CreatePostFlow.stories.tsx src/pages/create-post/ui/CloseCreationConfirm.stories.tsx` прошёл успешно: 2 файла, 7 тестов.
+- Storybook Docs для `pages/CreatePostFlow` визуально проверен на `http://localhost:6006/?path=/docs/pages-createpostflow--docs`: stories рендерятся через iframe, наложений fixed-модалок в основном docs DOM не найдено.
+- `pnpm exec vitest run --project unit` прошёл успешно: 16 файлов, 78 тестов.
+- `pnpm build` прошёл успешно.
+- `pnpm lint` не прошёл из-за существующих несвязанных ошибок сортировки export в `src/shared/ui/alert/index.ts`, `src/shared/ui/icon/index.ts`, `src/shared/ui/select/index.ts`, `src/widgets/navigation/index.ts` и существующих prettier warnings вне изменённых файлов.
+- Storybook MCP tools не были доступны в текущем наборе инструментов Codex; затронутые Storybook tests запущены через `pnpm exec vitest run --project storybook`.
+
+### 2026-06-25
+
+#### Create Post
+
+- В модальный сценарий `Add Photo` добавлен скрытый file input для выбора JPEG/PNG-фотографий с поддержкой multiple upload.
+- Добавлена page-local модель валидации файлов публикации: до 10 фото, JPEG/PNG, размер каждого файла не больше 20 MB.
+- После успешного выбора создаются object URL preview, показывается первое выбранное фото и количество выбранных фото; object URL освобождаются при размонтировании сценария.
+- Для ошибок выбора файла добавлен alert в модалке, включая отдельное сообщение для превышения лимита количества фото.
+- Добавлена pinned-зависимость `react-easy-crop@6.0.2` для настройки обрезки фотографий.
+- После успешной загрузки wizard переходит на шаг `Cropping`, где для каждой фотографии отдельно сохраняются crop position, zoom, aspect ratio и crop area в пикселях.
+- Реализованы cropper, переключатели `1:1`, `4:5`, `16:9`, zoom slider и thumbnail strip для переключения между выбранными фотографиями без потери настроек.
+- В cropper добавлен формат `Original`, который выбран по умолчанию и сохраняет исходное соотношение сторон фотографии без принудительной обрезки.
+- Управление выбранными фотографиями, текущей фотографией, crop-настройками и cleanup object URL вынесено из общего flow-hook в отдельный `useCreatePostPhotos`.
+- Добавлен шаг `Filters`: выбор фильтра сохраняется отдельно для каждой фотографии, preview применяет CSS-filter, а `Back` возвращает пользователя на crop-step.
+- Добавлен шаг `Publication` с preview выбранной фотографии, полем `Description`, ограничением описания до 500 символов и счётчиком символов; `Publish` оставлен неактивным до этапа mock publish.
+- Кнопка `Publish` подключена к TanStack Query mock mutation: перед отправкой фотографии экспортируются через Canvas с учётом crop area и CSS-фильтра, после успешного mock publish форма закрывается с переходом на профиль.
+- Preview на шагах `Filters` и `Publication` строится через тот же Canvas export, что и publish payload, поэтому crop и filter совпадают с итоговым файлом.
+- На шагах `Filters` и `Publication` добавлено переключение между несколькими фотографиями через overlay-стрелки и pagination dots; при одном фото лишняя навигация не отображается.
+- При переходе на шаги `Filters` и `Publication` активная фотография сбрасывается на первую, чтобы каждый этап начинался с начала набора.
+- При закрытии начатого создания публикации показывается confirm: можно сохранить in-memory draft на текущую сессию, восстановить его через `Open Draft` или удалить через `Discard`.
+- Исправлено растягивание фотографии в cropped preview: изображение позиционируется внутри crop area без искажения исходных пропорций.
+- На шагах `Filters` и `Publication` убрана тёмная подложка итогового preview, чтобы область соответствовала размеру обработанной фотографии.
+- На шаге `Cropping` убраны тёмная подложка рабочей области и затемняющий overlay cropper.
+
+#### Verification
+
+- `pnpm exec eslint 'app/(main)/create/page.tsx' src/pages/create-post` прошёл успешно.
+- `pnpm exec vitest run --project unit src/pages/create-post/model/createPostFile.test.ts` прошёл успешно: 1 файл, 7 тестов.
+- `pnpm exec eslint src/pages/create-post` прошёл успешно.
+- `pnpm exec vitest run --project unit src/pages/create-post` прошёл успешно: 4 файла, 12 тестов.
+- `pnpm exec tsc --noEmit` прошёл успешно.
+- `pnpm build` не запускался повторно: на предыдущем этапе команда зависала на `Creating an optimized production build ...` без вывода ошибок.
+- Storybook tests не запускались, потому что stories не изменялись и Storybook MCP tools недоступны в текущей сессии.
+
+### 2026-06-24
+
+#### Create Post
+
+- Добавлен route `/create` с тонким Next.js route-файлом и page-slice `pages/create-post`.
+- Реализован первый экран модального сценария `Add Photo` на существующих shared `Modal`, `Button` и `Icon`: placeholder, кнопка `Select from Computer` и кнопка `Open Draft`.
+
+#### Verification
+
+- `pnpm exec eslint 'app/(main)/create/page.tsx' src/pages/create-post` прошёл успешно.
+- `pnpm exec tsc --noEmit` прошёл успешно.
+- `pnpm build` был остановлен вручную после длительного зависания на этапе `Creating an optimized production build ...` без вывода ошибок.
+- Storybook tests не запускались, потому что stories не изменялись и Storybook MCP tools недоступны в текущей сессии.
 ### 2026-07-14
 
 #### Auth
