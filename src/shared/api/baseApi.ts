@@ -1,4 +1,4 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? ''
+import { API_BASE_URL } from '@/shared/config'
 
 export type ApiErrorData = {
   message: string
@@ -15,7 +15,7 @@ export class ApiError extends Error {
 }
 
 async function apiFetch(path: string, init?: RequestInit): Promise<Response> {
-  const response = await fetch(`${BASE_URL}${path}`, {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
     headers: {
       'Content-Type': 'application/json',
