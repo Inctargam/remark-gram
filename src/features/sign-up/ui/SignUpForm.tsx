@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { Controller } from 'react-hook-form'
 
 import { EMAIL_RULES, EmailSentModal, PASSWORD_CREATION_RULES } from '@/entities/auth'
-import { getOAuthAuthorizeEndpoint } from '@/features/oauth-sign-in'
+import { OAUTH_AUTHORIZE_URLS } from '@/features/oauth-authentication'
 import { ROUTES } from '@/shared/config'
 import { Button } from '@/shared/ui/button'
 import { Card } from '@/shared/ui/card'
@@ -36,7 +36,7 @@ export const SignUpForm = () => {
           <Button
             className={styles.socialButton}
             nativeButton={false}
-            render={<a href={getOAuthAuthorizeEndpoint('google')} />}
+            render={<a href={OAUTH_AUTHORIZE_URLS.google} />}
             variant="text"
             aria-label="Sign up with Google">
             <Icon iconId="icon-google" width={36} height={36} />
@@ -44,7 +44,7 @@ export const SignUpForm = () => {
           <Button
             className={styles.socialButton}
             nativeButton={false}
-            render={<a href={getOAuthAuthorizeEndpoint('github')} />}
+            render={<a href={OAUTH_AUTHORIZE_URLS.github} />}
             variant="text"
             aria-label="Sign up with GitHub">
             <Icon iconId="icon-github" width={36} height={36} />
