@@ -5,6 +5,19 @@
   max-width: 972px;
 }
 
+.thumbnailButton {
+  display: block;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.thumbnailButton:focus-visible {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+}
+
 .skeleton {
   aspect-ratio: 234 / 228;
   border-radius: 2px;

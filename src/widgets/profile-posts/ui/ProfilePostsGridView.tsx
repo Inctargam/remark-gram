@@ -13,6 +13,7 @@ type Props = {
   hasNextPage: boolean
   errorMessage?: string | null
   onLoadMore: () => void
+  onPostSelect: (post: Post) => void
 }
 
 const SKELETON_KEYS = Array.from({ length: PROFILE_POSTS_PAGE_SIZE }, (_, index) => index)
@@ -36,6 +37,7 @@ export const ProfilePostsGridView = ({
   hasNextPage,
   errorMessage = null,
   onLoadMore,
+  onPostSelect,
 }: Props) => {
   const sentinelRef = useInfiniteScroll({ hasNextPage, isFetchingNextPage, onLoadMore })
   const isEmpty = posts.length === 0
@@ -64,7 +66,15 @@ export const ProfilePostsGridView = ({
     <>
       <div className={styles.grid} aria-label="Profile publications">
         {posts.map((post) => (
-          <PostThumbnail key={post.id} post={post} />
+          // The tile is a button, not a link: the post opens in a modal and keeps the URL.
+          // Its accessible name comes from the image alt inside the thumbnail.
+          <button
+            className={styles.thumbnailButton}
+            type="button"
+            key={post.id}
+            onClick={() => onPostSelect(post)}>
+            <PostThumbnail post={post} />
+          </button>
         ))}
         {isFetchingNextPage ? <PostsSkeleton /> : null}
       </div>

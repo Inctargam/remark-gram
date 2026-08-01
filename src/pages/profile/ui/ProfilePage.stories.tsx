@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
-import { expect, within } from 'storybook/test'
+import { expect, screen, userEvent, waitFor, within } from 'storybook/test'
 
 import type { Post, PostsPage } from '@/entities/post'
 import { MOCK_CURRENT_USER_ID } from '@/shared/auth'
@@ -80,6 +80,25 @@ export const OwnProfile: Story = {
     await expect(await canvas.findByAltText('Mock publication 1')).toBeInTheDocument()
     await expect(canvas.getAllByRole('img')).toHaveLength(8)
     await expect(canvas.getByRole('button', { name: 'Profile Settings' })).toBeInTheDocument()
+  },
+}
+
+/** Opening a post keeps the URL: the view is a modal over the profile, not a route. */
+export const OpenPost: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    await userEvent.click(await canvas.findByAltText('Mock publication 2'))
+
+    // The modal renders in a portal, so it is looked up in the whole document.
+    const dialog = await screen.findByRole('dialog')
+
+    await expect(within(dialog).getByText('Mock publication 2')).toBeVisible()
+    await expect(within(dialog).getByText('July 1, 2026')).toBeInTheDocument()
+
+    await userEvent.keyboard('{Escape}')
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
   },
 }
 

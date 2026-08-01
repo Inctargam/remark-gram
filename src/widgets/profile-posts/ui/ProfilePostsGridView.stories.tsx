@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
-import { expect, fn, within } from 'storybook/test'
+import { expect, fn, userEvent, within } from 'storybook/test'
 
 import type { Post } from '@/entities/post'
 
@@ -37,6 +37,7 @@ const meta = {
     isFetchingNextPage: false,
     hasNextPage: false,
     onLoadMore: fn(),
+    onPostSelect: fn(),
   },
 } satisfies Meta<typeof ProfilePostsGridView>
 
@@ -50,6 +51,16 @@ export const Default: Story = {
 
     await expect(canvas.getAllByRole('img')).toHaveLength(8)
     await expect(canvas.getByAltText('Mock publication 1')).toBeInTheDocument()
+  },
+}
+
+export const SelectPost: Story = {
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    await userEvent.click(canvas.getByAltText('Mock publication 3'))
+
+    await expect(args.onPostSelect).toHaveBeenCalledWith(expect.objectContaining({ id: 'post-3' }))
   },
 }
 
