@@ -24,6 +24,14 @@
     color: var(--color-primary-500);
 }
 
+/*
+ * The menu is portalled to the end of the body, so it needs to outrank the dialogs it opens
+ * from (backdrop 100, popup 101) — otherwise a menu inside a modal renders underneath it.
+ */
+.positioner {
+    z-index: 200;
+}
+
 .popup {
     min-width: 160px;
     padding: 6px 0;

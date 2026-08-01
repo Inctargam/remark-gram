@@ -61,7 +61,11 @@ export const DropdownMenu = ({
     </Menu.Trigger>
 
     <Menu.Portal>
-      <Menu.Positioner side={side} align={align} sideOffset={sideOffset}>
+      <Menu.Positioner
+        className={styles.positioner}
+        side={side}
+        align={align}
+        sideOffset={sideOffset}>
         <Menu.Popup className={clsx(styles.popup, className)}>
           {items.map(({ id, label, iconId, onSelect, disabled, danger }) => (
             <Menu.Item
