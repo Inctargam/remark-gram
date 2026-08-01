@@ -52,7 +52,7 @@ describe('getProfilePosts', () => {
       items: [post],
       nextCursor: null,
     })
-    expect(getRequestedUrl()).toContain('/mock/posts?userId=user-1&pageSize=8')
+    expect(getRequestedUrl()).toContain('/api/mock/posts?userId=user-1&pageSize=8')
     expect(getRequestInit().method).toBe('GET')
   })
 
@@ -87,7 +87,7 @@ describe('getPost', () => {
     respondWith(post)
 
     await expect(getPost('post-1')).resolves.toEqual(post)
-    expect(getRequestedUrl()).toContain('/mock/posts/post-1')
+    expect(getRequestedUrl()).toContain('/api/mock/posts/post-1')
   })
 
   it('throws ApiError with the server message on a failed request', async () => {
@@ -103,7 +103,7 @@ describe('createPost', () => {
     respondWith(post, 201)
 
     await expect(createPost({ description: 'New', images: post.images })).resolves.toEqual(post)
-    expect(getRequestedUrl()).toContain('/mock/posts')
+    expect(getRequestedUrl()).toContain('/api/mock/posts')
     expect(getRequestInit().method).toBe('POST')
     expect(getRequestInit().body).toBe(JSON.stringify({ description: 'New', images: post.images }))
   })
@@ -117,7 +117,7 @@ describe('updatePost', () => {
       ...post,
       description: 'Updated',
     })
-    expect(getRequestedUrl()).toContain('/mock/posts/post-1')
+    expect(getRequestedUrl()).toContain('/api/mock/posts/post-1')
     expect(getRequestInit().method).toBe('PATCH')
     expect(getRequestInit().body).toBe(JSON.stringify({ description: 'Updated' }))
   })
@@ -128,7 +128,7 @@ describe('deletePost', () => {
     respondWith(null, 204)
 
     await expect(deletePost('post-1')).resolves.toBeUndefined()
-    expect(getRequestedUrl()).toContain('/mock/posts/post-1')
+    expect(getRequestedUrl()).toContain('/api/mock/posts/post-1')
     expect(getRequestInit().method).toBe('DELETE')
   })
 })
