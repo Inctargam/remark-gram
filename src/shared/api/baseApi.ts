@@ -37,4 +37,10 @@ export const api = {
 
   get: (path: string, init?: Omit<RequestInit, 'method'>) =>
     apiFetch(path, { ...init, method: 'GET' }),
+
+  patch: (path: string, body: unknown, init?: Omit<RequestInit, 'body' | 'method'>) =>
+    apiFetch(path, { ...init, method: 'PATCH', body: JSON.stringify(body) }),
+
+  delete: (path: string, init?: Omit<RequestInit, 'method'>) =>
+    apiFetch(path, { ...init, method: 'DELETE' }),
 }
