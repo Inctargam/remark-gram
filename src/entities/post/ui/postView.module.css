@@ -1,0 +1,197 @@
+.post {
+  display: grid;
+  grid-template-columns: 490px minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+}
+
+.gallery {
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+  background-color: var(--color-dark-900);
+}
+
+.image {
+  object-fit: cover;
+}
+
+.emptyGallery {
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-dark-900);
+}
+
+.arrow {
+  position: absolute;
+  top: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: none;
+  background: var(--color-dark-500);
+  color: var(--color-light-100);
+  opacity: 0.5;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+.arrow:hover {
+  opacity: 0.8;
+}
+
+.arrowPrevious {
+  left: 12px;
+}
+
+.arrowNext {
+  right: 12px;
+}
+
+.dots {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  display: flex;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 2px;
+  background: var(--color-dark-500);
+  transform: translateX(-50%);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--color-light-100);
+  cursor: pointer;
+}
+
+.dot[data-selected] {
+  background: var(--color-primary-500);
+}
+
+.side {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  min-width: 0;
+  border-left: 1px solid var(--color-dark-100);
+}
+
+.author {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  height: 59px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--color-dark-100);
+}
+
+.avatar {
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: var(--color-dark-100);
+}
+
+.avatarImage {
+  object-fit: cover;
+}
+
+.username {
+  overflow: hidden;
+  color: var(--color-light-100);
+  font-size: var(--font-size-bold-16);
+  font-weight: var(--font-weight-bold-16);
+  line-height: var(--line-height-bold-16);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.actions {
+  margin-left: auto;
+}
+
+.content {
+  min-height: 0;
+  padding: 24px;
+}
+
+.description {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin: 0 0 16px;
+}
+
+.descriptionBody {
+  min-width: 0;
+}
+
+.descriptionText {
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--color-light-100);
+  font-size: var(--font-size-regular-14);
+  font-weight: var(--font-weight-regular-14);
+  line-height: var(--line-height-regular-14);
+}
+
+.descriptionAuthor {
+  margin-right: 6px;
+  font-weight: var(--font-weight-bold-14);
+}
+
+.descriptionTime {
+  margin: 4px 0 0;
+  color: var(--color-light-900);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-small);
+  line-height: var(--line-height-small);
+}
+
+.footer {
+  border-top: 1px solid var(--color-dark-100);
+}
+
+.engagement {
+  padding: 12px 24px;
+}
+
+/* Publication date sits under the likes row, above the divider — as in the design. */
+.publishedAt {
+  margin: 8px 0 0;
+  color: var(--color-light-900);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-small);
+  line-height: var(--line-height-small);
+}
+
+.commentForm {
+  padding: 12px 24px;
+  border-top: 1px solid var(--color-dark-100);
+}
+
+@media (max-width: 900px) {
+  .post {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .gallery {
+    height: 280px;
+  }
+
+  .side {
+    border-left: none;
+  }
+}
