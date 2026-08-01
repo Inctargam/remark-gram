@@ -17,7 +17,7 @@ export const BottomBar = ({ className }: Props) => {
 
   return (
     <nav aria-label="Mobile navigation" className={clsx(styles.root, className)}>
-      {BOTTOM_BAR_ITEMS.map(item => (
+      {BOTTOM_BAR_ITEMS.map((item) => (
         <NavLink
           key={item.id}
           className={styles.navItem}
