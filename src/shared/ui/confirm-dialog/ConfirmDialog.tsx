@@ -14,6 +14,10 @@ type Props = {
   message: ReactNode
   confirmLabel?: string
   cancelLabel?: string
+  /** Blocks the confirm button while the confirmed action is still running. */
+  confirmDisabled?: boolean
+  /** Class for the popup — for dialogs whose width differs from the default one. */
+  className?: string
   onConfirm: () => void
   /** Called on cancel button, close icon and any other dismissal. */
   onCancel?: () => void
@@ -33,6 +37,8 @@ export const ConfirmDialog = ({
   message,
   confirmLabel = 'Yes',
   cancelLabel = 'No',
+  confirmDisabled = false,
+  className,
   onConfirm,
   onCancel,
   disablePointerDismissal = true,
@@ -57,13 +63,14 @@ export const ConfirmDialog = ({
 
   return (
     <Modal
+      className={className}
       open={open}
       onOpenChange={openChangeHandler}
       title={title}
       disablePointerDismissal={disablePointerDismissal}>
       <div className={styles.message}>{message}</div>
       <div className={styles.actions}>
-        <Button variant="outline" onClick={confirmHandler}>
+        <Button variant="outline" disabled={confirmDisabled} onClick={confirmHandler}>
           {confirmLabel}
         </Button>
         <Button variant="primary" onClick={cancelHandler}>
