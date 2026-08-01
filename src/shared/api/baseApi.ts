@@ -29,7 +29,8 @@ async function apiFetch(path: string, init?: ApiRequestInit): Promise<Response> 
   const response = await fetch(`${baseUrl}${path}`, {
     ...requestInit,
     headers: {
-      'Content-Type': 'application/json',
+      // Only a request that carries a body describes its type; GET and DELETE send none.
+      ...(requestInit.body === undefined ? null : { 'Content-Type': 'application/json' }),
       ...requestInit.headers,
     },
   })

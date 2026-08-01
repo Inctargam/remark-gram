@@ -39,4 +39,16 @@ describe('api', () => {
     expect(getRequestInit()).not.toHaveProperty('baseUrl')
     expect(getRequestInit().method).toBe('POST')
   })
+
+  it('declares the content type only for requests that carry a body', async () => {
+    await api.post('/api/mock/posts', { description: 'text' }, { baseUrl: '' })
+
+    expect(getRequestInit().headers).toEqual({ 'Content-Type': 'application/json' })
+  })
+
+  it('sends no content type on a request without a body', async () => {
+    await api.delete('/api/mock/posts/post-1', { baseUrl: '' })
+
+    expect(getRequestInit().headers).toEqual({})
+  })
 })

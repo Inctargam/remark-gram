@@ -1,6 +1,5 @@
 'use client'
 
-import Image from 'next/image'
 import type { ReactNode } from 'react'
 
 import { Scroll } from '@/shared/ui/scroll'
@@ -8,6 +7,7 @@ import { Scroll } from '@/shared/ui/scroll'
 import { formatPostDate } from '../lib/formatPostDate'
 import { formatPostRelativeTime } from '../lib/formatPostRelativeTime'
 import type { Post } from '../model/types'
+import { PostAuthor } from './PostAuthor'
 import { PostGallery } from './PostGallery'
 import styles from './postView.module.css'
 import { PostCommentFormStub } from './stubs/PostCommentFormStub'
@@ -29,30 +29,16 @@ export const PostView = ({ post, actions }: Props) => {
 
   return (
     <div className={styles.post}>
-      <PostGallery post={post} />
+      {/* Keyed by post: a different publication must start from its first photo. */}
+      <PostGallery post={post} key={post.id} />
 
       <div className={styles.side}>
-        <div className={styles.author}>
-          <span className={styles.avatar}>
-            {post.ownerAvatarUrl ? (
-              <Image
-                className={styles.avatarImage}
-                src={post.ownerAvatarUrl}
-                alt=""
-                fill
-                sizes="36px"
-                unoptimized
-              />
-            ) : null}
-          </span>
-          <span className={styles.username}>{post.ownerUsername}</span>
-          {actions ? <div className={styles.actions}>{actions}</div> : null}
-        </div>
+        <PostAuthor className={styles.author} post={post} actions={actions} />
 
         <Scroll className={styles.content}>
           {post.description ? (
             <div className={styles.description}>
-              <span className={styles.avatar} aria-hidden="true" />
+              <span className={styles.descriptionAvatar} aria-hidden="true" />
               <div className={styles.descriptionBody}>
                 <p className={styles.descriptionText}>
                   <span className={styles.descriptionAuthor}>{post.ownerUsername}</span>

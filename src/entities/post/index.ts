@@ -9,16 +9,14 @@ export {
 } from './api/postsApi'
 export { postsQueryKeys } from './api/queryKeys'
 export { useProfilePostsQuery } from './api/useProfilePostsQuery'
-export { flattenPostsPages } from './lib/flattenPostsPages'
-export { formatPostDate } from './lib/formatPostDate'
-export { formatPostRelativeTime } from './lib/formatPostRelativeTime'
-export { getPostImageAlt } from './lib/getPostImageAlt'
 export {
   isValidPostDescription,
   normalizePostDescription,
   POST_DESCRIPTION_MAX_LENGTH,
 } from './model/postDescription'
 export type { Post, PostImage, PostsPage } from './model/types'
+export { PostAuthor } from './ui/PostAuthor'
+export { PostDescriptionField } from './ui/PostDescriptionField'
 export { PostGallery } from './ui/PostGallery'
 export { PostThumbnail } from './ui/PostThumbnail'
 export { PostView } from './ui/PostView'

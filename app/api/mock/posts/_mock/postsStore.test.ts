@@ -1,11 +1,12 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 
+import { MOCK_CURRENT_USER_ID } from '@/shared/auth'
+
 import {
   createPost,
   deletePost,
   findPost,
   listPosts,
-  MOCK_CURRENT_USER_ID,
   MOCK_OTHER_USER_ID,
   resetPostsMockStore,
   updatePostDescription,

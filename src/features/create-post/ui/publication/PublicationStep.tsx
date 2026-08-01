@@ -1,8 +1,5 @@
-import type { ChangeEvent } from 'react'
-
-import { normalizePostDescription, POST_DESCRIPTION_MAX_LENGTH } from '@/entities/post'
+import { PostDescriptionField } from '@/entities/post'
 import { Button } from '@/shared/ui/button'
-import { TextArea } from '@/shared/ui/textarea'
 
 import type { CreatePostPhoto } from '../../model/createPostFile'
 import styles from '../createPost.module.css'
@@ -33,52 +30,40 @@ export const PublicationStep = ({
   onDescriptionChange,
   onPhotoSelect,
   onPublish,
-}: Props) => {
-  const descriptionChangeHandler = (event: ChangeEvent<HTMLInputElement>) => {
-    onDescriptionChange(normalizePostDescription(event.currentTarget.value))
-  }
-
-  return (
-    <div className={styles.publicationContent}>
-      <div className={styles.publicationPreviewPanel}>
-        <div className={styles.publicationPreviewFrame}>
-          <EditedPhotoPreview photo={selectedPhoto} alt="Publication preview" />
-          <PhotoCarouselControls
-            photos={photos}
-            selectedPhotoId={selectedPhotoId}
-            onPhotoSelect={onPhotoSelect}
-          />
-        </div>
-      </div>
-
-      <div className={styles.publicationForm}>
-        <TextArea
-          className={styles.descriptionField}
-          label="Description"
-          maxLength={POST_DESCRIPTION_MAX_LENGTH}
-          placeholder="Add publication description"
-          value={description}
-          onChange={descriptionChangeHandler}
+}: Props) => (
+  <div className={styles.publicationContent}>
+    <div className={styles.publicationPreviewPanel}>
+      <div className={styles.publicationPreviewFrame}>
+        <EditedPhotoPreview photo={selectedPhoto} alt="Publication preview" />
+        <PhotoCarouselControls
+          photos={photos}
+          selectedPhotoId={selectedPhotoId}
+          onPhotoSelect={onPhotoSelect}
         />
-        <p className={styles.descriptionCounter}>
-          {description.length}/{POST_DESCRIPTION_MAX_LENGTH}
-        </p>
-
-        {publishError && (
-          <p className={styles.publishError} role="alert">
-            {publishError}
-          </p>
-        )}
-
-        <div className={styles.stepActions}>
-          <Button type="button" variant="outline" disabled={isPublishing} onClick={onBack}>
-            Back
-          </Button>
-          <Button type="button" disabled={isPublishing} onClick={onPublish}>
-            {isPublishing ? 'Publishing...' : 'Publish'}
-          </Button>
-        </div>
       </div>
     </div>
-  )
-}
+
+    <div className={styles.publicationForm}>
+      <PostDescriptionField
+        label="Description"
+        value={description}
+        onChange={onDescriptionChange}
+      />
+
+      {publishError && (
+        <p className={styles.publishError} role="alert">
+          {publishError}
+        </p>
+      )}
+
+      <div className={styles.stepActions}>
+        <Button type="button" variant="outline" disabled={isPublishing} onClick={onBack}>
+          Back
+        </Button>
+        <Button type="button" disabled={isPublishing} onClick={onPublish}>
+          {isPublishing ? 'Publishing...' : 'Publish'}
+        </Button>
+      </div>
+    </div>
+  </div>
+)

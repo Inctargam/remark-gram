@@ -1,9 +1,10 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 
 import type { PostsPage } from '@/entities/post'
+import { MOCK_CURRENT_USER_ID } from '@/shared/auth'
 
 import { createPostHandler, getPostsListHandler } from './postsListHandler'
-import { MOCK_CURRENT_USER_ID, resetPostsMockStore } from './postsStore'
+import { resetPostsMockStore } from './postsStore'
 
 const MOCK_API_ORIGIN = 'https://dev.remark-gram.com:3000/api/mock/posts'
 

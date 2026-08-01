@@ -1,14 +1,11 @@
 'use client'
 
-import Image from 'next/image'
-import type { ChangeEvent } from 'react'
 import { useState } from 'react'
 
 import type { Post } from '@/entities/post'
-import { POST_DESCRIPTION_MAX_LENGTH, PostGallery } from '@/entities/post'
+import { PostAuthor, PostDescriptionField, PostGallery } from '@/entities/post'
 import { Button } from '@/shared/ui/button'
 import { Modal } from '@/shared/ui/modal'
-import { TextArea } from '@/shared/ui/textarea'
 
 import { useUpdatePostMutation } from '../api/useUpdatePostMutation'
 import { preparePostDescription } from '../model/editPostDescription'
@@ -50,10 +47,6 @@ export const EditPostModal = ({ post, open, onOpenChange }: Props) => {
     }
   }
 
-  const textAreaChangeHandler = (event: ChangeEvent<HTMLInputElement>) => {
-    descriptionChangeHandler(event.currentTarget.value)
-  }
-
   const saveHandler = () => {
     mutate(preparePostDescription(description), { onSuccess: () => onOpenChange(false) })
   }
@@ -73,37 +66,19 @@ export const EditPostModal = ({ post, open, onOpenChange }: Props) => {
         // While the confirmation is on screen the form must not react to clicks outside it.
         disablePointerDismissal={isDiscardOpen}>
         <div className={styles.content}>
-          <PostGallery post={post} />
+          {/* Keyed by post: a different publication must start from its first photo. */}
+          <PostGallery post={post} key={post.id} />
 
           <div className={styles.form}>
-            <div className={styles.author}>
-              <span className={styles.avatar}>
-                {post.ownerAvatarUrl ? (
-                  <Image
-                    className={styles.avatarImage}
-                    src={post.ownerAvatarUrl}
-                    alt=""
-                    fill
-                    sizes="36px"
-                    unoptimized
-                  />
-                ) : null}
-              </span>
-              <span className={styles.username}>{post.ownerUsername}</span>
-            </div>
+            <PostAuthor className={styles.author} post={post} />
 
-            <TextArea
+            <PostDescriptionField
               className={styles.descriptionField}
               label="Add publication descriptions"
-              maxLength={POST_DESCRIPTION_MAX_LENGTH}
-              placeholder="Add publication description"
               value={description}
               disabled={isPending}
-              onChange={textAreaChangeHandler}
+              onChange={descriptionChangeHandler}
             />
-            <p className={styles.counter}>
-              {description.length}/{POST_DESCRIPTION_MAX_LENGTH}
-            </p>
 
             {error ? (
               <p className={styles.error} role="alert">

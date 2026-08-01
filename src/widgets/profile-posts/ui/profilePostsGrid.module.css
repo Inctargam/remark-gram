@@ -33,6 +33,15 @@
   line-height: var(--line-height-regular-14);
 }
 
+/* Reason a next page could not be loaded, shown under the posts that did load. */
+.loadMoreError {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  margin-top: 24px;
+}
+
 /* Zero-height probe under the grid: it only reports visibility, it must not add spacing. */
 .sentinel {
   height: 1px;

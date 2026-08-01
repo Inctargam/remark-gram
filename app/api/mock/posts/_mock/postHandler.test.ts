@@ -1,9 +1,10 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 
 import type { Post } from '@/entities/post'
+import { MOCK_CURRENT_USER_ID } from '@/shared/auth'
 
 import { deletePostHandler, getPostHandler, updatePostHandler } from './postHandler'
-import { listPosts, MOCK_CURRENT_USER_ID, resetPostsMockStore } from './postsStore'
+import { listPosts, resetPostsMockStore } from './postsStore'
 
 const createPatchRequest = (payload: unknown, postId: string) =>
   new Request(`https://dev.remark-gram.com:3000/api/mock/posts/${postId}`, {

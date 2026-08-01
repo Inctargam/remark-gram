@@ -2,6 +2,7 @@
 
 import type { Post } from '@/entities/post'
 import { PostThumbnail, PROFILE_POSTS_PAGE_SIZE } from '@/entities/post'
+import { Button } from '@/shared/ui/button'
 
 import { useInfiniteScroll } from '../lib/useInfiniteScroll'
 import styles from './profilePostsGrid.module.css'
@@ -50,16 +51,16 @@ export const ProfilePostsGridView = ({
     )
   }
 
-  if (errorMessage) {
-    return (
+  // With nothing on screen the error is the whole state; with posts already loaded it is
+  // only the failed next page, so the feed must stay and the message goes under it.
+  if (isEmpty) {
+    return errorMessage ? (
       <p className={styles.message} role="alert">
         {errorMessage}
       </p>
+    ) : (
+      <p className={styles.message}>No publications yet.</p>
     )
-  }
-
-  if (isEmpty) {
-    return <p className={styles.message}>No publications yet.</p>
   }
 
   return (
@@ -78,8 +79,21 @@ export const ProfilePostsGridView = ({
         ))}
         {isFetchingNextPage ? <PostsSkeleton /> : null}
       </div>
-      {/* Sentinel stays mounted only while there is something left to load. */}
-      {hasNextPage ? (
+
+      {errorMessage ? (
+        <div className={styles.loadMoreError}>
+          <p className={styles.message} role="alert">
+            {errorMessage}
+          </p>
+          <Button type="button" variant="outline" onClick={onLoadMore}>
+            Try again
+          </Button>
+        </div>
+      ) : null}
+
+      {/* Sentinel stays mounted only while there is something left to load. It is dropped on
+          an error: a visible sentinel would retry the failed page in a loop. */}
+      {hasNextPage && !errorMessage ? (
         <div className={styles.sentinel} ref={sentinelRef} aria-hidden="true" />
       ) : null}
     </>

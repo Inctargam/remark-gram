@@ -1,6 +1,7 @@
+/* The photo column sizes itself — its width lives in `postGallery.module.css`. */
 .post {
   display: grid;
-  grid-template-columns: 490px minmax(0, 1fr);
+  grid-template-columns: auto minmax(0, 1fr);
   height: 100%;
   min-height: 0;
 }
@@ -12,41 +13,11 @@
   border-left: 1px solid var(--color-dark-100);
 }
 
+/* Frame around the shared author row: here it is a fixed-height bar with a divider. */
 .author {
-  display: flex;
-  gap: 12px;
-  align-items: center;
   height: 59px;
   padding: 0 24px;
   border-bottom: 1px solid var(--color-dark-100);
-}
-
-.avatar {
-  position: relative;
-  overflow: hidden;
-  flex-shrink: 0;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background-color: var(--color-dark-100);
-}
-
-.avatarImage {
-  object-fit: cover;
-}
-
-.username {
-  overflow: hidden;
-  color: var(--color-light-100);
-  font-size: var(--font-size-bold-16);
-  font-weight: var(--font-weight-bold-16);
-  line-height: var(--line-height-bold-16);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.actions {
-  margin-left: auto;
 }
 
 .content {
@@ -59,6 +30,15 @@
   gap: 12px;
   align-items: flex-start;
   margin: 0 0 16px;
+}
+
+/* Empty circle that lines the description up with the comments below it. */
+.descriptionAvatar {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: var(--color-dark-100);
 }
 
 .descriptionBody {

@@ -16,6 +16,12 @@ type Props = {
   cancelLabel?: string
   /** Blocks the confirm button while the confirmed action is still running. */
   confirmDisabled?: boolean
+  /**
+   * Whether confirming closes the dialog by itself.
+   * Turn off for an asynchronous action: the dialog has to stay until the request resolves,
+   * otherwise a failure has nowhere to be reported. The owner then closes it on success.
+   */
+  closeOnConfirm?: boolean
   /** Class for the popup — for dialogs whose width differs from the default one. */
   className?: string
   onConfirm: () => void
@@ -38,6 +44,7 @@ export const ConfirmDialog = ({
   confirmLabel = 'Yes',
   cancelLabel = 'No',
   confirmDisabled = false,
+  closeOnConfirm = true,
   className,
   onConfirm,
   onCancel,
@@ -53,7 +60,10 @@ export const ConfirmDialog = ({
 
   const confirmHandler = () => {
     onConfirm()
-    onOpenChange(false)
+
+    if (closeOnConfirm) {
+      onOpenChange(false)
+    }
   }
 
   const cancelHandler = () => {

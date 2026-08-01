@@ -100,6 +100,7 @@ export const Empty: Story = {
   },
 }
 
+/** Nothing loaded yet: the error is the whole state of the grid. */
 export const LoadFailed: Story = {
   args: {
     posts: [],
@@ -111,5 +112,23 @@ export const LoadFailed: Story = {
     await expect(canvas.getByRole('alert')).toHaveTextContent(
       'Failed to load publications. Please try again.'
     )
+  },
+}
+
+/** A failed next page must not take the posts that did load off the screen. */
+export const LoadNextPageFailed: Story = {
+  args: {
+    hasNextPage: true,
+    errorMessage: 'Failed to load publications. Please try again.',
+  },
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    await expect(canvas.getAllByRole('img')).toHaveLength(8)
+    await expect(canvas.getByRole('alert')).toBeVisible()
+
+    await userEvent.click(canvas.getByRole('button', { name: 'Try again' }))
+
+    await expect(args.onLoadMore).toHaveBeenCalledOnce()
   },
 }

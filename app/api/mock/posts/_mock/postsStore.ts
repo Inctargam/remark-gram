@@ -16,14 +16,18 @@ type GlobalWithPostsStore = typeof globalThis & {
   [STORE_KEY]?: PostsStoreState
 }
 
-/** Owner of the seeded profile feed — the same mock id the app treats as the current user. */
-export { MOCK_CURRENT_USER_ID }
+/** A second author, so the feed can prove it filters by owner. */
 export const MOCK_OTHER_USER_ID = 'mock-user-2'
 
+const DEFAULT_USERNAME = 'UserName'
+
+/** `MOCK_CURRENT_USER_ID` owns the seeded feed: the app treats that id as the current user. */
 const MOCK_USERNAMES: Record<string, string> = {
-  [MOCK_CURRENT_USER_ID]: 'UserName',
+  [MOCK_CURRENT_USER_ID]: DEFAULT_USERNAME,
   [MOCK_OTHER_USER_ID]: 'OtherUser',
 }
+
+const getUsername = (ownerId: string) => MOCK_USERNAMES[ownerId] ?? DEFAULT_USERNAME
 
 const SEED_POSTS_COUNT = 20
 const SEED_OTHER_USER_POSTS_COUNT = 4
@@ -51,7 +55,7 @@ const createSeedPost = (ownerId: string, index: number): Post => {
   return {
     id: `${ownerId}-post-${label.padStart(2, '0')}`,
     ownerId,
-    ownerUsername: MOCK_USERNAMES[ownerId] ?? 'UserName',
+    ownerUsername: getUsername(ownerId),
     ownerAvatarUrl: null,
     images: [
       {
@@ -164,7 +168,7 @@ export const createPost = ({
   const post: Post = {
     id: crypto.randomUUID(),
     ownerId,
-    ownerUsername: MOCK_USERNAMES[ownerId] ?? 'UserName',
+    ownerUsername: getUsername(ownerId),
     ownerAvatarUrl: null,
     images,
     description,

@@ -1,3 +1,5 @@
+import clsx from 'clsx'
+
 import { Icon } from '@/shared/ui/icon'
 
 import styles from './postStubs.module.css'
@@ -19,7 +21,7 @@ export const PostEngagementStub = () => (
         <Icon iconId="icon-paper-plane-outline" width={24} height={24} />
       </button>
       <button
-        className={`${styles.action} ${styles.bookmark}`}
+        className={clsx(styles.action, styles.bookmark)}
         type="button"
         aria-label="Save"
         disabled>

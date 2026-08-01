@@ -1,16 +1,12 @@
 import { createPost } from '@/entities/post'
 
+import type { ExportedPostPhoto } from '../lib/exportEditedImage'
 import { fileToDataUrl } from '../lib/fileToDataUrl'
-
-export type PublishPostPhoto = {
-  file: File
-  width: number
-  height: number
-}
 
 export type PublishPostPayload = {
   description: string
-  photos: PublishPostPhoto[]
+  /** Exactly what `exportEditedImage` produces — the flow publishes edited photos as they are. */
+  photos: ExportedPostPhoto[]
 }
 
 export type PublishPostResult = {

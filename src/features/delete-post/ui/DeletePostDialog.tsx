@@ -1,7 +1,5 @@
 'use client'
 
-import { useRef } from 'react'
-
 import type { Post } from '@/entities/post'
 import { ConfirmDialog } from '@/shared/ui/confirm-dialog'
 
@@ -24,29 +22,20 @@ type Props = {
 
 export const DeletePostDialog = ({ post, open, onOpenChange, onDeleted }: Props) => {
   const { error, isPending, mutate } = useDeletePostMutation(post)
-  // A ref, not `isPending`: `ConfirmDialog` asks to close in the same tick as the click,
-  // before React has re-rendered with the pending state.
-  const isDeletingRef = useRef(false)
 
   const confirmHandler = () => {
-    isDeletingRef.current = true
-
     mutate(undefined, {
       onSuccess: () => {
-        isDeletingRef.current = false
         onOpenChange(false)
         onDeleted()
-      },
-      onError: () => {
-        isDeletingRef.current = false
       },
     })
   }
 
-  // The confirmation must survive its own `Yes` until the request resolves, otherwise a
-  // failed deletion would have nowhere to be reported.
+  // While the request is in flight the confirmation stays put, otherwise a failed
+  // deletion would have nowhere to be reported.
   const openChangeHandler = (nextOpen: boolean) => {
-    if (!nextOpen && isDeletingRef.current) {
+    if (!nextOpen && isPending) {
       return
     }
 
@@ -72,6 +61,8 @@ export const DeletePostDialog = ({ post, open, onOpenChange, onDeleted }: Props)
       title={DELETE_POST_TITLE}
       message={message}
       confirmDisabled={isPending}
+      // The deletion is asynchronous: the dialog closes in `onSuccess`, not on the click.
+      closeOnConfirm={false}
       onConfirm={confirmHandler}
     />
   )

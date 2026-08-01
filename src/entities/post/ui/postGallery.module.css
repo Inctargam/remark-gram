@@ -1,6 +1,9 @@
+/* The gallery owns the width of the photo column: both screens that show it size their
+   grid off this value instead of repeating it. */
 .gallery {
   position: relative;
   overflow: hidden;
+  width: 490px;
   height: 100%;
   background-color: var(--color-dark-900);
 }
@@ -73,6 +76,7 @@
 /* Both screens that use the gallery stack their columns at the same breakpoint. */
 @media (max-width: 900px) {
   .gallery {
+    width: 100%;
     height: 280px;
   }
 }

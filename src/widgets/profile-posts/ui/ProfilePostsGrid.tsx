@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useState } from 'react'
 
 import type { Post } from '@/entities/post'
 import { PostViewModal, useProfilePostsQuery } from '@/entities/post'
@@ -30,46 +30,48 @@ export const ProfilePostsGrid = ({ userId }: Props) => {
   // Editing and deleting belong to the post owner — the check follows the post, not the route.
   const canManageSelectedPost = selectedPost !== null && isProfileOwner(selectedPost.ownerId)
 
-  const loadMoreHandler = useCallback(() => {
+  // Handlers are plain functions: React Compiler is on for this project (`reactCompiler`
+  // in `next.config.ts`), so wrapping them in `useCallback` by hand would add nothing.
+  const loadMoreHandler = () => {
     fetchNextPage()
-  }, [fetchNextPage])
+  }
 
-  const postSelectHandler = useCallback((post: Post) => {
+  const postSelectHandler = (post: Post) => {
     setSelectedPostId(post.id)
-  }, [])
+  }
 
-  const modalOpenChangeHandler = useCallback((open: boolean) => {
+  const modalOpenChangeHandler = (open: boolean) => {
     if (!open) {
       setSelectedPostId(null)
     }
-  }, [])
+  }
 
-  const editStartHandler = useCallback(() => {
+  const editStartHandler = () => {
     setIsEditing(true)
-  }, [])
+  }
 
   // Saving and discarding both land back on the post, so only the edit form closes here.
-  const editOpenChangeHandler = useCallback((open: boolean) => {
+  const editOpenChangeHandler = (open: boolean) => {
     if (!open) {
       setIsEditing(false)
     }
-  }, [])
+  }
 
-  const deleteStartHandler = useCallback(() => {
+  const deleteStartHandler = () => {
     setIsDeleting(true)
-  }, [])
+  }
 
-  const deleteOpenChangeHandler = useCallback((open: boolean) => {
+  const deleteOpenChangeHandler = (open: boolean) => {
     if (!open) {
       setIsDeleting(false)
     }
-  }, [])
+  }
 
   // After a deletion the user stays on the profile — the page behind the modal is already
   // their home page, so UC-3 needs the view closed, not a navigation.
-  const postDeletedHandler = useCallback(() => {
+  const postDeletedHandler = () => {
     setSelectedPostId(null)
-  }, [])
+  }
 
   return (
     <>

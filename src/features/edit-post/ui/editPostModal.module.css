@@ -8,9 +8,10 @@
   padding: 0;
 }
 
+/* The photo column sizes itself — its width lives in `postGallery.module.css`. */
 .content {
   display: grid;
-  grid-template-columns: 490px minmax(0, 1fr);
+  grid-template-columns: auto minmax(0, 1fr);
   height: min(503px, calc(100vh - 156px));
 }
 
@@ -22,48 +23,13 @@
   border-left: 1px solid var(--color-dark-100);
 }
 
+/* Frame around the shared author row: here it only needs the gap before the form. */
 .author {
-  display: flex;
-  gap: 12px;
-  align-items: center;
   margin: 0 0 24px;
-}
-
-.avatar {
-  position: relative;
-  overflow: hidden;
-  flex-shrink: 0;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background-color: var(--color-dark-100);
-}
-
-.avatarImage {
-  object-fit: cover;
-}
-
-.username {
-  overflow: hidden;
-  color: var(--color-light-100);
-  font-size: var(--font-size-bold-16);
-  font-weight: var(--font-weight-bold-16);
-  line-height: var(--line-height-bold-16);
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .descriptionField textarea {
   height: 120px;
-}
-
-.counter {
-  margin: 6px 0 0;
-  color: var(--color-light-900);
-  font-size: var(--font-size-small);
-  font-weight: var(--font-weight-small);
-  line-height: var(--line-height-small);
-  text-align: right;
 }
 
 .error {

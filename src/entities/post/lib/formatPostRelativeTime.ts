@@ -7,16 +7,18 @@ const WEEK = 7 * DAY
 const MONTH = 30 * DAY
 const YEAR = 365 * DAY
 
-/** Ordered coarse to fine: the first threshold the age reaches wins. */
+/**
+ * Ordered coarse to fine: the first unit the age fills at least once wins.
+ * `seconds` is both the length of the unit and the threshold to reach it.
+ */
 const UNITS = [
-  { limit: YEAR, seconds: YEAR, unit: 'year' },
-  { limit: MONTH, seconds: MONTH, unit: 'month' },
-  { limit: WEEK, seconds: WEEK, unit: 'week' },
-  { limit: DAY, seconds: DAY, unit: 'day' },
-  { limit: HOUR, seconds: HOUR, unit: 'hour' },
-  { limit: MINUTE, seconds: MINUTE, unit: 'minute' },
+  { seconds: YEAR, unit: 'year' },
+  { seconds: MONTH, unit: 'month' },
+  { seconds: WEEK, unit: 'week' },
+  { seconds: DAY, unit: 'day' },
+  { seconds: HOUR, unit: 'hour' },
+  { seconds: MINUTE, unit: 'minute' },
 ] as const satisfies readonly {
-  limit: number
   seconds: number
   unit: Intl.RelativeTimeFormatUnit
 }[]
@@ -37,7 +39,7 @@ export const formatPostRelativeTime = (isoDate: string, now: Date = new Date()):
   const elapsedSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
   // A clock skew between the server and the client must not produce "in 3 seconds".
   const age = Math.max(elapsedSeconds, 0)
-  const match = UNITS.find(({ limit }) => age >= limit)
+  const match = UNITS.find(({ seconds }) => age >= seconds)
 
   if (!match) {
     return 'just now'

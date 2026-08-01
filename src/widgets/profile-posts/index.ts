@@ -1,4 +1,2 @@
-export { shouldFetchNextPage } from './lib/shouldFetchNextPage'
-export { useInfiniteScroll } from './lib/useInfiniteScroll'
+/** The connected grid is the whole widget; its view and scroll helpers stay internal. */
 export { ProfilePostsGrid } from './ui/ProfilePostsGrid'
-export { ProfilePostsGridView } from './ui/ProfilePostsGridView'

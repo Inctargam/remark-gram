@@ -1,9 +1,14 @@
 import type { PostImage } from '@/entities/post'
-import { isValidPostDescription, POST_DESCRIPTION_MAX_LENGTH } from '@/entities/post'
+import {
+  isValidPostDescription,
+  POST_DESCRIPTION_MAX_LENGTH,
+  PROFILE_POSTS_PAGE_SIZE,
+} from '@/entities/post'
 
 import { createPost, listPosts } from './postsStore'
 
-const DEFAULT_PAGE_SIZE = 8
+/** A caller that sends no `pageSize` gets what the profile feed asks for anyway. */
+const DEFAULT_PAGE_SIZE = PROFILE_POSTS_PAGE_SIZE
 const MAX_PAGE_SIZE = 50
 
 const parsePageSize = (rawPageSize: string | null): number | null => {
