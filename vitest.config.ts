@@ -16,6 +16,27 @@ export default defineConfig({
     },
   },
   test: {
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html'],
+      // Thresholds are scoped to the posts CRUD code only — the rest of the project
+      // predates the test setup and would drag the numbers below any useful gate.
+      // Listed slice by slice on purpose: a 'src/features/*-post/**' glob would also
+      // pull in features/create-post, which belongs to another task and is not covered here.
+      include: [
+        'src/entities/post/**',
+        'src/features/edit-post/**',
+        'src/features/delete-post/**',
+        'src/features/post-actions/**',
+        'src/widgets/profile-posts/**',
+        'app/api/mock/posts/**',
+      ],
+      exclude: ['**/*.stories.tsx', '**/index.ts', '**/*.module.css'],
+      thresholds: {
+        lines: 70,
+        branches: 70,
+      },
+    },
     projects: [
       {
         extends: true,
