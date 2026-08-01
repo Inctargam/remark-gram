@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react'
 
 import type { Post } from '@/entities/post'
 import { PostViewModal, useProfilePostsQuery } from '@/entities/post'
+import { DeletePostDialog } from '@/features/delete-post'
 import { EditPostModal } from '@/features/edit-post'
 import { PostActionsMenu } from '@/features/post-actions'
 import { isProfileOwner } from '@/shared/auth'
@@ -21,6 +22,7 @@ export const ProfilePostsGrid = ({ userId }: Props) => {
     useProfilePostsQuery(userId)
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null)
   const [isEditing, setIsEditing] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   // The open post is looked up in the feed by id instead of being copied into state:
   // an edited post re-renders with fresh data, and a deleted one closes the modal by itself.
@@ -54,7 +56,19 @@ export const ProfilePostsGrid = ({ userId }: Props) => {
   }, [])
 
   const deleteStartHandler = useCallback(() => {
-    // TODO(uc-3): open the delete confirmation.
+    setIsDeleting(true)
+  }, [])
+
+  const deleteOpenChangeHandler = useCallback((open: boolean) => {
+    if (!open) {
+      setIsDeleting(false)
+    }
+  }, [])
+
+  // After a deletion the user stays on the profile — the page behind the modal is already
+  // their home page, so UC-3 needs the view closed, not a navigation.
+  const postDeletedHandler = useCallback(() => {
+    setSelectedPostId(null)
   }, [])
 
   return (
@@ -74,6 +88,9 @@ export const ProfilePostsGrid = ({ userId }: Props) => {
         // The view steps aside while the edit form is open: both take the same box on screen.
         open={selectedPost !== null && !isEditing}
         onOpenChange={modalOpenChangeHandler}
+        // The delete confirmation sits on top of the post, so a stray click must not
+        // dismiss the post underneath it.
+        disablePointerDismissal={isDeleting}
         actions={
           canManageSelectedPost ? (
             <PostActionsMenu onEdit={editStartHandler} onDelete={deleteStartHandler} />
@@ -83,6 +100,15 @@ export const ProfilePostsGrid = ({ userId }: Props) => {
 
       {selectedPost && isEditing ? (
         <EditPostModal post={selectedPost} open onOpenChange={editOpenChangeHandler} />
+      ) : null}
+
+      {selectedPost && isDeleting ? (
+        <DeletePostDialog
+          post={selectedPost}
+          open
+          onOpenChange={deleteOpenChangeHandler}
+          onDeleted={postDeletedHandler}
+        />
       ) : null}
     </>
   )

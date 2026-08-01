@@ -34,16 +34,30 @@ const createPage = (ownerId: string): PostsPage => ({
 
 /**
  * Storybook does not run Next.js route handlers, so the posts mock endpoint is stubbed here.
- * The stub answers the profile feed request only and is restored after every story.
+ * The stub keeps deleted ids so that a refetched feed really comes back without them, and is
+ * restored after every story.
  */
 const stubPostsFetch = () => {
   const originalFetch = globalThis.fetch
+  const deletedIds = new Set<string>()
 
-  globalThis.fetch = (async (input: RequestInfo | URL) => {
+  globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = typeof input === 'string' ? input : input.toString()
-    const ownerId = url.includes(OTHER_USER_ID) ? OTHER_USER_ID : MOCK_CURRENT_USER_ID
+    const method = init?.method ?? 'GET'
 
-    return Response.json(createPage(ownerId))
+    if (method === 'DELETE') {
+      deletedIds.add(url.split('/').pop() ?? '')
+
+      return new Response(null, { status: 204 })
+    }
+
+    const ownerId = url.includes(OTHER_USER_ID) ? OTHER_USER_ID : MOCK_CURRENT_USER_ID
+    const page = createPage(ownerId)
+
+    return Response.json({
+      ...page,
+      items: page.items.filter(({ id }) => !deletedIds.has(id)),
+    })
   }) as typeof globalThis.fetch
 
   return () => {
@@ -117,6 +131,28 @@ export const EditOwnPost: Story = {
     await expect(screen.getByLabelText('Add publication descriptions')).toHaveValue(
       'Mock publication 1'
     )
+  },
+}
+
+/** UC-3 end to end: menu → confirmation → post gone from the feed, user stays on the profile. */
+export const DeleteOwnPost: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    await userEvent.click(await canvas.findByAltText('Mock publication 3'))
+    await userEvent.click(await screen.findByRole('button', { name: 'Post actions' }))
+    await userEvent.click(await screen.findByRole('menuitem', { name: 'Delete Post' }))
+
+    await expect(
+      await screen.findByText('Are you sure you want to delete this post?')
+    ).toBeVisible()
+
+    await userEvent.click(screen.getByRole('button', { name: 'Yes' }))
+
+    // Both the confirmation and the post view close; the profile grid is what stays.
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    await waitFor(() => expect(canvas.queryByAltText('Mock publication 3')).not.toBeInTheDocument())
+    await expect(canvas.getByAltText('Mock publication 1')).toBeInTheDocument()
   },
 }
 

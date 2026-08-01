@@ -15,6 +15,8 @@ type Props = {
   open: boolean
   onOpenChange: (open: boolean) => void
   actions?: ReactNode
+  /** Set while a dialog opened from the post is on screen, so a click outside keeps the post. */
+  disablePointerDismissal?: boolean
 }
 
 /**
@@ -27,13 +29,22 @@ type Props = {
  * (the edit-post screen does use it) and turning that header into a set of flags would
  * complicate every existing caller.
  */
-export const PostViewModal = ({ post, open, onOpenChange, actions }: Props) => {
+export const PostViewModal = ({
+  post,
+  open,
+  onOpenChange,
+  actions,
+  disablePointerDismissal = false,
+}: Props) => {
   if (!post) {
     return null
   }
 
   return (
-    <Dialog.Root open={open} onOpenChange={onOpenChange}>
+    <Dialog.Root
+      open={open}
+      onOpenChange={onOpenChange}
+      disablePointerDismissal={disablePointerDismissal}>
       <Dialog.Portal>
         <Dialog.Backdrop className={styles.backdrop} />
         <Dialog.Popup className={styles.popup} aria-label="Publication">
