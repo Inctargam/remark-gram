@@ -102,6 +102,24 @@ export const OpenPost: Story = {
   },
 }
 
+/** UC-2 entry point: the owner reaches the edit form through the three-dot menu on the post. */
+export const EditOwnPost: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    await userEvent.click(await canvas.findByAltText('Mock publication 1'))
+    await userEvent.click(await screen.findByRole('button', { name: 'Post actions' }))
+    await userEvent.click(await screen.findByRole('menuitem', { name: 'Edit Post' }))
+
+    const dialog = await screen.findByRole('dialog')
+
+    await expect(dialog).toHaveTextContent('Edit Post')
+    await expect(screen.getByLabelText('Add publication descriptions')).toHaveValue(
+      'Mock publication 1'
+    )
+  },
+}
+
 export const OtherUserProfile: Story = {
   args: {
     userId: OTHER_USER_ID,
