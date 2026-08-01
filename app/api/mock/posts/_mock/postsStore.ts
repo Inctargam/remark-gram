@@ -1,4 +1,5 @@
 import type { Post, PostsPage } from '@/entities/post'
+import { MOCK_CURRENT_USER_ID } from '@/shared/auth'
 
 /**
  * In-memory posts store for the mock API.
@@ -15,8 +16,8 @@ type GlobalWithPostsStore = typeof globalThis & {
   [STORE_KEY]?: PostsStoreState
 }
 
-/** Owner of the seeded profile feed. TODO(post-ownership): comes from the session once the backend exposes the user id. */
-export const MOCK_CURRENT_USER_ID = 'mock-user-1'
+/** Owner of the seeded profile feed — the same mock id the app treats as the current user. */
+export { MOCK_CURRENT_USER_ID }
 export const MOCK_OTHER_USER_ID = 'mock-user-2'
 
 const MOCK_USERNAMES: Record<string, string> = {

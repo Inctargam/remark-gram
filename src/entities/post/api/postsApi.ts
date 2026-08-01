@@ -1,6 +1,6 @@
 import { api } from '@/shared/api/baseApi'
 
-import type { Post, PostsPage } from '../model/types'
+import type { Post, PostImage, PostsPage } from '../model/types'
 
 /**
  * The only place that talks to the posts API. Hooks and UI never call `fetch` directly,
@@ -45,6 +45,17 @@ export const getProfilePosts = async ({
 
 export const getPost = async (postId: string): Promise<Post> => {
   const response = await api.get(`${getPostsBasePath()}/${postId}`)
+
+  return response.json()
+}
+
+export type CreatePostPayload = {
+  description: string
+  images: PostImage[]
+}
+
+export const createPost = async (payload: CreatePostPayload): Promise<Post> => {
+  const response = await api.post(getPostsBasePath(), payload)
 
   return response.json()
 }

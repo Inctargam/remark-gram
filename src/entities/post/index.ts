@@ -1,5 +1,6 @@
-export type { UpdatePostPayload } from './api/postsApi'
+export type { CreatePostPayload, UpdatePostPayload } from './api/postsApi'
 export {
+  createPost,
   deletePost,
   getPost,
   getProfilePosts,
@@ -7,6 +8,8 @@ export {
   updatePost,
 } from './api/postsApi'
 export { postsQueryKeys } from './api/queryKeys'
+export { useProfilePostsQuery } from './api/useProfilePostsQuery'
+export { flattenPostsPages } from './lib/flattenPostsPages'
 export { getPostImageAlt } from './lib/getPostImageAlt'
 export {
   isValidPostDescription,

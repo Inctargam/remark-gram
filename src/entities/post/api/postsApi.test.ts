@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ApiError } from '@/shared/api/baseApi'
 
 import type { Post } from '../model/types'
-import { deletePost, getPost, getProfilePosts, updatePost } from './postsApi'
+import { createPost, deletePost, getPost, getProfilePosts, updatePost } from './postsApi'
 
 const post: Post = {
   id: 'post-1',
@@ -95,6 +95,17 @@ describe('getPost', () => {
 
     await expect(getPost('missing')).rejects.toThrow(ApiError)
     await expect(getPost('missing')).rejects.toThrow('Post not found.')
+  })
+})
+
+describe('createPost', () => {
+  it('posts the description with the images to the collection path', async () => {
+    respondWith(post, 201)
+
+    await expect(createPost({ description: 'New', images: post.images })).resolves.toEqual(post)
+    expect(getRequestedUrl()).toContain('/mock/posts')
+    expect(getRequestInit().method).toBe('POST')
+    expect(getRequestInit().body).toBe(JSON.stringify({ description: 'New', images: post.images }))
   })
 })
 
