@@ -19,6 +19,7 @@ export {
   POST_DESCRIPTION_MAX_LENGTH,
 } from './model/postDescription'
 export type { Post, PostImage, PostsPage } from './model/types'
+export { PostGallery } from './ui/PostGallery'
 export { PostThumbnail } from './ui/PostThumbnail'
 export { PostView } from './ui/PostView'
 export { PostViewModal } from './ui/PostViewModal'
