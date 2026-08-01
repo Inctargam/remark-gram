@@ -17,6 +17,35 @@
 - `pnpm exec vitest run --project unit` прошёл успешно: 19 файлов, 84 теста.
 - `pnpm exec vitest run --project storybook` прошёл успешно: 37 файлов, 157 тестов.
 - `pnpm build` прошёл успешно.
+### 2026-07-31
+
+#### Auth
+
+- OAuth-вход и регистрация через Google и GitHub переведены на browser navigation к backend endpoints `/api/v1/auth/google` и `/api/v1/auth/github`, сформированным через `NEXT_PUBLIC_API_BASE_URL`.
+- Удалены frontend-обмен `code/state`, callback-страницы и локальный mock OAuth backend; после возврата на `/` сессия восстанавливается существующим `SessionBootstrap` через refresh token cookie.
+- OAuth-ошибка из query-параметра главной страницы переносится на `/sign-in` для последующей реализации сообщений и повторного входа.
+
+#### Architecture
+
+- Разметка и стили главной страницы перенесены из Next.js route в FSD-слайс `src/pages/home`; `app/(main)/page.tsx` оставлен тонкой композицией маршрута.
+- Формирование пути для переноса OAuth-ошибки хранится в переименованном слайсе `features/oauth-authentication` и покрыто изолированными unit-тестами.
+- Статичные backend OAuth URL объединены в карте `OAUTH_AUTHORIZE_URLS` внутри feature; избыточные provider helper, тип и `shared/config/oauth.ts` удалены.
+- `NEXT_PUBLIC_API_BASE_URL` теперь читается в единой точке `shared/config/api.ts`; OpenAPI-клиент, OAuth feature и legacy `baseApi` используют общий `API_BASE_URL`, а дублирующий `shared/api/openapi/config.ts` удалён.
+
+#### Verification
+
+- `pnpm exec next typegen` прошёл успешно.
+- `pnpm exec tsc --noEmit --pretty false` прошёл успешно.
+- Focused ESLint для изменённых OAuth, auth UI, config, home route и FSD page-слайса прошёл успешно без предупреждений.
+- Focused Stylelint для стилей `src/pages/home` прошёл успешно.
+- `pnpm exec vitest run --project unit` прошёл успешно: 7 файлов, 31 тест.
+- `pnpm exec vitest run --project storybook` прошёл успешно: 35 файлов, 150 тестов.
+- `pnpm run build` прошёл успешно.
+
+#### Notes
+
+- Отображение OAuth-ошибок и очистка `error` из URL отложены в отдельную ветку; текущая реализация сохраняет код ошибки в query страницы `/sign-in`.
+- `.env.local` не изменялся; устаревшие локальные OAuth client secrets можно удалить отдельно после проверки окружения.
 
 ### 2026-07-28
 
