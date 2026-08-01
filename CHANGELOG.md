@@ -307,6 +307,19 @@
 
 - Для прогона story-тестов локально понадобилось доустановить браузер: `pnpm exec playwright install chromium`.
 - Пропсы существующих компонентов сверялись по исходникам (`Modal.tsx`, `Button.tsx`) и типам `@base-ui/react`, а не через MCP `inctagram-storybook`: этот сервер настроен для Codex и в текущем окружении недоступен.
+### 2026-08-01
+
+#### Tooling
+
+- Починены накопившиеся ошибки `simple-import-sort/exports` в `shared/ui/alert`, `shared/ui/icon`, `shared/ui/select` и `widgets/navigation`, а также prettier-warnings в `shared/ui/icon/Icon.tsx`, `shared/ui/modal`, `widgets/navigation/ui/BottomBar` и `eslint.config.mjs`. `pnpm lint` по всему проекту снова проходит: 0 ошибок, остаётся один warning `react-hooks/incompatible-library` в `features/sign-up` (правило про `watch()` из react-hook-form, автофиксом не чинится).
+- Правки чисто форматирующие, поведение не менялось: результат `pnpm exec eslint --fix`, вручную ничего не переписывалось. Вынесены отдельной веткой, чтобы не тащить чужие файлы в ветки задач и не повторять эту сноску в каждом отчёте.
+
+#### Verification
+
+- `pnpm lint` — 0 ошибок.
+- `pnpm exec vitest run --project unit` прошёл успешно: 19 файлов, 84 теста.
+- `pnpm exec vitest run --project storybook` прошёл успешно: 37 файлов, 157 тестов.
+- `pnpm build` прошёл успешно.
 ### 2026-07-31
 
 #### Auth
