@@ -78,7 +78,7 @@ describe('getProfilePosts', () => {
 
     await getProfilePosts({ userId: 'user-1' })
 
-    expect(getRequestedUrl()).toContain('/v1/posts?')
+    expect(getRequestedUrl()).toContain('/api/v1/posts?')
   })
 })
 

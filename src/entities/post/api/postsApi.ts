@@ -7,7 +7,8 @@ import type { Post, PostImage, PostsPage } from '../model/types'
  * so switching from the in-memory mock to the real backend is a change in this file alone.
  *
  * Paths mirror the future real ones and differ by prefix only:
- * mock `/api/mock/posts`, real `${NEXT_PUBLIC_API_BASE_URL}/v1/posts`.
+ * mock `/api/mock/posts`, real `${NEXT_PUBLIC_API_BASE_URL}/api/v1/posts` — the same shape
+ * the auth calls use, so the base url carries the host only.
  *
  * The mock lives in `app/api/mock/posts` — a route handler of this very app, so it is
  * requested on the current origin and must not inherit the backend base url. Auth already
@@ -17,7 +18,7 @@ import type { Post, PostImage, PostsPage } from '../model/types'
  * openapi-fetch client once posts endpoints appear in `schema.d.ts`.
  */
 const MOCK_POSTS_PATH = '/api/mock/posts'
-const REAL_POSTS_PATH = '/v1/posts'
+const REAL_POSTS_PATH = '/api/v1/posts'
 
 export const PROFILE_POSTS_PAGE_SIZE = 8
 
