@@ -12,6 +12,7 @@ type ForgotPasswordFormValues = {
 export const useForgotPasswordForm = () => {
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false)
   const [submittedEmail, setSubmittedEmail] = useState<string | null>(null)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   const { isPending, mutateAsync } = usePasswordResetRequestMutation()
 
@@ -32,6 +33,7 @@ export const useForgotPasswordForm = () => {
   const emailChangeHandler = () => {
     setIsConfirmationOpen(false)
     setSubmittedEmail(null)
+    setSubmitError(null)
   }
 
   const emailField = register('email', {
@@ -44,12 +46,18 @@ export const useForgotPasswordForm = () => {
       return
     }
 
-    const recaptchaToken = await executeRecaptchaV3('forgot_password')
+    setSubmitError(null)
 
-    await mutateAsync({ email: email.trim(), recaptchaToken })
+    try {
+      const recaptchaToken = await executeRecaptchaV3('forgot_password')
 
-    setSubmittedEmail(email.trim())
-    setIsConfirmationOpen(true)
+      await mutateAsync({ email: email.trim(), recaptchaToken })
+
+      setSubmittedEmail(email.trim())
+      setIsConfirmationOpen(true)
+    } catch {
+      setSubmitError('Something went wrong. Please try again.')
+    }
   }
 
   const submitHandler = handleSubmit(submitFormHandler)
@@ -65,6 +73,7 @@ export const useForgotPasswordForm = () => {
     isConfirmationOpen,
     isPending,
     isSubmitDisabled,
+    submitError,
     submitHandler,
     submittedEmail,
   }

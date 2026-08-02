@@ -18,6 +18,7 @@ export const ForgotPasswordForm = () => {
     isConfirmationOpen,
     isPending,
     isSubmitDisabled,
+    submitError,
     submitHandler,
     submittedEmail,
   } = useForgotPasswordForm()
@@ -45,6 +46,12 @@ export const ForgotPasswordForm = () => {
             The link has been sent by email.
             <br />
             If you don&rsquo;t receive an email send link again
+          </p>
+        )}
+
+        {submitError && (
+          <p className={styles.message} role="alert">
+            {submitError}
           </p>
         )}
 

@@ -1,6 +1,6 @@
 import { RECAPTCHA_SITE_KEY } from '@/shared/config'
 
-const SCRIPT_URL = 'https://www.google.com/recaptcha/enterprise.js'
+const SCRIPT_URL = `https://www.google.com/recaptcha/enterprise.js?render=${RECAPTCHA_SITE_KEY}`
 
 let scriptPromise: Promise<void> | null = null
 
@@ -41,7 +41,7 @@ export const executeRecaptchaV3 = async (action: string): Promise<string> => {
     throw new Error('reCAPTCHA is not available')
   }
 
-  await enterprise.ready()
+  await new Promise<void>((resolve) => enterprise.ready(resolve))
 
   return enterprise.execute(RECAPTCHA_SITE_KEY, { action })
 }
