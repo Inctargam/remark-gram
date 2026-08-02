@@ -1,8 +1,9 @@
 import { useCallback, useState } from 'react'
 
+import { normalizePostDescription } from '@/entities/post'
+
 import { usePublishPostMutation } from '../api/usePublishPostMutation'
 import { exportEditedImage } from '../lib/exportEditedImage'
-import { normalizeCreatePostDescription } from './createPostDescription'
 import { createPostDraftFromState } from './createPostDraft'
 import { validateCreatePostFiles } from './createPostFile'
 import type { CreatePostStep } from './createPostFlow'
@@ -74,7 +75,7 @@ export const useCreatePostFlow = () => {
   }, [selectFirstPhotoHandler])
 
   const updateDescriptionHandler = useCallback((descriptionValue: string) => {
-    setDescription(normalizeCreatePostDescription(descriptionValue))
+    setDescription(normalizePostDescription(descriptionValue))
   }, [])
 
   const resetFlowHandler = useCallback(() => {

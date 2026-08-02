@@ -37,7 +37,14 @@ const createCanvasBlob = (canvas: HTMLCanvasElement, type: string): Promise<Blob
     )
   })
 
-export const exportEditedImage = async (photo: CreatePostPhoto): Promise<File> => {
+/** Exported photo carries its final size: the publication API stores image dimensions. */
+export type ExportedPostPhoto = {
+  file: File
+  width: number
+  height: number
+}
+
+export const exportEditedImage = async (photo: CreatePostPhoto): Promise<ExportedPostPhoto> => {
   const { element: image, objectUrl } = await loadImage(photo.file)
   const cropArea = photo.croppedAreaPixels ?? {
     height: image.naturalHeight,
@@ -72,5 +79,9 @@ export const exportEditedImage = async (photo: CreatePostPhoto): Promise<File> =
 
   const blob = await createCanvasBlob(canvas, photo.file.type)
 
-  return new File([blob], photo.file.name, { type: photo.file.type })
+  return {
+    file: new File([blob], photo.file.name, { type: photo.file.type }),
+    width: canvas.width,
+    height: canvas.height,
+  }
 }

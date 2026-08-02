@@ -393,19 +393,6 @@
   min-width: 0;
 }
 
-.descriptionField {
-  width: 100%;
-}
-
-.descriptionCounter {
-  margin: 6px 0 0;
-  color: var(--color-light-900);
-  font-size: var(--font-size-small);
-  font-weight: var(--font-weight-small);
-  line-height: var(--line-height-small);
-  text-align: right;
-}
-
 .publishError {
   margin: 16px 0 0;
   color: var(--color-danger-500);

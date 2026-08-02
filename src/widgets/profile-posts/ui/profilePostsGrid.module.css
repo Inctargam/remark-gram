@@ -1,0 +1,71 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 234px));
+  gap: 12px;
+  max-width: 972px;
+}
+
+.thumbnailButton {
+  display: block;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.thumbnailButton:focus-visible {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+}
+
+.skeleton {
+  aspect-ratio: 234 / 228;
+  border-radius: 2px;
+  background-color: var(--color-dark-900);
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+.message {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-regular-14);
+  font-weight: var(--font-weight-regular-14);
+  line-height: var(--line-height-regular-14);
+}
+
+/* Reason a next page could not be loaded, shown under the posts that did load. */
+.loadMoreError {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  margin-top: 24px;
+}
+
+/* Zero-height probe under the grid: it only reports visibility, it must not add spacing. */
+.sentinel {
+  height: 1px;
+}
+
+@keyframes skeleton-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@media (max-width: 1023px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

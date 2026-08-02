@@ -1,0 +1,11 @@
+.thumbnail {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 234 / 228;
+  border-radius: 2px;
+  background-color: var(--color-dark-900);
+}
+
+.image {
+  object-fit: cover;
+}

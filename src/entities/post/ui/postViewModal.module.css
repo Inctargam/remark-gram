@@ -1,0 +1,53 @@
+.backdrop {
+    position: fixed;
+    z-index: 100;
+    background: var(--color-dark-900);
+    opacity: 0.6;
+    inset: 0;
+}
+
+/*
+ * Fixed 972x564 comes from the design: the photo column is not square and the right
+ * column scrolls inside, so the popup must not grow with the content.
+ */
+.popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    z-index: 101;
+    width: min(972px, calc(100vw - 32px));
+    height: min(564px, calc(100vh - 96px));
+    background: var(--color-dark-300);
+    transform: translate(-50%, -50%);
+}
+
+/* The design puts the close button outside the popup, above its top right corner. */
+.close {
+    position: absolute;
+    top: -36px;
+    right: -18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--color-light-100);
+    cursor: pointer;
+}
+
+.close:hover {
+    color: var(--color-primary-100);
+}
+
+@media (max-width: 900px) {
+    .popup {
+        height: min(720px, calc(100vh - 96px));
+    }
+
+    .close {
+        right: 0;
+    }
+}

@@ -1,7 +1,9 @@
 export const ROUTES = {
   home: '/',
   create: '/create',
+  /** Own profile entry point: `/profile` redirects to `/profile/{currentUserId}`. */
   profile: '/profile',
+  profileById: (userId: string) => `/profile/${userId}`,
   messenger: '/messenger',
   search: '/search',
   statistics: '/statistics',
