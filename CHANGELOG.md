@@ -4,6 +4,29 @@
 
 ## Unreleased
 
+### 2026-08-02
+
+#### App Styles
+
+- Шапка (`Header`, `HeaderMobile`) закреплена `position: sticky; top: 0` и получила `z-index` ниже модалок, поэтому остаётся на экране на длинных страницах.
+- Слот сайдбара в `AppShell` стал `sticky` под шапкой с высотой `calc(100vh - var(--layout-header-height))` и `overflow-y: auto`: меню и `Log Out` видны при любом скролле, длинное меню скроллится внутри себя.
+- `BottomBar` на мобильной раскладке прижат `position: sticky; bottom: 0` — место в потоке остаётся за ним, контент под панель не уезжает.
+- `.main` получил `min-width: 0`: без этого широкая сетка постов растягивала флекс-строку и давала горизонтальный скролл у body.
+
+#### Tooling
+
+- В `src/app/styles/tokens.css` добавлены layout- и z-index-токены: `--layout-header-height`, `--layout-bottom-bar-height`, `--layout-sidebar-width`, `--z-index-header`, `--z-index-sidebar`, `--z-index-bottom-bar`. Высота шапки в 60px больше не дублируется между `Sidebar.module.css` и `.inner` шапки.
+
+#### Tests
+
+- В `AppShellView.stories.tsx` добавлена стори `AuthenticatedLongContent` с длинным контентом: скроллит окно и проверяет, что шапка стоит на `top: 0`, `Log Out` остаётся в пределах вьюпорта и горизонтального скролла у документа нет.
+
+#### Verification
+
+- `pnpm exec stylelint` по затронутым файлам: новых ошибок нет (в репозитории остаётся прежний пул `order/properties-order` и `comment-empty-line-before` — чужие файлы, отдельная ветка).
+- `pnpm exec eslint src/widgets` — чисто.
+- `pnpm exec vitest run --project=storybook` — 37 файлов, 158 тестов, прошло. Скрипта `pnpm test:storybook` в проекте нет.
+- Новая стори проверена на ловлю регрессии: при временном снятии `sticky` с шапки и со слота сайдбара она падает.
 ### 2026-08-02 — Причёсывание кода постов перед PR
 
 #### Posts
@@ -79,6 +102,9 @@
 - `pnpm build` прошёл успешно.
 
 #### Notes
+
+- Ручная проверка на профиле с 20 постами не проводилась: маршрута `/profile/[id]` и ленты постов в `develop` нет, они живут в ветке `feat/posts-crud`. Проверять после её мержа.
+- Страницы (`src/pages/*`) по-прежнему используют литерал `calc(100vh - 60px)`; перевод их на `--layout-header-height` не входил в задачу.
 
 - Когда появится бэкенд постов, мок-режим удаляется вместе с флагом `NEXT_PUBLIC_POSTS_API_MOCK`, и `postsApi` возвращается к общему базовому URL.
 
