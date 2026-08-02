@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
-import { useRecaptchaWidget } from '@/shared/lib/recaptcha'
+import { executeRecaptchaV3 } from '@/shared/lib/recaptcha'
+
+import { usePasswordResetRequestMutation } from '../api/usePasswordResetRequestMutation'
 
 type ForgotPasswordFormValues = {
   email: string
@@ -11,12 +13,7 @@ export const useForgotPasswordForm = () => {
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false)
   const [submittedEmail, setSubmittedEmail] = useState<string | null>(null)
 
-  const {
-    containerRef: recaptchaContainerRef,
-    token,
-    isVerified,
-    reset: resetRecaptcha,
-  } = useRecaptchaWidget()
+  const { isPending, mutateAsync } = usePasswordResetRequestMutation()
 
   const {
     formState: { errors, isValid },
@@ -29,13 +26,12 @@ export const useForgotPasswordForm = () => {
     mode: 'onChange',
   })
 
-  const canSubmit = isValid && (Boolean(submittedEmail) || isVerified)
-  const isSubmitDisabled = !canSubmit
+  const canSubmit = isValid
+  const isSubmitDisabled = !canSubmit || isPending
 
   const emailChangeHandler = () => {
     setIsConfirmationOpen(false)
     setSubmittedEmail(null)
-    resetRecaptcha()
   }
 
   const emailField = register('email', {
@@ -44,26 +40,16 @@ export const useForgotPasswordForm = () => {
   })
 
   const submitFormHandler = async ({ email }: ForgotPasswordFormValues) => {
-    if (!canSubmit || !token) {
+    if (!canSubmit) {
       return
     }
 
-    const response = await fetch('/api/v1/recaptcha/verify', {
-      body: JSON.stringify({ action: 'forgot_password', token }),
-      headers: { 'Content-Type': 'application/json' },
-      method: 'POST',
-    })
+    const recaptchaToken = await executeRecaptchaV3('forgot_password')
 
-    const result = (await response.json()) as { score: number; success: boolean }
-
-    if (!result.success || result.score < 0.5) {
-      resetRecaptcha()
-      return
-    }
+    await mutateAsync({ email: email.trim(), recaptchaToken })
 
     setSubmittedEmail(email.trim())
     setIsConfirmationOpen(true)
-    resetRecaptcha()
   }
 
   const submitHandler = handleSubmit(submitFormHandler)
@@ -78,7 +64,6 @@ export const useForgotPasswordForm = () => {
     emailField,
     isConfirmationOpen,
     isSubmitDisabled,
-    recaptchaContainerRef,
     submitHandler,
     submittedEmail,
   }
