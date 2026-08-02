@@ -16,8 +16,8 @@ export const ForgotPasswordForm = () => {
     emailError,
     emailField,
     isConfirmationOpen,
+    isPending,
     isSubmitDisabled,
-    recaptchaContainerRef,
     submitHandler,
     submittedEmail,
   } = useForgotPasswordForm()
@@ -53,14 +53,12 @@ export const ForgotPasswordForm = () => {
           disabled={isSubmitDisabled}
           type="submit"
           variant="primary">
-          {submittedEmail ? 'Send Link Again' : 'Send Link'}
+          {isPending ? 'Sending...' : submittedEmail ? 'Send Link Again' : 'Send Link'}
         </Button>
 
         <Link className={styles.signInLink} href={ROUTES.signIn}>
           Back to Sign In
         </Link>
-
-        {!submittedEmail && <div className={styles.recaptcha} ref={recaptchaContainerRef} />}
       </form>
 
       <EmailSentModal

@@ -63,6 +63,7 @@ export const useForgotPasswordForm = () => {
     emailError: errors.email?.message,
     emailField,
     isConfirmationOpen,
+    isPending,
     isSubmitDisabled,
     submitHandler,
     submittedEmail,
