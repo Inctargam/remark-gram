@@ -17,13 +17,13 @@ export const useEditedPhotoPreview = (photo: CreatePostPhoto) => {
 
     const createPreview = async () => {
       try {
-        const editedPhoto = await exportEditedImage(photo)
+        const { file } = await exportEditedImage(photo)
 
         if (!isActive) {
           return
         }
 
-        previewUrl = URL.createObjectURL(editedPhoto)
+        previewUrl = URL.createObjectURL(file)
         setEditedPreview({ photo, url: previewUrl })
       } catch {
         return

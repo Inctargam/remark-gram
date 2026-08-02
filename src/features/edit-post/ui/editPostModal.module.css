@@ -1,0 +1,60 @@
+/* Same 972x564 box as the post view: editing replaces the view in place. */
+.modal {
+  width: min(972px, calc(100vw - 32px));
+}
+
+/* The photo column must reach the popup edges, so the default modal padding is dropped. */
+.body {
+  padding: 0;
+}
+
+/* The photo column sizes itself — its width lives in `postGallery.module.css`. */
+.content {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  height: min(503px, calc(100vh - 156px));
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 24px;
+  border-left: 1px solid var(--color-dark-100);
+}
+
+/* Frame around the shared author row: here it only needs the gap before the form. */
+.author {
+  margin: 0 0 24px;
+}
+
+.descriptionField textarea {
+  height: 120px;
+}
+
+.error {
+  margin: 12px 0 0;
+  color: var(--color-danger-500);
+  font-size: var(--font-size-regular-14);
+  font-weight: var(--font-weight-regular-14);
+  line-height: var(--line-height-regular-14);
+}
+
+/* Save Changes sits in the bottom right corner of the form column. */
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: auto;
+}
+
+@media (max-width: 900px) {
+  .content {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    height: auto;
+  }
+
+  .form {
+    border-left: none;
+  }
+}

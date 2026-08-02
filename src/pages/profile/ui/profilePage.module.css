@@ -77,18 +77,10 @@
   line-height: var(--line-height-regular-14);
 }
 
+/* Grid layout itself lives in widgets/profile-posts; the page only positions it. */
 .posts {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 234px));
-  gap: 12px;
   max-width: 972px;
   margin-top: 48px;
-}
-
-.post {
-  aspect-ratio: 234 / 228;
-  border-radius: 2px;
-  background-color: var(--color-dark-900);
 }
 
 @media (max-width: 1023px) {
@@ -115,10 +107,6 @@
     flex-wrap: wrap;
     gap: 24px;
   }
-
-  .posts {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
 }
 
 @media (max-width: 767px) {
@@ -128,9 +116,5 @@
 
   .avatar {
     width: 112px;
-  }
-
-  .posts {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

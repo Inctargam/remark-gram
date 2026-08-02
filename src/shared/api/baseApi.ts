@@ -14,12 +14,24 @@ export class ApiError extends Error {
   }
 }
 
-async function apiFetch(path: string, init?: RequestInit): Promise<Response> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...init,
+export type ApiRequestInit = RequestInit & {
+  /**
+   * Prefix for the request path. Defaults to the external API base url.
+   * Pass an empty string for route handlers of this very app — they live on the same
+   * origin and must not be sent to the backend host.
+   */
+  baseUrl?: string
+}
+
+async function apiFetch(path: string, init?: ApiRequestInit): Promise<Response> {
+  const { baseUrl = API_BASE_URL, ...requestInit } = init ?? {}
+
+  const response = await fetch(`${baseUrl}${path}`, {
+    ...requestInit,
     headers: {
-      'Content-Type': 'application/json',
-      ...init?.headers,
+      // Only a request that carries a body describes its type; GET and DELETE send none.
+      ...(requestInit.body === undefined ? null : { 'Content-Type': 'application/json' }),
+      ...requestInit.headers,
     },
   })
 
@@ -32,9 +44,15 @@ async function apiFetch(path: string, init?: RequestInit): Promise<Response> {
 }
 
 export const api = {
-  post: (path: string, body: unknown, init?: Omit<RequestInit, 'body' | 'method'>) =>
+  post: (path: string, body: unknown, init?: Omit<ApiRequestInit, 'body' | 'method'>) =>
     apiFetch(path, { ...init, method: 'POST', body: JSON.stringify(body) }),
 
-  get: (path: string, init?: Omit<RequestInit, 'method'>) =>
+  get: (path: string, init?: Omit<ApiRequestInit, 'method'>) =>
     apiFetch(path, { ...init, method: 'GET' }),
+
+  patch: (path: string, body: unknown, init?: Omit<ApiRequestInit, 'body' | 'method'>) =>
+    apiFetch(path, { ...init, method: 'PATCH', body: JSON.stringify(body) }),
+
+  delete: (path: string, init?: Omit<ApiRequestInit, 'method'>) =>
+    apiFetch(path, { ...init, method: 'DELETE' }),
 }

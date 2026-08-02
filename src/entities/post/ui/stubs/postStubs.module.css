@@ -1,0 +1,151 @@
+.comments {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.comment {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.avatar {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: var(--color-dark-100);
+}
+
+.commentBody {
+  margin: 0;
+  color: var(--color-light-100);
+  font-size: var(--font-size-regular-14);
+  font-weight: var(--font-weight-regular-14);
+  line-height: var(--line-height-regular-14);
+}
+
+.commentAuthor {
+  margin-right: 6px;
+  font-weight: var(--font-weight-bold-14);
+}
+
+.commentMeta {
+  margin: 4px 0 0;
+  color: var(--color-light-900);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-small);
+  line-height: var(--line-height-small);
+}
+
+.emptyComments {
+  margin: 0;
+  color: var(--color-light-900);
+  font-size: var(--font-size-regular-14);
+  font-weight: var(--font-weight-regular-14);
+  line-height: var(--line-height-regular-14);
+}
+
+.engagement {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.actions {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  color: var(--color-light-100);
+}
+
+.action {
+  display: flex;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+}
+
+/* Stubs must not look clickable: no pointer cursor, muted color. */
+.action:disabled {
+  color: var(--color-light-900);
+  cursor: default;
+}
+
+.bookmark {
+  margin-left: auto;
+}
+
+.likes {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  color: var(--color-light-100);
+  font-size: var(--font-size-regular-14);
+  font-weight: var(--font-weight-regular-14);
+  line-height: var(--line-height-regular-14);
+}
+
+.likeAvatars {
+  display: flex;
+}
+
+.likeAvatar {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--color-dark-300);
+  border-radius: 50%;
+  background-color: var(--color-dark-100);
+}
+
+.likeAvatar + .likeAvatar {
+  margin-left: -8px;
+}
+
+.likeCount {
+  font-weight: var(--font-weight-bold-14);
+}
+
+.commentForm {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.commentInput {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-light-100);
+  font-family: inherit;
+  font-size: var(--font-size-regular-14);
+  font-weight: var(--font-weight-regular-14);
+  line-height: var(--line-height-regular-14);
+}
+
+.commentInput::placeholder {
+  color: var(--color-light-900);
+}
+
+.publishButton {
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-primary-500);
+  font-size: var(--font-size-medium-14);
+  font-weight: var(--font-weight-medium-14);
+  line-height: var(--line-height-medium-14);
+}
+
+.publishButton:disabled {
+  color: var(--color-light-900);
+  cursor: default;
+}
