@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 
 import type { PostsPage } from '@/entities/post'
+import { resetPostsMockStore } from '@/shared/api/mock/postsStore'
 import { MOCK_CURRENT_USER_ID } from '@/shared/auth'
 
 import { createPostHandler, getPostsListHandler } from './postsListHandler'
-import { resetPostsMockStore } from './postsStore'
 
 const MOCK_API_ORIGIN = 'https://dev.remark-gram.com:3000/api/mock/posts'
 
@@ -47,11 +47,27 @@ describe('getPostsListHandler', () => {
     expect(secondPage.items[0]?.id).toBe(firstPage.nextCursor)
   })
 
-  it('rejects a request without userId', async () => {
+  it('rejects a request without userId or limit', async () => {
     const response = await getPostsListHandler(createListRequest('pageSize=8'))
 
     expect(response.status).toBe(400)
-    await expect(response.json()).resolves.toEqual({ message: 'userId is required.' })
+    await expect(response.json()).resolves.toEqual({ message: 'userId or limit is required.' })
+  })
+
+  it('returns the latest N posts when limit is provided without userId', async () => {
+    const response = await getPostsListHandler(createListRequest('limit=4'))
+    const body: PostsPage = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(body.items).toHaveLength(4)
+    expect(body.nextCursor).toBeNull()
+  })
+
+  it('rejects a limit that exceeds MAX_PAGE_SIZE', async () => {
+    const response = await getPostsListHandler(createListRequest('limit=51'))
+
+    expect(response.status).toBe(400)
+    await expect(response.json()).resolves.toEqual({ message: 'userId or limit is required.' })
   })
 
   it('rejects an unusable pageSize', async () => {

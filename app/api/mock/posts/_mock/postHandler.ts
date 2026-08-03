@@ -1,6 +1,5 @@
 import { isValidPostDescription, POST_DESCRIPTION_MAX_LENGTH } from '@/entities/post'
-
-import { deletePost, findPost, updatePostDescription } from './postsStore'
+import { deletePost, findPost, updatePostDescription } from '@/shared/api/mock/postsStore'
 
 const postNotFound = () => Response.json({ message: 'Post not found.' }, { status: 404 })
 
