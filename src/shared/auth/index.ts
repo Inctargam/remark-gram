@@ -1,3 +1,4 @@
+export { checkMockAuth } from './checkMockAuth'
 export { getCurrentUserId, isProfileOwner, MOCK_CURRENT_USER_ID } from './currentUser'
 export { refreshSession } from './refreshSession'
 export type { SessionStatus } from './sessionStore'

@@ -4,48 +4,55 @@ import {
   POST_DESCRIPTION_MAX_LENGTH,
   PROFILE_POSTS_PAGE_SIZE,
 } from '@/entities/post'
-
-import { createPost, listPosts } from './postsStore'
+import { createPost, listLatestPosts, listPosts } from '@/shared/api/mock/postsStore'
 
 /** A caller that sends no `pageSize` gets what the profile feed asks for anyway. */
 const DEFAULT_PAGE_SIZE = PROFILE_POSTS_PAGE_SIZE
 const MAX_PAGE_SIZE = 50
 
-const parsePageSize = (rawPageSize: string | null): number | null => {
-  if (rawPageSize === null) {
-    return DEFAULT_PAGE_SIZE
+const parseIntegerParam = (raw: string | null, max: number): number | null => {
+  if (raw === null) {
+    return null
   }
 
-  const pageSize = Number(rawPageSize)
-  const isUsablePageSize = Number.isInteger(pageSize) && pageSize > 0 && pageSize <= MAX_PAGE_SIZE
+  const value = Number(raw)
 
-  return isUsablePageSize ? pageSize : null
+  return Number.isInteger(value) && value > 0 && value <= max ? value : null
 }
 
 export const getPostsListHandler = async (request: Request) => {
   const { searchParams } = new URL(request.url)
   const userId = searchParams.get('userId')
+  const limit = parseIntegerParam(searchParams.get('limit'), MAX_PAGE_SIZE)
 
-  if (!userId) {
-    return Response.json({ message: 'userId is required.' }, { status: 400 })
+  if (userId) {
+    const pageSize = searchParams.get('pageSize')
+      ? parseIntegerParam(searchParams.get('pageSize'), MAX_PAGE_SIZE)
+      : DEFAULT_PAGE_SIZE
+
+    if (pageSize === null) {
+      return Response.json(
+        { message: `pageSize must be an integer between 1 and ${MAX_PAGE_SIZE}.` },
+        { status: 400 }
+      )
+    }
+
+    const page = listPosts({ userId, cursor: searchParams.get('cursor'), pageSize })
+
+    if (!page) {
+      return Response.json({ message: 'Unknown cursor.' }, { status: 400 })
+    }
+
+    return Response.json(page)
   }
 
-  const pageSize = parsePageSize(searchParams.get('pageSize'))
+  if (limit) {
+    const items = listLatestPosts(limit)
 
-  if (pageSize === null) {
-    return Response.json(
-      { message: `pageSize must be an integer between 1 and ${MAX_PAGE_SIZE}.` },
-      { status: 400 }
-    )
+    return Response.json({ items, nextCursor: null })
   }
 
-  const page = listPosts({ userId, cursor: searchParams.get('cursor'), pageSize })
-
-  if (!page) {
-    return Response.json({ message: 'Unknown cursor.' }, { status: 400 })
-  }
-
-  return Response.json(page)
+  return Response.json({ message: 'userId or limit is required.' }, { status: 400 })
 }
 
 type CreatePostRequestBody = {

@@ -4,11 +4,13 @@ import { useQueryClient } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
 import { useEffect } from 'react'
 
-import { refreshSession, sessionStore } from '@/shared/auth'
+import { checkMockAuth, refreshSession, sessionStore } from '@/shared/auth'
 
 type Props = {
   children: ReactNode
 }
+
+const isMockAuth = process.env.NEXT_PUBLIC_AUTH_MOCK === 'true'
 
 export const SessionBootstrap = ({ children }: Props) => {
   const queryClient = useQueryClient()
@@ -21,7 +23,11 @@ export const SessionBootstrap = ({ children }: Props) => {
       }
     })
 
-    void refreshSession()
+    if (isMockAuth) {
+      void checkMockAuth()
+    } else {
+      void refreshSession()
+    }
 
     return unsubscribe
   }, [queryClient])

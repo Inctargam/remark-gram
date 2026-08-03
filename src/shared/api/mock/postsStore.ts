@@ -158,6 +158,9 @@ export type CreatePostParams = {
   images: Post['images']
 }
 
+/** Returns the latest `count` posts globally, newest first. */
+export const listLatestPosts = (count: number): Post[] => getState().posts.slice(0, count)
+
 /** New posts go to the top of the feed, matching the newest-first ordering. */
 export const createPost = ({
   ownerId = MOCK_CURRENT_USER_ID,

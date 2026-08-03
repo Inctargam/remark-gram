@@ -4,6 +4,28 @@
 
 ## Unreleased
 
+### 2026-08-03
+
+#### Home Page
+
+- Реализована главная страница с SSG (ISR, `revalidate = 60`): сервер рендерит 4 последних поста и количество зарегистрированных пользователей, клиент проверяет авторизацию через `GET /api/mock/auth/me`.
+- Созданы мок-эндпоинты: `GET /api/mock/posts?limit=4` (глобальный список постов без `userId`), `GET /api/mock/registered-users-count` (возвращает `{ totalCount: 2150 }`), `GET /api/mock/auth/me` (проверяет `Authorization: Bearer mock-token`).
+- Мок-хранилища `postsStore` и `usersCountStore` вынесены из `app/api/mock/` в `src/shared/api/mock/` для доступа через `@/shared/api/mock/` из серверных компонентов.
+- `SessionBootstrap` в mock-режиме (`NEXT_PUBLIC_AUTH_MOCK=true`) вызывает `checkMockAuth()` вместо `refreshSession()`.
+- Компонент `HomePage` принимает `posts` и `registeredUsersCount`, рендерит заголовок «Inctagram», счётчик пользователей и сетку из 4 `PostThumbnail`.
+- Добавлены Storybook-истории (`Default`, `NoPosts`).
+- В `.env.local` добавлены `NEXT_PUBLIC_POSTS_API_MOCK=true` и `NEXT_PUBLIC_AUTH_MOCK=true`.
+
+#### Verification
+
+- `pnpm vitest run` — 151 тест, все проходят.
+- `pnpm build` — успешная сборка, 17/17 страниц, главная помечена как ISR (`ƒ /`).
+- `pnpm lint` — 0 ошибок в затронутых файлах.
+
+#### Notes
+
+- `react-easy-crop` отсутствовал в `node_modules` — установлен через `pnpm install`.
+
 ### 2026-08-02
 
 #### App Styles
