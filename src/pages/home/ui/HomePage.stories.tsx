@@ -10,6 +10,14 @@ const createImageUrl = (label: string, hue: number) =>
     `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080"><rect width="1080" height="1080" fill="hsl(${hue}, 42%, 32%)"/><text x="50%" y="52%" fill="hsl(${hue}, 60%, 88%)" font-family="sans-serif" font-size="220" text-anchor="middle" dominant-baseline="middle">${label}</text></svg>`
   )}`
 
+/**
+ * The counter renders the number inside a `<span>` and the label as a sibling text node,
+ * so `getByText` with a plain string finds no single element holding the whole phrase.
+ * Matching on the wrapping `<p>` keeps the assertion on the full rendered sentence.
+ */
+const usersCountMatcher = (expected: string) => (_: string, element: Element | null) =>
+  element?.tagName === 'P' && element.textContent === expected
+
 const createMockPosts = (): Post[] =>
   Array.from({ length: 4 }, (_, index) => ({
     id: `mock-user-1-post-${String(index + 1).padStart(2, '0')}`,
@@ -50,7 +58,7 @@ export const Default: Story = {
     const canvas = within(canvasElement)
 
     await expect(canvas.getByText('Inctagram')).toBeInTheDocument()
-    await expect(canvas.getByText('2,150 registered users')).toBeInTheDocument()
+    await expect(canvas.getByText(usersCountMatcher('2,150 registered users'))).toBeInTheDocument()
     await expect(canvas.getByText('Latest publications')).toBeInTheDocument()
     await expect(canvas.getAllByAltText(/Mock publication \d\. Seeded/)).toHaveLength(4)
   },
@@ -64,6 +72,6 @@ export const NoPosts: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
 
-    await expect(canvas.getByText('1,000 registered users')).toBeInTheDocument()
+    await expect(canvas.getByText(usersCountMatcher('1,000 registered users'))).toBeInTheDocument()
   },
 }

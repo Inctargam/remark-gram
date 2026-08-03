@@ -10,13 +10,27 @@
 
 - Удалён мёртвый реэкспорт `OAUTH_CONFIG` из `src/shared/config/index.ts`: файл `./oauth` был удалён в `b92614e`, из-за чего баррель ломал типизацию (`TS2339: Cannot find module './oauth'`). `OAUTH_CONFIG` нигде не использовался, актуальный OAuth-код живёт в `src/features/oauth-authentication`.
 
+- Восстановлен порядок экспортов в барреле по правилу `simple-import-sort/exports`.
+
+#### reCAPTCHA
+
+- Добавлен `src/shared/lib/recaptcha/grecaptcha.d.ts` — ambient-декларация `window.grecaptcha.enterprise` (`ready`, `render`, `execute`, `reset`). Скрипт грузится с CDN и присваивает объект в рантайме, поэтому свойство объявлено опциональным. Закрывает 5 ошибок `TS2339`, из-за которых `pnpm build` падал на стадии type-check. Описано только используемое API вместо установки `@types/grecaptcha`.
+
+#### Tests
+
+- Починены две истории в `src/pages/home/ui/HomePage.stories.tsx`. Счётчик рендерит число внутри `<span>`, а подпись — соседним текстовым узлом, поэтому `getByText` со строкой целиком не находил элемент. Ассерты переведены на матчер по обёртке `<p>`; сам компонент не менялся.
+
 #### Verification
 
-- `pnpm exec tsc --noEmit` — ошибка в `src/shared/config/index.ts` устранена.
+- `pnpm exec tsc --noEmit` — 0 ошибок.
+- `pnpm build` — успешная сборка.
+- `pnpm vitest run` — 355 тестов, все проходят.
+- `pnpm lint` — 0 ошибок.
 
 #### Notes
 
-- Остаются 5 несвязанных ошибок `TS2339: Property 'grecaptcha' does not exist on type 'Window'` в `src/shared/lib/recaptcha/` (пришли из мержа `bb70f33`) — нужна глобальная декларация типа или `@types/grecaptcha`. Не исправлялось в рамках этой правки.
+- Подготовка к релизному PR `develop` → `main` (83 коммита, 272 файла).
+- Остаются 1159 предупреждений `prettier/prettier` — почти все в сгенерированном `src/shared/api/openapi/schema.d.ts`; линтер также заходит в папку артефактов `coverage/`. Не блокирует сборку, вынесено за рамки правки.
 
 #### Home Page
 
