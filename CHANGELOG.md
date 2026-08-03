@@ -6,6 +6,18 @@
 
 ### 2026-08-03
 
+#### Shared Config
+
+- Удалён мёртвый реэкспорт `OAUTH_CONFIG` из `src/shared/config/index.ts`: файл `./oauth` был удалён в `b92614e`, из-за чего баррель ломал типизацию (`TS2339: Cannot find module './oauth'`). `OAUTH_CONFIG` нигде не использовался, актуальный OAuth-код живёт в `src/features/oauth-authentication`.
+
+#### Verification
+
+- `pnpm exec tsc --noEmit` — ошибка в `src/shared/config/index.ts` устранена.
+
+#### Notes
+
+- Остаются 5 несвязанных ошибок `TS2339: Property 'grecaptcha' does not exist on type 'Window'` в `src/shared/lib/recaptcha/` (пришли из мержа `bb70f33`) — нужна глобальная декларация типа или `@types/grecaptcha`. Не исправлялось в рамках этой правки.
+
 #### Home Page
 
 - Реализована главная страница с SSG (ISR, `revalidate = 60`): сервер рендерит 4 последних поста и количество зарегистрированных пользователей, клиент проверяет авторизацию через `GET /api/mock/auth/me`.
