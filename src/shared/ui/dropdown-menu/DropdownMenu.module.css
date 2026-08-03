@@ -1,0 +1,79 @@
+.trigger {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    border: none;
+    border-radius: 2px;
+    background: transparent;
+    color: var(--color-light-100);
+    cursor: pointer;
+    transition: color 0.15s ease;
+}
+
+.trigger:hover {
+    color: var(--color-primary-100);
+}
+
+.trigger:focus-visible {
+    outline: 2px solid var(--color-primary-700);
+    outline-offset: 2px;
+}
+
+.trigger[data-popup-open] {
+    color: var(--color-primary-500);
+}
+
+/*
+ * The menu is portalled to the end of the body, so it needs to outrank the dialogs it opens
+ * from (backdrop 100, popup 101) — otherwise a menu inside a modal renders underneath it.
+ */
+.positioner {
+    z-index: 200;
+}
+
+.popup {
+    min-width: 160px;
+    padding: 6px 0;
+    border: 1px solid var(--color-dark-100);
+    border-radius: 2px;
+    background: var(--color-dark-500);
+    outline: none;
+    box-sizing: border-box;
+}
+
+.item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 12px;
+    color: var(--color-light-100);
+    font-size: var(--font-size-regular-14);
+    font-weight: var(--font-weight-regular-14);
+    line-height: var(--line-height-regular-14);
+    cursor: pointer;
+    transition: background-color 0.1s ease;
+    outline: none;
+    user-select: none;
+}
+
+.item[data-highlighted] {
+    background-color: var(--color-dark-300);
+}
+
+.item[data-disabled] {
+    color: var(--color-text-secondary);
+    cursor: not-allowed;
+}
+
+.danger {
+    color: var(--color-danger-300);
+}
+
+.danger[data-highlighted] {
+    color: var(--color-danger-100);
+}
+
+.itemIcon {
+    flex: 0 0 auto;
+}

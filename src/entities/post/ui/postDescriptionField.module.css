@@ -1,0 +1,12 @@
+.field {
+  width: 100%;
+}
+
+.counter {
+  margin: 6px 0 0;
+  color: var(--color-light-900);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-small);
+  line-height: var(--line-height-small);
+  text-align: right;
+}

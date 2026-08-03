@@ -1,0 +1,34 @@
+.author {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.avatar {
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: var(--color-dark-100);
+}
+
+.avatarImage {
+  object-fit: cover;
+}
+
+.username {
+  overflow: hidden;
+  color: var(--color-light-100);
+  font-size: var(--font-size-bold-16);
+  font-weight: var(--font-weight-bold-16);
+  line-height: var(--line-height-bold-16);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Pushes the three-dot menu to the opposite edge of the row. */
+.actions {
+  margin-left: auto;
+}

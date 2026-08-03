@@ -50,6 +50,16 @@
   --color-text-secondary: #8D9094;
   --color-text-placeholder: #8D9094;
 
+  /* ─── Layout: single source of truth for the sticky shell offsets ─── */
+  --layout-header-height: 60px;
+  --layout-bottom-bar-height: 60px;
+  --layout-sidebar-width: 220px;
+
+  /* ─── Z-index: shell chrome stays below Modal (100/101) and dropdowns ─── */
+  --z-index-sidebar: 40;
+  --z-index-header: 50;
+  --z-index-bottom-bar: 50;
+
   /* ─── Typography ──────────────────────────── */
   --font-base: 'Inter', sans-serif;
   /* large */

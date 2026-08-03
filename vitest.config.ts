@@ -16,6 +16,43 @@ export default defineConfig({
     },
   },
   test: {
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html'],
+      // Thresholds are scoped to the posts CRUD code only — the rest of the project
+      // predates the test setup and would drag the numbers below any useful gate.
+      // Listed slice by slice on purpose: a 'src/features/*-post/**' glob would also
+      // pull in features/create-post, which belongs to another task and is not covered here.
+      include: [
+        'src/entities/post/**',
+        'src/features/edit-post/**',
+        'src/features/delete-post/**',
+        'src/features/post-actions/**',
+        'src/widgets/profile-posts/**',
+        'app/api/mock/posts/**',
+      ],
+      // Only what the `unit` project can actually execute is measured. The project runs in
+      // `node` and the repo has no jsdom/RTL, so components and React hooks cannot be
+      // rendered here — they are covered by `play` tests in the `storybook` project, whose
+      // coverage is not collected. Leaving them in would make the number track the amount
+      // of UI files instead of the amount of testing.
+      exclude: [
+        '**/*.stories.tsx',
+        '**/index.ts',
+        '**/*.module.css',
+        // Components: covered by story `play` tests.
+        '**/*.tsx',
+        // React hooks: need a DOM and a QueryClient, so their logic is extracted into
+        // pure functions (`shouldFetchNextPage`, `flattenPostsPages`) which are covered.
+        '**/use*.ts',
+        // Route files are thin re-exports; the handlers behind them are tested directly.
+        '**/route.ts',
+      ],
+      thresholds: {
+        lines: 80,
+        branches: 80,
+      },
+    },
     projects: [
       {
         extends: true,

@@ -1,0 +1,10 @@
+/* The design gives this confirmation a narrower popup than the 438px modal default. */
+.dialog {
+  width: min(378px, calc(100vw - 32px));
+}
+
+.error {
+  display: block;
+  margin-top: 12px;
+  color: var(--color-danger-500);
+}
