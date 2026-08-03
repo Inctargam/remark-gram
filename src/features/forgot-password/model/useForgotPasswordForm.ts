@@ -1,18 +1,20 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
-import type { RecaptchaState } from '@/shared/ui/recaptcha'
+import { executeRecaptchaV3 } from '@/shared/lib/recaptcha'
+
+import { usePasswordResetRequestMutation } from '../api/usePasswordResetRequestMutation'
 
 type ForgotPasswordFormValues = {
   email: string
 }
 
-const RECAPTCHA_LOADING_DURATION = 300
-
 export const useForgotPasswordForm = () => {
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false)
-  const [recaptchaState, setRecaptchaState] = useState<RecaptchaState>('default')
   const [submittedEmail, setSubmittedEmail] = useState<string | null>(null)
+  const [submitError, setSubmitError] = useState<string | null>(null)
+
+  const { isPending, mutateAsync } = usePasswordResetRequestMutation()
 
   const {
     formState: { errors, isValid },
@@ -25,33 +27,13 @@ export const useForgotPasswordForm = () => {
     mode: 'onChange',
   })
 
-  const isRecaptchaVerified = recaptchaState === 'checked'
-  const canSubmit = isValid && (Boolean(submittedEmail) || isRecaptchaVerified)
-  const isSubmitDisabled = !canSubmit
-
-  useEffect(() => {
-    if (recaptchaState !== 'loading') {
-      return
-    }
-
-    const recaptchaTimeoutId = setTimeout(() => {
-      setRecaptchaState('checked')
-    }, RECAPTCHA_LOADING_DURATION)
-
-    return () => {
-      clearTimeout(recaptchaTimeoutId)
-    }
-  }, [recaptchaState])
+  const canSubmit = isValid
+  const isSubmitDisabled = !canSubmit || isPending
 
   const emailChangeHandler = () => {
     setIsConfirmationOpen(false)
     setSubmittedEmail(null)
-
-    if (recaptchaState === 'default') {
-      return
-    }
-
-    setRecaptchaState('default')
+    setSubmitError(null)
   }
 
   const emailField = register('email', {
@@ -59,17 +41,23 @@ export const useForgotPasswordForm = () => {
     onChange: emailChangeHandler,
   })
 
-  const recaptchaVerifyHandler = () => {
-    setRecaptchaState('loading')
-  }
-
-  const submitFormHandler = ({ email }: ForgotPasswordFormValues) => {
+  const submitFormHandler = async ({ email }: ForgotPasswordFormValues) => {
     if (!canSubmit) {
       return
     }
 
-    setSubmittedEmail(email.trim())
-    setIsConfirmationOpen(true)
+    setSubmitError(null)
+
+    try {
+      const recaptchaToken = await executeRecaptchaV3('forgot_password')
+
+      await mutateAsync({ email: email.trim(), recaptchaToken })
+
+      setSubmittedEmail(email.trim())
+      setIsConfirmationOpen(true)
+    } catch {
+      setSubmitError('Something went wrong. Please try again.')
+    }
   }
 
   const submitHandler = handleSubmit(submitFormHandler)
@@ -83,9 +71,9 @@ export const useForgotPasswordForm = () => {
     emailError: errors.email?.message,
     emailField,
     isConfirmationOpen,
+    isPending,
     isSubmitDisabled,
-    recaptchaState,
-    recaptchaVerifyHandler,
+    submitError,
     submitHandler,
     submittedEmail,
   }
