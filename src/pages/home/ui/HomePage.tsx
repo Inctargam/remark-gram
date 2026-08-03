@@ -1,8 +1,15 @@
 import Image from 'next/image'
 
+import type { Post } from '@/entities/post'
+
 import styles from './homePage.module.css'
 
-export const HomePage = () => (
+type Props = {
+  posts: Post[]
+  registeredUsersCount: number
+}
+
+export const HomePage = (_props: Props) => (
   <div className={styles.page}>
     <main className={styles.main}>
       <Image

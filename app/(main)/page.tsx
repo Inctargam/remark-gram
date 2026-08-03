@@ -2,6 +2,9 @@ import { redirect } from 'next/navigation'
 
 import { getOAuthErrorRedirectPath } from '@/features/oauth-authentication'
 import { HomePage } from '@/pages/home'
+import { getHomePagePosts, getHomePageUsersCount } from '@/shared/api/homePageData'
+
+export const revalidate = 60
 
 type Props = {
   searchParams: Promise<{
@@ -17,5 +20,10 @@ export default async function Page({ searchParams }: Props) {
     redirect(redirectPath)
   }
 
-  return <HomePage />
+  const [{ items: posts }, { totalCount }] = await Promise.all([
+    getHomePagePosts(),
+    getHomePageUsersCount(),
+  ])
+
+  return <HomePage posts={posts} registeredUsersCount={totalCount} />
 }
