@@ -1,4 +1,3 @@
-export { OAUTH_CONFIG } from './oauth'
 export { RECAPTCHA_SITE_KEY } from './recaptcha'
 export { API_BASE_URL } from './api'
 export { ROUTES } from './routes'
