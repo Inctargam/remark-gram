@@ -27,11 +27,27 @@
     border-bottom: 1px solid var(--color-dark-100);
 }
 
+.header[data-has-start] {
+    display: grid;
+    grid-template-columns: 24px 1fr 24px;
+    gap: 16px;
+}
+
+.headerStart {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .title {
     margin: 0;
     color: var(--color-light-100);
     font-size: var(--font-size-h1);
     font-weight: var(--font-weight-bold);
+}
+
+.header[data-has-start] .title {
+    text-align: center;
 }
 
 .close {

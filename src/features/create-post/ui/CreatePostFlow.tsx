@@ -26,6 +26,7 @@ export const CreatePostFlow = ({ onClose }: Props) => {
     photos,
     publishError,
     publishPostHandler,
+    removePhotoHandler,
     saveCurrentDraftHandler,
     selectPhotosHandler,
     selectedPhoto,
@@ -101,6 +102,7 @@ export const CreatePostFlow = ({ onClose }: Props) => {
         onNextFromCrop={openFiltersStepHandler}
         onNextFromFilters={openPublicationStepHandler}
         onPhotoSelect={updateSelectedPhotoHandler}
+        onPhotoRemove={removePhotoHandler}
         onPhotosSelect={selectPhotosHandler}
         onPublish={publishHandler}
         photos={photos}

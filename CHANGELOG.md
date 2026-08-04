@@ -4,6 +4,26 @@
 
 ## Unreleased
 
+### 2026-08-04
+
+#### Create Post
+
+- В шагах `Filters` и `Publication` добавлена стрелка назад в заголовке модального wizard-а создания поста; на `Cropping` стрелки назад нет, потому что управление выбранными фото доступно прямо на этом шаге.
+- Нижние текстовые кнопки `Back` в editor-шагах убраны, чтобы не дублировать действие.
+- В `Cropping` рядом с выбранными миниатюрами появилась icon-кнопка добавления фото, а на самих миниатюрах — крестик удаления отдельного фото.
+- Ошибки дозагрузки фото на `Cropping` теперь показываются рядом с миниатюрами, включая лимит 10 фото и неверный формат/размер файла.
+- `shared/ui/Modal` получил необязательный левый слот заголовка `headerStart`; без него существующие модалки сохраняют прежнюю раскладку.
+- Storybook-сценарии `Crop With One Photo` и `Crop With Several Photos` проверяют отсутствие header back-кнопки на crop и удаление выбранного фото из миниатюр.
+
+#### Verification
+
+- `pnpm lint` прошёл без ошибок; остаются существующие предупреждения проекта в `src/shared/api/openapi/schema.d.ts` и `src/features/sign-up/model/useSignUpForm.ts`.
+- `pnpm exec vitest run --project storybook src/features/create-post/ui/stories/CreatePostFlow.stories.tsx` прошёл: 6 story-тестов.
+- Storybook MCP focused tests для `CreatePostModal` (`crop`, `filters`, `publication`) прошли с `a11y: false`.
+- Storybook a11y для `crop` не проходит из-за существующего contrast у primary-кнопки `Next`; цветовую систему кнопок в этом фиксе не меняли.
+- `pnpm exec stylelint src/shared/ui/modal/Modal.module.css src/features/create-post/ui/createPost.module.css` не прошёл из-за существующих нарушений в `createPost.module.css` (`clip`, порядок старых свойств, `:global`).
+- `pnpm exec tsc --noEmit` не прошёл из-за stale `.next/types/validator.ts`, который ссылается на отсутствующие route-файлы.
+
 ### 2026-08-03
 
 #### Shared Config
@@ -75,6 +95,7 @@
 - `pnpm exec eslint src/widgets` — чисто.
 - `pnpm exec vitest run --project=storybook` — 37 файлов, 158 тестов, прошло. Скрипта `pnpm test:storybook` в проекте нет.
 - Новая стори проверена на ловлю регрессии: при временном снятии `sticky` с шапки и со слота сайдбара она падает.
+
 ### 2026-08-02 — Причёсывание кода постов перед PR
 
 #### Posts
@@ -381,6 +402,7 @@
 
 - Для прогона story-тестов локально понадобилось доустановить браузер: `pnpm exec playwright install chromium`.
 - Пропсы существующих компонентов сверялись по исходникам (`Modal.tsx`, `Button.tsx`) и типам `@base-ui/react`, а не через MCP `inctagram-storybook`: этот сервер настроен для Codex и в текущем окружении недоступен.
+
 ### 2026-08-01
 
 #### Tooling
@@ -394,6 +416,7 @@
 - `pnpm exec vitest run --project unit` прошёл успешно: 19 файлов, 84 теста.
 - `pnpm exec vitest run --project storybook` прошёл успешно: 37 файлов, 157 тестов.
 - `pnpm build` прошёл успешно.
+
 ### 2026-07-31
 
 #### Auth
@@ -508,6 +531,7 @@
 - `pnpm exec tsc --noEmit` прошёл успешно.
 - `pnpm build` был остановлен вручную после длительного зависания на этапе `Creating an optimized production build ...` без вывода ошибок.
 - Storybook tests не запускались, потому что stories не изменялись и Storybook MCP tools недоступны в текущей сессии.
+
 ### 2026-07-14
 
 #### Auth
@@ -791,6 +815,7 @@
 #### Verification
 
 - Не запускались; изменение только документационное.
+
 ### 2026-06-14
 
 #### Shared UI

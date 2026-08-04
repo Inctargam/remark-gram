@@ -59,6 +59,32 @@ export const useCreatePostPhotos = () => {
     setSelectedPhotoId(photosRef.current[0]?.id ?? null)
   }, [])
 
+  const removePhotoHandler = useCallback((photoId: string) => {
+    setPhotos((currentPhotos) => {
+      const removedPhotoIndex = currentPhotos.findIndex((photo) => photo.id === photoId)
+
+      if (removedPhotoIndex === -1) {
+        return currentPhotos
+      }
+
+      const removedPhoto = currentPhotos[removedPhotoIndex]
+      const nextPhotos = currentPhotos.filter((photo) => photo.id !== photoId)
+
+      URL.revokeObjectURL(removedPhoto.previewUrl)
+      setSelectedPhotoId((currentSelectedPhotoId) => {
+        if (currentSelectedPhotoId !== photoId) {
+          return nextPhotos.some(({ id }) => id === currentSelectedPhotoId)
+            ? currentSelectedPhotoId
+            : (nextPhotos[0]?.id ?? null)
+        }
+
+        return nextPhotos[Math.min(removedPhotoIndex, nextPhotos.length - 1)]?.id ?? null
+      })
+
+      return nextPhotos
+    })
+  }, [])
+
   const resetPhotosHandler = useCallback(() => {
     revokePhotoPreviewUrls(photosRef.current)
     setPhotos([])
@@ -145,6 +171,7 @@ export const useCreatePostPhotos = () => {
     selectedPhoto,
     selectedPhotoId: effectiveSelectedPhotoId,
     addPhotosHandler,
+    removePhotoHandler,
     resetPhotosHandler,
     restorePhotosHandler,
     selectFirstPhotoHandler,

@@ -27,6 +27,7 @@ export const useCreatePostFlow = () => {
     selectedPhoto,
     selectedPhotoId,
     addPhotosHandler,
+    removePhotoHandler,
     resetPhotosHandler,
     restorePhotosHandler,
     selectFirstPhotoHandler,
@@ -55,7 +56,9 @@ export const useCreatePostFlow = () => {
 
       setUploadError(null)
       addPhotosHandler(files)
-      setStep('crop')
+      setStep((currentStep) =>
+        currentStep === 'add-photo' && photos.length > 0 ? currentStep : 'crop'
+      )
     },
     [addPhotosHandler, photos.length]
   )
@@ -73,6 +76,17 @@ export const useCreatePostFlow = () => {
     selectFirstPhotoHandler()
     setStep('publication')
   }, [selectFirstPhotoHandler])
+
+  const removePhotoFromFlowHandler = useCallback(
+    (photoId: string) => {
+      removePhotoHandler(photoId)
+
+      if (photos.length <= 1) {
+        setStep('add-photo')
+      }
+    },
+    [photos.length, removePhotoHandler]
+  )
 
   const updateDescriptionHandler = useCallback((descriptionValue: string) => {
     setDescription(normalizePostDescription(descriptionValue))
@@ -164,6 +178,7 @@ export const useCreatePostFlow = () => {
     openFiltersStepHandler,
     openPublicationStepHandler,
     publishPostHandler,
+    removePhotoHandler: removePhotoFromFlowHandler,
     resetFlowHandler,
     saveCurrentDraftHandler,
     selectPhotosHandler,
