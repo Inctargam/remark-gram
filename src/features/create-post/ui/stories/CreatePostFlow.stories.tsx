@@ -215,7 +215,7 @@ export const CropWithSeveralPhotos: Story = {
     await userEvent.click(documentCanvas.getByRole('button', { name: /remove photo 1/i }))
     await expect(args.onPhotoRemove).toHaveBeenCalledTimes(1)
     await expect(args.onPhotoRemove).toHaveBeenCalledWith('story-photo-1')
-    await expect(documentCanvas.queryByRole('button', { name: /select photo 3/i })).toBeNull()
+    await expect(documentCanvas.getAllByRole('button', { name: /select photo/i })).toHaveLength(2)
   },
 }
 

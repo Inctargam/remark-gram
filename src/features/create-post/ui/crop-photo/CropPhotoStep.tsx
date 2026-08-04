@@ -87,6 +87,7 @@ export const CropPhotoStep = ({
           ref={fileInputRef}
           className={styles.fileInput}
           type="file"
+          aria-label="Add photos"
           accept="image/jpeg,image/png"
           multiple
           onChange={fileChangeHandler}

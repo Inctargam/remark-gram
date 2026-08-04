@@ -4,6 +4,24 @@
 
 ## Unreleased
 
+### 2026-08-05
+
+#### Create Post
+
+- Хуки создания поста приведены к более чистой модели для React 19: побочные эффекты `URL.createObjectURL`/`URL.revokeObjectURL` и синхронизация выбранного фото больше не выполняются внутри updater-функций `setState`.
+- Ручные `useCallback` убраны из create-post hooks там, где они не дают полезного стабильного контракта и дублируют работу React Compiler.
+- Скрытый file input на шаге `Cropping` получил доступное имя `Add photos`, поэтому новый критичный Storybook a11y label-issue закрыт.
+- Storybook-проверка удаления фото теперь проверяет количество оставшихся thumbnail-кнопок, а не нестабильную подпись после переиндексации.
+
+#### Verification
+
+- `pnpm lint` прошёл без ошибок; остаются существующие предупреждения проекта в `src/shared/api/openapi/schema.d.ts` и `src/features/sign-up/model/useSignUpForm.ts`.
+- `pnpm exec tsc --noEmit` прошёл без ошибок.
+- `pnpm test:unit` прошёл: 28 файлов, 151 тест.
+- Storybook MCP focused tests для `CreatePostModal` (`crop`, `filters`, `publication`) прошли с `a11y: false`.
+- Storybook a11y для тех же сценариев больше не показывает label-ошибку file input; остаются существующие contrast-нарушения общей цветовой системы `Button`/`TextArea`, визуальные цвета в этой правке не менялись.
+- `pnpm build` был запущен, но остановлен вручную: Next.js/Turbopack завис на этапе `Creating an optimized production build ...` без дальнейшего вывода.
+
 ### 2026-08-04
 
 #### Create Post
