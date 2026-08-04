@@ -1,0 +1,101 @@
+/* The photo column sizes itself — its width lives in `postGallery.module.css`. */
+.post {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+}
+
+.side {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  min-width: 0;
+  border-left: 1px solid var(--color-dark-100);
+}
+
+/* Frame around the shared author row: here it is a fixed-height bar with a divider. */
+.author {
+  height: 59px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--color-dark-100);
+}
+
+.content {
+  min-height: 0;
+  padding: 24px;
+}
+
+.description {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin: 0 0 16px;
+}
+
+/* Empty circle that lines the description up with the comments below it. */
+.descriptionAvatar {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: var(--color-dark-100);
+}
+
+.descriptionBody {
+  min-width: 0;
+}
+
+.descriptionText {
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--color-light-100);
+  font-size: var(--font-size-regular-14);
+  font-weight: var(--font-weight-regular-14);
+  line-height: var(--line-height-regular-14);
+}
+
+.descriptionAuthor {
+  margin-right: 6px;
+  font-weight: var(--font-weight-bold-14);
+}
+
+.descriptionTime {
+  margin: 4px 0 0;
+  color: var(--color-light-900);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-small);
+  line-height: var(--line-height-small);
+}
+
+.footer {
+  border-top: 1px solid var(--color-dark-100);
+}
+
+.engagement {
+  padding: 12px 24px;
+}
+
+/* Publication date sits under the likes row, above the divider — as in the design. */
+.publishedAt {
+  margin: 8px 0 0;
+  color: var(--color-light-900);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-small);
+  line-height: var(--line-height-small);
+}
+
+.commentForm {
+  padding: 12px 24px;
+  border-top: 1px solid var(--color-dark-100);
+}
+
+@media (max-width: 900px) {
+  .post {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .side {
+    border-left: none;
+  }
+}

@@ -2,7 +2,8 @@
 
 import Link from 'next/link'
 
-import { getOAuthAuthorizeEndpoint } from '@/features/oauth-sign-in'
+import { EMAIL_RULES, PASSWORD_LENGTH_RULES } from '@/entities/auth'
+import { OAUTH_AUTHORIZE_URLS } from '@/features/oauth-authentication'
 import { ROUTES } from '@/shared/config'
 import { Button } from '@/shared/ui/button'
 import { Card } from '@/shared/ui/card'
@@ -10,7 +11,6 @@ import { Icon } from '@/shared/ui/icon'
 import { Input } from '@/shared/ui/input'
 
 import { useSignInForm } from '../model/useSignInForm'
-import { EMAIL_RULES, PASSWORD_RULES } from '../model/validationRules'
 import styles from './SignInForm.module.css'
 
 export const SignInForm = () => {
@@ -25,7 +25,7 @@ export const SignInForm = () => {
           <Button
             className={styles.socialButton}
             nativeButton={false}
-            render={<a href={getOAuthAuthorizeEndpoint('google')} />}
+            render={<a href={OAUTH_AUTHORIZE_URLS.google} />}
             variant="text"
             aria-label="Sign in with Google">
             <Icon iconId="icon-google" width={36} height={36} />
@@ -33,7 +33,7 @@ export const SignInForm = () => {
           <Button
             className={styles.socialButton}
             nativeButton={false}
-            render={<a href={getOAuthAuthorizeEndpoint('github')} />}
+            render={<a href={OAUTH_AUTHORIZE_URLS.github} />}
             variant="text"
             aria-label="Sign in with GitHub">
             <Icon iconId="icon-github" width={36} height={36} />
@@ -53,7 +53,7 @@ export const SignInForm = () => {
             placeholder="**********"
             type="password"
             error={errors.password?.message}
-            {...register('password', PASSWORD_RULES)}
+            {...register('password', PASSWORD_LENGTH_RULES)}
           />
         </div>
 

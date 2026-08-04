@@ -14,6 +14,8 @@ type Props = {
   title: string
   children: ReactNode
   className?: string
+  /** Class for the body wrapper — for dialogs whose content must ignore the default padding. */
+  bodyClassName?: string
   disablePointerDismissal?: boolean
 }
 
@@ -25,6 +27,7 @@ export const Modal = ({
   title,
   children,
   className,
+  bodyClassName,
   disablePointerDismissal = false,
 }: Props) => (
   <Dialog.Root
@@ -40,7 +43,7 @@ export const Modal = ({
             <Icon iconId="icon-close-outline" width={24} height={24} />
           </Dialog.Close>
         </div>
-        <div className={styles.body}>{children}</div>
+        <div className={clsx(styles.body, bodyClassName)}>{children}</div>
       </Dialog.Popup>
     </Dialog.Portal>
   </Dialog.Root>

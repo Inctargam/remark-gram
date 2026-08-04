@@ -1,0 +1,54 @@
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.sidebarSlot {
+  display: none;
+}
+
+.main {
+  flex: 1;
+
+  /* Flex items default to min-width: auto — wide grids would push the body sideways */
+  min-width: 0;
+}
+
+.bottomBarSlot {
+  position: sticky;
+  bottom: 0;
+  z-index: var(--z-index-bottom-bar);
+}
+
+.languageSelector {
+  width: 163px;
+}
+
+@media (width >= 768px) {
+  .content {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  /* Pinned under the sticky header; scrolls internally if the menu outgrows the viewport */
+  .sidebarSlot {
+    position: sticky;
+    top: var(--layout-header-height);
+    z-index: var(--z-index-sidebar);
+    display: block;
+    flex-shrink: 0;
+    height: calc(100vh - var(--layout-header-height));
+    overflow-y: auto;
+  }
+
+  .bottomBarSlot {
+    display: none;
+  }
+}

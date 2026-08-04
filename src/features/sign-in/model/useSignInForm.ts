@@ -2,6 +2,7 @@ import { useRouter } from 'next/navigation'
 import { useForm, useWatch } from 'react-hook-form'
 
 import { ApiError } from '@/shared/api/baseApi'
+import { sessionStore } from '@/shared/auth'
 import { ROUTES } from '@/shared/config'
 
 import { useLoginMutation } from '../api/useLoginMutation'
@@ -33,7 +34,8 @@ export const useSignInForm = () => {
     mutate(
       { email: data.email, password: data.password },
       {
-        onSuccess: () => {
+        onSuccess: ({ accessToken }) => {
+          sessionStore.getState().setAuthenticated(accessToken)
           router.push(ROUTES.profile)
         },
         onError: (error) => {

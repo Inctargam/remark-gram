@@ -1,8 +1,6 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
-import { ApiError } from '@/shared/api/baseApi'
-
 import { useRegisterMutation } from '../api/useRegisterMutation'
 import type { SignUpFormValues } from './signUpFormValues'
 
@@ -34,7 +32,7 @@ export const useSignUpForm = () => {
     Boolean(email) &&
     Boolean(password) &&
     Boolean(passwordConfirmation) &&
-    agreeToTerms === true
+    agreeToTerms
 
   const isSubmitDisabled = !hasAllValues || !isValid || isPending
 
@@ -47,10 +45,11 @@ export const useSignUpForm = () => {
           setIsSuccessModalOpen(true)
         },
         onError: (error) => {
-          if (!(error instanceof ApiError) || !error.data) {
+          // TODO(api-error-middleware): Replace with the centralized API error type.
+          if (!(error instanceof Error)) {
             return
           }
-          const { message } = error.data
+          const { message } = error
 
           if (message === EMAIL_TAKEN_MSG) {
             setError('email', { message })

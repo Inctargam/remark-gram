@@ -1,11 +1,14 @@
 .header {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-index-header);
   width: 100%;
   background-color: var(--color-dark-700);
   border-bottom: 1px solid var(--color-dark-300);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 60px;
+  height: var(--layout-header-height);
   padding: 0 15px 0 15px;
 }
 
