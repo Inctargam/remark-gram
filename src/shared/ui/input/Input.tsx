@@ -2,13 +2,14 @@ import { Field } from '@base-ui/react/field'
 import type { InputProps as BaseInputProps } from '@base-ui/react/input'
 import { Input as BaseInput } from '@base-ui/react/input'
 import clsx from 'clsx'
+import type { ReactNode } from 'react'
 import { useState } from 'react'
 
 import { Icon } from '../icon'
 import styles from './input.module.css'
 
 export type InputProps = {
-  label?: string
+  label?: ReactNode
   error?: string
   className?: string
 } & Omit<BaseInputProps, 'className'>

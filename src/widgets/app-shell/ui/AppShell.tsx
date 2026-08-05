@@ -1,9 +1,11 @@
 'use client'
 
+import { usePathname } from 'next/navigation'
 import type { ReactNode } from 'react'
 
 import { useLogoutMutation } from '@/features/logout'
 import { useSessionStatus } from '@/shared/auth'
+import { ROUTES } from '@/shared/config'
 
 import { AppShellView } from './AppShellView'
 
@@ -12,11 +14,13 @@ type Props = {
 }
 
 export const AppShell = ({ children }: Props) => {
+  const pathname = usePathname()
   const status = useSessionStatus()
   const { mutateAsync: logout } = useLogoutMutation()
+  const isSettingsPage = pathname === ROUTES.settings
 
   return (
-    <AppShellView status={status} onLogout={logout}>
+    <AppShellView hideBottomBar={isSettingsPage} status={status} onLogout={logout}>
       {children}
     </AppShellView>
   )

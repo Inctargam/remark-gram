@@ -16,4 +16,5 @@ export const ROUTES = {
   termsOfService: '/terms-of-service',
   privacyPolicy: '/privacy-policy',
   confirmEmail: '/auth/registration/confirmation',
+  settings: '/settings',
 } as const

@@ -4,6 +4,30 @@
 
 ## Unreleased
 
+### 2026-08-05
+
+#### Profile Settings
+
+- Добавлена адаптивная страница общей информации профиля по макетам Figma для desktop 1280 px и mobile 360 px: аватар, поля пользователя, дата рождения, выбор страны и города, описание и кнопка сохранения.
+- На desktop страна и город отображаются отдельными селектами, а на mobile используются единое поле `City` и отдельный заголовок страницы с возвратом в профиль; остальные вкладки настроек показаны как недоступные.
+- Приватный маршрут `/settings` подключён к FSD-композиции `SettingsPage`; идентификатор пользователя удалён из URL, поскольку настройки всегда относятся к текущей сессии.
+- Гость при прямом открытии `/settings` перенаправляется на `/sign-in`, форма не отображается во время проверки сессии, а после входа сохраняется существующий переход в `/profile`.
+- Добавлены Storybook-сценарии General information и Guest redirect с проверкой активной вкладки, недоступных разделов, начальных значений, кнопки сохранения и защиты маршрута.
+
+#### App Shell
+
+- Для авторизованной mobile-раскладки подключён существующий `HeaderMobile` с компактным переключателем языка; логотипы desktop и mobile приведены к названию `Inctagram` из макета.
+- `BottomBar` не отображается на маршруте настроек профиля; sticky-поведение общего header сохранено.
+
+#### Verification
+
+- `node node_modules/eslint/bin/eslint.js ...` по затронутым TypeScript-файлам прошёл без ошибок.
+- `node node_modules/stylelint/bin/stylelint.mjs src/pages/settings/ui/settingsPage.module.css src/widgets/app-shell/ui/AppShell.module.css` прошёл без ошибок.
+- `node_modules/.bin/tsc.cmd --noEmit --pretty false` прошёл без ошибок.
+- `node_modules/.bin/vitest.cmd run --project storybook ...` прошёл: 3 story-файла, 11 тестов, включая authenticated- и guest-состояния настроек.
+- `pnpm run build` прошёл; Next.js собрал 19 маршрутов, включая приватный `/settings`.
+- Верстка вручную сверена в Storybook при размерах 1280×794 и 360×1068.
+
 ### 2026-08-03
 
 #### Shared Config
@@ -75,6 +99,7 @@
 - `pnpm exec eslint src/widgets` — чисто.
 - `pnpm exec vitest run --project=storybook` — 37 файлов, 158 тестов, прошло. Скрипта `pnpm test:storybook` в проекте нет.
 - Новая стори проверена на ловлю регрессии: при временном снятии `sticky` с шапки и со слота сайдбара она падает.
+
 ### 2026-08-02 — Причёсывание кода постов перед PR
 
 #### Posts
@@ -381,6 +406,7 @@
 
 - Для прогона story-тестов локально понадобилось доустановить браузер: `pnpm exec playwright install chromium`.
 - Пропсы существующих компонентов сверялись по исходникам (`Modal.tsx`, `Button.tsx`) и типам `@base-ui/react`, а не через MCP `inctagram-storybook`: этот сервер настроен для Codex и в текущем окружении недоступен.
+
 ### 2026-08-01
 
 #### Tooling
@@ -394,6 +420,7 @@
 - `pnpm exec vitest run --project unit` прошёл успешно: 19 файлов, 84 теста.
 - `pnpm exec vitest run --project storybook` прошёл успешно: 37 файлов, 157 тестов.
 - `pnpm build` прошёл успешно.
+
 ### 2026-07-31
 
 #### Auth
@@ -508,6 +535,7 @@
 - `pnpm exec tsc --noEmit` прошёл успешно.
 - `pnpm build` был остановлен вручную после длительного зависания на этапе `Creating an optimized production build ...` без вывода ошибок.
 - Storybook tests не запускались, потому что stories не изменялись и Storybook MCP tools недоступны в текущей сессии.
+
 ### 2026-07-14
 
 #### Auth
@@ -791,6 +819,7 @@
 #### Verification
 
 - Не запускались; изменение только документационное.
+
 ### 2026-06-14
 
 #### Shared UI
