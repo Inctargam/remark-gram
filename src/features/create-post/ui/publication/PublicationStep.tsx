@@ -13,7 +13,6 @@ type Props = {
   publishError: string | null
   selectedPhoto: CreatePostPhoto
   selectedPhotoId: string | null
-  onBack: () => void
   onDescriptionChange: (description: string) => void
   onPhotoSelect: (photoId: string) => void
   onPublish: () => void
@@ -26,7 +25,6 @@ export const PublicationStep = ({
   publishError,
   selectedPhoto,
   selectedPhotoId,
-  onBack,
   onDescriptionChange,
   onPhotoSelect,
   onPublish,
@@ -57,9 +55,6 @@ export const PublicationStep = ({
       )}
 
       <div className={styles.stepActions}>
-        <Button type="button" variant="outline" disabled={isPublishing} onClick={onBack}>
-          Back
-        </Button>
         <Button type="button" disabled={isPublishing} onClick={onPublish}>
           {isPublishing ? 'Publishing...' : 'Publish'}
         </Button>

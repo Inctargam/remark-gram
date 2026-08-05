@@ -12,7 +12,6 @@ type Props = {
   photos: CreatePostPhoto[]
   selectedPhoto: CreatePostPhoto
   selectedPhotoId: string | null
-  onBack: () => void
   onFilterChange: (filterId: CreatePostFilterId) => void
   onNext: () => void
   onPhotoSelect: (photoId: string) => void
@@ -22,7 +21,6 @@ export const FilterPhotoStep = ({
   photos,
   selectedPhoto,
   selectedPhotoId,
-  onBack,
   onFilterChange,
   onNext,
   onPhotoSelect,
@@ -70,9 +68,6 @@ export const FilterPhotoStep = ({
         </fieldset>
 
         <div className={styles.stepActions}>
-          <Button type="button" variant="outline" onClick={onBack}>
-            Back
-          </Button>
           <Button type="button" onClick={onNext}>
             Next
           </Button>
