@@ -1,7 +1,9 @@
 const stylelintConfig = {
   extends: ['stylelint-config-standard'],
   plugins: ['stylelint-order'],
+  referenceFiles: ['src/app/styles/tokens.css'],
   rules: {
+    'no-unknown-custom-properties': true,
     'selector-class-pattern': '^[a-z][a-zA-Z0-9]+$',
     'declaration-no-important': true,
     'declaration-block-no-duplicate-properties': true,

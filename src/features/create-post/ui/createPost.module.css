@@ -416,7 +416,7 @@
   color: var(--color-light-100);
   font-size: var(--font-size-regular-16);
   font-weight: var(--font-weight-regular-16);
-  line-height: var(--line-height-regular-24);
+  line-height: var(--line-height-regular-16);
 }
 
 .closeConfirmActions {
