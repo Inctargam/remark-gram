@@ -31,3 +31,12 @@
   line-height: var(--line-height-regular-16);
   text-align: center;
 }
+
+.text p {
+  margin: 0;
+}
+
+.text a {
+  color: var(--color-primary-500);
+  text-decoration: underline;
+}
