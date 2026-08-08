@@ -33,7 +33,7 @@ export const useEditProfileForm = () => {
     trigger,
   } = useForm<EditProfileFormValues>({
     defaultValues: EMPTY_EDIT_PROFILE_FORM_VALUES,
-    mode: 'onBlur',
+    mode: 'onTouched',
     reValidateMode: 'onChange',
   })
   const locationFields = useProfileLocationFields({ control })

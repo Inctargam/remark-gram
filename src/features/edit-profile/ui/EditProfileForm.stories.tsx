@@ -175,6 +175,29 @@ export const ValidationError: Story = {
   },
 }
 
+export const CorrectedValidationError: Story = {
+  play: async ({ canvas }) => {
+    const username = await canvas.findByLabelText('Username*')
+    const saveButton = canvas.getByRole('button', { name: 'Save Changes' })
+
+    await userEvent.clear(username)
+    await userEvent.type(username, 'short')
+    await userEvent.tab()
+
+    await expect(canvas.getByText('Minimum number of characters 6')).toBeVisible()
+    await expect(saveButton).toBeDisabled()
+
+    await userEvent.click(username)
+    await userEvent.clear(username)
+    await userEvent.type(username, 'valid-user')
+
+    await waitFor(() => {
+      expect(canvas.queryByText('Minimum number of characters 6')).not.toBeInTheDocument()
+      expect(saveButton).toBeEnabled()
+    })
+  },
+}
+
 export const RequiredField: Story = {
   play: async ({ canvas }) => {
     const firstName = await canvas.findByLabelText('First Name*')
