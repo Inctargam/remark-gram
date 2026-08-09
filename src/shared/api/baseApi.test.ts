@@ -53,6 +53,16 @@ describe('api', () => {
     expect(getRequestInit().body).toBe(JSON.stringify({ userName: 'user123' }))
   })
 
+  it('lets the browser declare the multipart boundary for FormData requests', async () => {
+    const formData = new FormData()
+    formData.append('file', new Blob(['photo'], { type: 'image/png' }), 'photo.png')
+
+    await api.postForm('/api/v1/profile/avatar', formData, { baseUrl: '' })
+
+    expect(getRequestInit().headers).toEqual({})
+    expect(getRequestInit().body).toBe(formData)
+  })
+
   it('sends no content type on a request without a body', async () => {
     await api.delete('/api/mock/posts/post-1', { baseUrl: '' })
 
