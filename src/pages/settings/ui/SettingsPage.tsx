@@ -1,50 +1,40 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
 
 import { EditProfileForm } from '@/features/edit-profile'
-import { useSessionStatus } from '@/shared/auth'
 import { ROUTES } from '@/shared/config'
 import { Button } from '@/shared/ui/button'
 import { Icon } from '@/shared/ui/icon'
 import { Tabs } from '@/shared/ui/tabs'
 
+import { SETTINGS_PARTS, type SettingsPart } from '../model/settingsPart'
 import styles from './settingsPage.module.css'
 
-export const SettingsPage = () => {
+type Props = {
+  activePart: SettingsPart
+}
+
+export const SettingsPage = ({ activePart }: Props) => {
   const router = useRouter()
-  const sessionStatus = useSessionStatus()
 
-  useEffect(() => {
-    if (sessionStatus === 'guest') {
-      router.replace(ROUTES.signIn)
-    }
-  }, [router, sessionStatus])
-
-  if (sessionStatus !== 'authenticated') {
-    return null
+  const partChangeHandler = (part: SettingsPart) => {
+    router.push(`${ROUTES.settings}?part=${part}`)
   }
 
   return (
     <section aria-label="Profile settings" className={styles.page}>
-      <Tabs.Root className={styles.tabs} defaultValue="general-information">
+      <Tabs.Root className={styles.tabs} value={activePart} onValueChange={partChangeHandler}>
         <div className={styles.tabsViewport}>
           <Tabs.List className={styles.tabsList}>
-            <Tabs.Tab value="general-information">General information</Tabs.Tab>
-            <Tabs.Tab value="devices" disabled>
-              Devices
-            </Tabs.Tab>
-            <Tabs.Tab value="account-management" disabled>
-              Account Management
-            </Tabs.Tab>
-            <Tabs.Tab value="payments" disabled>
-              My payments
-            </Tabs.Tab>
+            <Tabs.Tab value={SETTINGS_PARTS.info}>General information</Tabs.Tab>
+            <Tabs.Tab value={SETTINGS_PARTS.devices}>Devices</Tabs.Tab>
+            <Tabs.Tab value={SETTINGS_PARTS.subscriptions}>Account Management</Tabs.Tab>
+            <Tabs.Tab value={SETTINGS_PARTS.payments}>My payments</Tabs.Tab>
           </Tabs.List>
         </div>
 
-        <Tabs.Panel className={styles.panel} value="general-information">
+        <Tabs.Panel className={styles.panel} value={SETTINGS_PARTS.info}>
           <EditProfileForm
             avatar={
               <div className={styles.avatarColumn}>
@@ -59,6 +49,9 @@ export const SettingsPage = () => {
             }
           />
         </Tabs.Panel>
+        <Tabs.Panel className={styles.panel} value={SETTINGS_PARTS.devices} />
+        <Tabs.Panel className={styles.panel} value={SETTINGS_PARTS.subscriptions} />
+        <Tabs.Panel className={styles.panel} value={SETTINGS_PARTS.payments} />
       </Tabs.Root>
     </section>
   )

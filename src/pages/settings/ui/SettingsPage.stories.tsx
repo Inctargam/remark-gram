@@ -1,8 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { getRouter } from '@storybook/nextjs-vite/navigation.mock'
-import { expect, waitFor } from 'storybook/test'
-
-import { sessionStore } from '@/shared/auth'
+import { expect, userEvent } from 'storybook/test'
 
 import { SettingsPage } from './SettingsPage'
 
@@ -48,6 +46,9 @@ const stubProfileFetch = () => {
 const meta = {
   title: 'pages/SettingsPage',
   component: SettingsPage,
+  args: {
+    activePart: 'info',
+  },
   tags: ['autodocs'],
   beforeEach: stubProfileFetch,
   parameters: {
@@ -66,36 +67,25 @@ type Story = StoryObj<typeof meta>
 
 export const GeneralInformation: Story = {
   beforeEach: () => {
-    const previousState = sessionStore.getState()
-    sessionStore.getState().setAuthenticated('mock-token')
+    const router = getRouter()
 
-    return () => sessionStore.setState(previousState)
+    router.push.mockClear()
   },
   play: async ({ canvas }) => {
     await expect(canvas.getByRole('tab', { name: 'General information' })).toHaveAttribute(
       'data-active'
     )
-    await expect(canvas.getByRole('tab', { name: 'Devices' })).toHaveAttribute(
-      'aria-disabled',
-      'true'
-    )
+    await expect(canvas.getByRole('tab', { name: 'Devices' })).toBeEnabled()
     await expect(await canvas.findByLabelText('Username*')).toHaveValue('user123')
     await expect(canvas.getByRole('button', { name: 'Save Changes' })).toBeDisabled()
-  },
-}
 
-export const GuestRedirect: Story = {
-  beforeEach: () => {
-    const previousState = sessionStore.getState()
-    const router = getRouter()
+    await userEvent.click(canvas.getByRole('tab', { name: 'Devices' }))
+    await expect(getRouter().push).toHaveBeenLastCalledWith('/settings?part=devices')
 
-    router.replace.mockClear()
-    sessionStore.getState().setGuest()
+    await userEvent.click(canvas.getByRole('tab', { name: 'Account Management' }))
+    await expect(getRouter().push).toHaveBeenLastCalledWith('/settings?part=subscriptions')
 
-    return () => sessionStore.setState(previousState)
-  },
-  play: async ({ canvas }) => {
-    await waitFor(() => expect(getRouter().replace).toHaveBeenCalledWith('/sign-in'))
-    await expect(canvas.queryByRole('tab', { name: 'General information' })).not.toBeInTheDocument()
+    await userEvent.click(canvas.getByRole('tab', { name: 'My payments' }))
+    await expect(getRouter().push).toHaveBeenLastCalledWith('/settings?part=payments')
   },
 }
