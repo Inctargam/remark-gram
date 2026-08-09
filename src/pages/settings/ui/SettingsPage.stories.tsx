@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { getRouter } from '@storybook/nextjs-vite/navigation.mock'
-import { expect, userEvent } from 'storybook/test'
+import { expect, screen, userEvent, waitFor } from 'storybook/test'
 
 import { SettingsPage } from './SettingsPage'
 
@@ -16,6 +16,17 @@ const PROFILE = {
   aboutMe: 'About me',
   avatars: [],
   createdAt: '2026-08-06T14:41:15.904Z',
+}
+
+const createPngFile = () => {
+  const bytes = Uint8Array.from(
+    atob(
+      'iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAFElEQVR42mNkYPj/n4GBgYGJAQoAHgQCAQO0yWQAAAAASUVORK5CYII='
+    ),
+    (character) => character.charCodeAt(0)
+  )
+
+  return new File([bytes], 'avatar.png', { type: 'image/png' })
 }
 
 const stubProfileFetch = () => {
@@ -87,5 +98,48 @@ export const GeneralInformation: Story = {
 
     await userEvent.click(canvas.getByRole('tab', { name: 'My payments' }))
     await expect(getRouter().push).toHaveBeenLastCalledWith('/settings?part=payments')
+  },
+}
+
+export const PreservesUnsavedFieldsAfterPhotoClose: Story = {
+  beforeEach: () => {
+    const router = getRouter()
+
+    router.replace.mockClear()
+  },
+  play: async ({ canvas }) => {
+    const username = await canvas.findByLabelText('Username*')
+
+    await userEvent.clear(username)
+    await userEvent.type(username, 'unsaved-user')
+    await userEvent.click(canvas.getByRole('button', { name: 'Add Profile Photo' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Close' }))
+
+    await expect(username).toHaveValue('unsaved-user')
+    await expect(getRouter().replace).not.toHaveBeenCalled()
+  },
+}
+
+export const PreservesUnsavedFieldsAfterPhotoSave: Story = {
+  beforeEach: () => {
+    const router = getRouter()
+
+    router.replace.mockClear()
+  },
+  play: async ({ canvas }) => {
+    const username = await canvas.findByLabelText('Username*')
+
+    await userEvent.clear(username)
+    await userEvent.type(username, 'unsaved-user')
+    await userEvent.click(canvas.getByRole('button', { name: 'Add Profile Photo' }))
+    await userEvent.upload(screen.getByLabelText('Profile photo file'), createPngFile())
+    await screen.findByLabelText('Profile photo crop area')
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }))
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog', { name: 'Add a Profile Photo' })).toBeNull()
+    })
+    await expect(username).toHaveValue('unsaved-user')
+    await expect(getRouter().replace).not.toHaveBeenCalled()
   },
 }

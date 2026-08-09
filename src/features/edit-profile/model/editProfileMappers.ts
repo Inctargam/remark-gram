@@ -1,5 +1,7 @@
+import type { Profile } from '@/entities/profile'
+
 import type { EditProfileFormValues } from './editProfileFormValues'
-import type { ProfileDto, UpdateProfilePayload } from './editProfileTypes'
+import type { UpdateProfilePayload } from './editProfileTypes'
 
 const PROFILE_DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/
 
@@ -39,7 +41,7 @@ export const formatProfileDate = (value: Date | null): string | null => {
   return `${year}-${month}-${day}`
 }
 
-export const mapProfileToFormValues = (profile: ProfileDto): EditProfileFormValues => ({
+export const mapProfileToFormValues = (profile: Profile): EditProfileFormValues => ({
   username: profile.userName,
   firstName: profile.firstName,
   lastName: profile.lastName,

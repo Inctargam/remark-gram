@@ -1,0 +1,147 @@
+.avatarColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-top: 24px;
+}
+
+.avatar {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 192px;
+  height: 192px;
+  overflow: visible;
+  border-radius: 50%;
+  background-color: var(--color-dark-500);
+  color: var(--color-light-900);
+}
+
+.avatarImage {
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.deleteAvatarButton {
+  position: absolute;
+  top: 15px;
+  right: 12px;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 2px solid var(--color-dark-700);
+  border-radius: 50%;
+  background-color: var(--color-danger-500);
+  color: var(--color-light-100);
+  cursor: pointer;
+}
+
+.selectAvatarButton {
+  width: 201px;
+  padding-right: 12px;
+  padding-left: 12px;
+  white-space: nowrap;
+}
+
+.addModal {
+  width: 492px;
+}
+
+.addModalBody {
+  padding: 24px 24px 36px;
+}
+
+.fileInput {
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
+.errorAlert {
+  margin-bottom: 24px;
+}
+
+.selectContent {
+  display: flex;
+  flex-direction: column;
+  gap: 60px;
+  align-items: center;
+  padding-top: 48px;
+}
+
+.avatarPlaceholder {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 222px;
+  height: 228px;
+  border-radius: 2px;
+  background-color: var(--color-dark-500);
+  color: var(--color-light-100);
+}
+
+.selectContent button {
+  width: 219px;
+}
+
+.cropContent {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+  align-items: center;
+  padding-top: 4px;
+}
+
+.cropperFrame {
+  position: relative;
+  width: 332px;
+  height: 340px;
+  overflow: hidden;
+}
+
+.cropperFrame :global(.reactEasyCrop_CropArea) {
+  border: none;
+  box-shadow: 0 0 0 9999em rgb(0 0 0 / 50%);
+}
+
+.saveAction {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.deleteModal {
+  width: 438px;
+}
+
+@media (width < 768px) {
+  .avatarColumn {
+    align-items: center;
+    gap: 24px;
+    padding-top: 0;
+  }
+
+  .selectAvatarButton {
+    width: 100%;
+    height: 48px;
+  }
+
+  .addModal,
+  .deleteModal {
+    width: calc(100vw - 32px);
+  }
+
+  .cropperFrame {
+    width: min(332px, 100%);
+    height: min(340px, calc(100vh - 250px));
+  }
+}

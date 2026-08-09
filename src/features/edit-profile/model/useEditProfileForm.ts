@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
-import { useProfileQuery } from '../api/useProfileQuery'
+import { useProfileQuery } from '@/entities/profile'
+
 import { useUpdateProfileMutation } from '../api/useUpdateProfileMutation'
 import {
   clearEditProfileDraft,

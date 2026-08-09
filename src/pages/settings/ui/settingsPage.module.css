@@ -18,31 +18,6 @@
   padding: 24px 0 0;
 }
 
-.avatarColumn {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  padding-top: 24px;
-}
-
-.avatarPlaceholder {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 192px;
-  height: 192px;
-  border-radius: 50%;
-  background-color: var(--color-dark-500);
-  color: var(--color-light-900);
-}
-
-.addPhotoButton {
-  width: 196px;
-  padding-right: 12px;
-  padding-left: 12px;
-  white-space: nowrap;
-}
-
 @media (width < 768px) {
   .page {
     min-height: calc(100vh - var(--layout-header-height));
@@ -83,14 +58,4 @@
     padding-top: 24px;
   }
 
-  .avatarColumn {
-    align-items: center;
-    gap: 24px;
-    padding-top: 0;
-  }
-
-  .addPhotoButton {
-    width: 100%;
-    height: 48px;
-  }
 }

@@ -1,14 +1,15 @@
 import { describe, expect, it } from 'vitest'
 
+import type { Profile } from '@/entities/profile'
+
 import {
   formatProfileDate,
   mapFormValuesToPayload,
   mapProfileToFormValues,
   parseProfileDate,
 } from './editProfileMappers'
-import type { ProfileDto } from './editProfileTypes'
 
-const PROFILE: ProfileDto = {
+const PROFILE: Profile = {
   id: 1,
   userName: 'user123',
   firstName: 'John',

@@ -1,0 +1,4 @@
+export const DEFAULT_PROFILE_AVATAR_CROP = { x: 0, y: 0 }
+export const DEFAULT_PROFILE_AVATAR_ZOOM = 1
+export const MIN_PROFILE_AVATAR_ZOOM = 1
+export const MAX_PROFILE_AVATAR_ZOOM = 3

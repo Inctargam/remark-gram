@@ -3,9 +3,8 @@
 import { useRouter } from 'next/navigation'
 
 import { EditProfileForm } from '@/features/edit-profile'
+import { ProfileAvatar } from '@/features/manage-profile-avatar'
 import { ROUTES } from '@/shared/config'
-import { Button } from '@/shared/ui/button'
-import { Icon } from '@/shared/ui/icon'
 import { Tabs } from '@/shared/ui/tabs'
 
 import { SETTINGS_PARTS, type SettingsPart } from '../model/settingsPart'
@@ -35,19 +34,7 @@ export const SettingsPage = ({ activePart }: Props) => {
         </div>
 
         <Tabs.Panel className={styles.panel} value={SETTINGS_PARTS.info}>
-          <EditProfileForm
-            avatar={
-              <div className={styles.avatarColumn}>
-                <div aria-hidden="true" className={styles.avatarPlaceholder}>
-                  <Icon iconId="icon-person-outline" width={48} height={48} />
-                </div>
-
-                <Button className={styles.addPhotoButton} type="button" variant="outline">
-                  Add a Profile Photo
-                </Button>
-              </div>
-            }
-          />
+          <EditProfileForm avatar={<ProfileAvatar />} />
         </Tabs.Panel>
         <Tabs.Panel className={styles.panel} value={SETTINGS_PARTS.devices} />
         <Tabs.Panel className={styles.panel} value={SETTINGS_PARTS.subscriptions} />
