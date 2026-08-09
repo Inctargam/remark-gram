@@ -1,3 +1,7 @@
+.error {
+  margin-bottom: 24px;
+}
+
 .message {
   margin: 0 0 30px;
   color: var(--color-light-100);

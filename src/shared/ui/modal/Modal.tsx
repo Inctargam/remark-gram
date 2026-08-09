@@ -17,6 +17,8 @@ type Props = {
   /** Class for the body wrapper — for dialogs whose content must ignore the default padding. */
   bodyClassName?: string
   disablePointerDismissal?: boolean
+  /** Blocks every dismissal path while an irreversible action is pending. */
+  dismissDisabled?: boolean
 }
 
 export type { Props as ModalProps }
@@ -29,22 +31,33 @@ export const Modal = ({
   className,
   bodyClassName,
   disablePointerDismissal = false,
-}: Props) => (
-  <Dialog.Root
-    open={open}
-    onOpenChange={onOpenChange}
-    disablePointerDismissal={disablePointerDismissal}>
-    <Dialog.Portal>
-      <Dialog.Backdrop className={styles.backdrop} />
-      <Dialog.Popup className={clsx(styles.popup, className)}>
-        <div className={styles.header}>
-          <Dialog.Title className={styles.title}>{title}</Dialog.Title>
-          <Dialog.Close className={styles.close} aria-label="Close">
-            <Icon iconId="icon-close-outline" width={24} height={24} />
-          </Dialog.Close>
-        </div>
-        <div className={clsx(styles.body, bodyClassName)}>{children}</div>
-      </Dialog.Popup>
-    </Dialog.Portal>
-  </Dialog.Root>
-)
+  dismissDisabled = false,
+}: Props) => {
+  const openChangeHandler = (nextOpen: boolean) => {
+    if (!nextOpen && dismissDisabled) {
+      return
+    }
+
+    onOpenChange(nextOpen)
+  }
+
+  return (
+    <Dialog.Root
+      open={open}
+      onOpenChange={openChangeHandler}
+      disablePointerDismissal={disablePointerDismissal || dismissDisabled}>
+      <Dialog.Portal>
+        <Dialog.Backdrop className={styles.backdrop} />
+        <Dialog.Popup className={clsx(styles.popup, className)}>
+          <div className={styles.header}>
+            <Dialog.Title className={styles.title}>{title}</Dialog.Title>
+            <Dialog.Close className={styles.close} aria-label="Close" disabled={dismissDisabled}>
+              <Icon iconId="icon-close-outline" width={24} height={24} />
+            </Dialog.Close>
+          </div>
+          <div className={clsx(styles.body, bodyClassName)}>{children}</div>
+        </Dialog.Popup>
+      </Dialog.Portal>
+    </Dialog.Root>
+  )
+}
