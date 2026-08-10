@@ -1,72 +1,118 @@
 .page {
   display: flex;
   flex-direction: column;
-  padding: 24px 24px 60px;
-  gap: 24px;
-  max-width: 1200px;
-  margin: 0 auto;
+  gap: 36px;
   width: 100%;
+  max-width: 1020px;
+  margin: 0 auto;
+  padding: 24px 24px 60px;
 }
 
-.hero {
+.usersPanel {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 72px;
+  padding: 11px 23px;
+  border: 1px solid var(--color-dark-300);
+  border-radius: 2px;
+  background-color: var(--color-dark-500);
 }
 
-.title {
-  font-size: var(--font-size-large);
-  font-weight: var(--font-weight-large);
-  line-height: var(--line-height-large);
-  color: var(--color-text-primary);
-  margin: 0;
-}
-
-.subtitle {
-  font-size: var(--font-size-regular-14);
-  font-weight: var(--font-weight-regular-14);
-  line-height: var(--line-height-regular-14);
-  color: var(--color-text-secondary);
-  margin: 0;
-}
-
-.count {
-  color: var(--color-text-primary);
-  font-weight: var(--font-weight-bold-14);
-}
-
-.latestLabel {
+.usersLabel {
   font-size: var(--font-size-h2);
   font-weight: var(--font-weight-h2);
   line-height: var(--line-height-h2);
   color: var(--color-text-primary);
-  margin: 16px 0 0;
+  white-space: nowrap;
 }
 
-.posts {
+.usersCounter {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  width: 203px;
+  height: 48px;
+  border: 1px solid var(--color-dark-300);
+  border-radius: 2px;
+  background-color: var(--color-dark-700);
+}
+
+.counterDigit {
+  position: relative;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-h2);
+  line-height: var(--line-height-h2);
+  color: var(--color-text-primary);
+}
+
+.counterDigit:not(:first-child)::before {
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: 0;
+  width: 1px;
+  background-color: var(--color-dark-300);
+  content: '';
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .postsGrid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
 }
 
-@media (width <= 1024px) {
+.postPlaceholder {
+  aspect-ratio: 234 / 391;
+  border-radius: 1px 1px 0 0;
+  background-color: var(--color-dark-500);
+}
+
+@media (width < 1024px) {
   .postsGrid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
-@media (width <= 640px) {
+@media (width < 768px) {
+  .postsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (width < 480px) {
   .page {
-    padding: 16px 16px 72px;
+    gap: 24px;
+    padding: 16px 16px 60px;
+  }
+
+  .usersPanel {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 12px;
+    padding: 15px;
+  }
+
+  .usersCounter {
+    width: 100%;
   }
 
   .postsGrid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 4px;
+    grid-template-columns: minmax(0, 1fr);
   }
 }

@@ -1,5 +1,4 @@
 import type { Post } from '@/entities/post'
-import { PostThumbnail } from '@/entities/post'
 
 import styles from './homePage.module.css'
 
@@ -9,21 +8,30 @@ type Props = {
 }
 
 export const HomePage = ({ posts, registeredUsersCount }: Props) => (
-  <div className={styles.page}>
-    <section className={styles.hero}>
-      <h1 className={styles.title}>Inctagram</h1>
-      <p className={styles.subtitle}>
-        <span className={styles.count}>{registeredUsersCount.toLocaleString()}</span> registered
-        users
+  <main className={styles.page}>
+    <section className={styles.usersPanel}>
+      <h1 className={styles.usersLabel}>Registered users:</h1>
+      <p className={styles.visuallyHidden}>
+        {registeredUsersCount.toLocaleString('en-US')} registered users
       </p>
-      <p className={styles.latestLabel}>Latest publications</p>
+      <span className={styles.usersCounter} aria-hidden="true">
+        {Math.max(0, Math.trunc(registeredUsersCount))
+          .toString()
+          .padStart(6, '0')
+          .split('')
+          .map((digit, digitIndex) => (
+            <span className={styles.counterDigit} key={`${digit}-${digitIndex}`}>
+              {digit}
+            </span>
+          ))}
+      </span>
     </section>
-    <section className={styles.posts}>
+    <section aria-label="Latest publications">
       <div className={styles.postsGrid}>
         {posts.map((post) => (
-          <PostThumbnail key={post.id} post={post} />
+          <article aria-hidden="true" className={styles.postPlaceholder} key={post.id} />
         ))}
       </div>
     </section>
-  </div>
+  </main>
 )
