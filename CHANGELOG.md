@@ -4,6 +4,20 @@
 
 ## Unreleased
 
+### 2026-08-10
+
+#### Profile SSR
+
+- Добавлены публичные mock-данные профиля и server-safe reader `getPublicProfile()` для будущего SSR `/profile/{id}`.
+- Добавлены server-safe readers постов `getProfilePostsServer()` и `getPostServer()`, которые читают mock store напрямую без HTTP-запроса к route handler.
+- Mock store постов получил `countUserPosts()`; счетчик публикаций профиля теперь можно получать из фактического состояния постов.
+
+#### Verification
+
+- `pnpm exec vitest run --project unit src/pages/profile/api/profile.server.test.ts src/entities/post/api/postsApi.server.test.ts src/shared/api/mock/postsStore.test.ts` прошёл успешно.
+- `pnpm build` был остановлен вручную после длительного зависания на этапе `Creating an optimized production build ...` без вывода ошибок.
+- `pnpm lint` запускался, но не прошёл из-за прежних предупреждений Prettier в сгенерированном `src/shared/api/openapi/schema.d.ts` и существующего предупреждения React Compiler вне этой правки.
+
 ### 2026-08-03
 
 #### Shared Config
@@ -75,6 +89,7 @@
 - `pnpm exec eslint src/widgets` — чисто.
 - `pnpm exec vitest run --project=storybook` — 37 файлов, 158 тестов, прошло. Скрипта `pnpm test:storybook` в проекте нет.
 - Новая стори проверена на ловлю регрессии: при временном снятии `sticky` с шапки и со слота сайдбара она падает.
+
 ### 2026-08-02 — Причёсывание кода постов перед PR
 
 #### Posts
@@ -381,6 +396,7 @@
 
 - Для прогона story-тестов локально понадобилось доустановить браузер: `pnpm exec playwright install chromium`.
 - Пропсы существующих компонентов сверялись по исходникам (`Modal.tsx`, `Button.tsx`) и типам `@base-ui/react`, а не через MCP `inctagram-storybook`: этот сервер настроен для Codex и в текущем окружении недоступен.
+
 ### 2026-08-01
 
 #### Tooling
@@ -394,6 +410,7 @@
 - `pnpm exec vitest run --project unit` прошёл успешно: 19 файлов, 84 теста.
 - `pnpm exec vitest run --project storybook` прошёл успешно: 37 файлов, 157 тестов.
 - `pnpm build` прошёл успешно.
+
 ### 2026-07-31
 
 #### Auth
@@ -508,6 +525,7 @@
 - `pnpm exec tsc --noEmit` прошёл успешно.
 - `pnpm build` был остановлен вручную после длительного зависания на этапе `Creating an optimized production build ...` без вывода ошибок.
 - Storybook tests не запускались, потому что stories не изменялись и Storybook MCP tools недоступны в текущей сессии.
+
 ### 2026-07-14
 
 #### Auth
@@ -791,6 +809,7 @@
 #### Verification
 
 - Не запускались; изменение только документационное.
+
 ### 2026-06-14
 
 #### Shared UI

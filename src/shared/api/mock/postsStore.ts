@@ -95,6 +95,8 @@ export const resetPostsMockStore = () => {
 
 const getUserPosts = (userId: string) => getState().posts.filter((post) => post.ownerId === userId)
 
+export const countUserPosts = (userId: string): number => getUserPosts(userId).length
+
 export type ListPostsParams = {
   userId: string
   cursor?: string | null
