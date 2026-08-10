@@ -38,6 +38,17 @@ export const Guest: Story = {
   },
 }
 
+export const GuestOnAuthRoute: Story = {
+  args: {
+    showGuestAuthActions: false,
+    status: 'guest',
+  },
+  play: async ({ canvas }) => {
+    await expect(canvas.queryByText('Log in')).not.toBeInTheDocument()
+    await expect(canvas.queryByText('Sign up')).not.toBeInTheDocument()
+  },
+}
+
 export const Authenticated: Story = {
   args: {
     status: 'authenticated',

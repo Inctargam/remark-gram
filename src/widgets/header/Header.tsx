@@ -11,8 +11,6 @@ import styles from './header.module.css'
 
 type AuthVariant = {
   variant: 'auth'
-  notificationCount?: number
-  onBellClick?: () => void
   languageSelector?: ReactNode
 }
 
@@ -21,6 +19,7 @@ type GuestVariant = {
   loginLabel?: string
   signupLabel?: string
   languageSelector?: ReactNode
+  showAuthActions?: boolean
 }
 
 export type HeaderProps = AuthVariant | GuestVariant
@@ -37,23 +36,14 @@ export const Header = (props: HeaderProps) => {
 
         <div className={styles.controls}>
           {variant === 'auth' && (
-            <button
-              aria-label="Notifications"
-              className={styles.bell}
-              type="button"
-              onClick={props.onBellClick}>
+            <span aria-hidden="true" className={styles.bell}>
               <Icon iconId="icon-bell-outline" />
-              {!!props.notificationCount && props.notificationCount > 0 && (
-                <span className={styles.badge}>
-                  {props.notificationCount > 99 ? '99+' : props.notificationCount}
-                </span>
-              )}
-            </button>
+            </span>
           )}
 
           {languageSelector}
 
-          {variant === 'guest' && (
+          {variant === 'guest' && (props.showAuthActions ?? true) && (
             <>
               <Button nativeButton={false} render={<Link href={ROUTES.signIn} />} variant="text">
                 {props.loginLabel ?? 'Log in'}

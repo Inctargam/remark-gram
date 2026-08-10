@@ -4,30 +4,57 @@ import Link from 'next/link'
 import type { ReactNode } from 'react'
 
 import { ROUTES } from '@/shared/config'
-import { Icon } from '@/shared/ui/icon'
+import { Button } from '@/shared/ui/button'
 
 import styles from './headerMobile.module.css'
 
-export type HeaderMobileProps = {
+type AuthVariant = {
+  variant: 'auth'
   languageSelector?: ReactNode
-  onMenuClick?: () => void
+  menu?: ReactNode
 }
 
-export const HeaderMobile = ({ languageSelector, onMenuClick }: HeaderMobileProps) => (
-  <header className={styles.header}>
-    <Link className={styles.logo} href={ROUTES.home}>
-      Remarkgram
-    </Link>
+type GuestVariant = {
+  variant: 'guest'
+  languageSelector?: ReactNode
+  showAuthActions?: boolean
+}
 
-    <div className={styles.controls}>
-      {languageSelector}
-      <button
-        aria-label="Open menu"
-        className={styles.menuButton}
-        type="button"
-        onClick={onMenuClick}>
-        <Icon iconId="icon-more-horizontal-outline" />
-      </button>
-    </div>
-  </header>
-)
+export type HeaderMobileProps = AuthVariant | GuestVariant
+
+export const HeaderMobile = (props: HeaderMobileProps) => {
+  const { languageSelector, variant } = props
+
+  return (
+    <header className={styles.header}>
+      <Link className={styles.logo} href={ROUTES.home}>
+        Remarkgram
+      </Link>
+
+      <div className={styles.controls}>
+        {languageSelector}
+
+        {variant === 'guest' && (props.showAuthActions ?? true) && (
+          <div className={styles.authActions}>
+            <Button
+              className={styles.authAction}
+              nativeButton={false}
+              render={<Link href={ROUTES.signIn} />}
+              variant="text">
+              Log in
+            </Button>
+            <Button
+              className={styles.authAction}
+              nativeButton={false}
+              render={<Link href={ROUTES.signUp} />}
+              variant="primary">
+              Sign up
+            </Button>
+          </div>
+        )}
+
+        {variant === 'auth' && props.menu}
+      </div>
+    </header>
+  )
+}

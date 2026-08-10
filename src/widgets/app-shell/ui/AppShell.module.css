@@ -38,19 +38,8 @@
   z-index: var(--z-index-bottom-bar);
 }
 
-.languageSelector {
-  width: 163px;
-}
-
-.mobileLanguage {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  color: var(--color-light-100);
-}
-
 @media (width < 768px) {
-  .authDesktopHeader {
+  .desktopHeader {
     display: none;
   }
 

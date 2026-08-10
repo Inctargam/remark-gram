@@ -1,0 +1,30 @@
+.root {
+  width: 163px;
+}
+
+.compactRoot {
+  width: 40px;
+}
+
+.valueContent,
+.optionContent {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.flag {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+}
+
+.compactTrigger {
+  padding-inline: 0;
+  background-color: transparent;
+  border-color: transparent;
+}
+
+.compactPopup {
+  min-width: 132px;
+}

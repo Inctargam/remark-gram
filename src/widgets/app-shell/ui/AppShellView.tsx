@@ -1,13 +1,16 @@
-import clsx from 'clsx'
-import Image from 'next/image'
+'use client'
 import type { ReactNode } from 'react'
+import { useState } from 'react'
 
 import { LogoutButton } from '@/features/logout'
 import type { SessionStatus } from '@/shared/auth'
-import { Icon } from '@/shared/ui/icon'
-import type { SelectOption } from '@/shared/ui/select'
-import { Select } from '@/shared/ui/select'
-import { Header, HeaderMobile } from '@/widgets/header'
+import {
+  Header,
+  type HeaderLanguage,
+  HeaderLanguageSwitcher,
+  HeaderMobile,
+  HeaderMobileMenu,
+} from '@/widgets/header'
 import { BottomBar, Sidebar } from '@/widgets/navigation'
 
 import styles from './AppShell.module.css'
@@ -15,16 +18,19 @@ import styles from './AppShell.module.css'
 type Props = {
   children: ReactNode
   hideBottomBar?: boolean
+  showGuestAuthActions?: boolean
   status: SessionStatus
   onLogout: () => Promise<void>
 }
 
-const LANGUAGE_OPTIONS: SelectOption<string>[] = [
-  { label: 'English', value: 'en' },
-  { label: 'Russian', value: 'ru' },
-]
-
-export const AppShellView = ({ children, hideBottomBar = false, status, onLogout }: Props) => {
+export const AppShellView = ({
+  children,
+  hideBottomBar = false,
+  showGuestAuthActions = true,
+  status,
+  onLogout,
+}: Props) => {
+  const [language, setLanguage] = useState<HeaderLanguage>('en')
   const isAuthenticated = status === 'authenticated'
   const isLoading = status === 'loading'
   const showBottomBar = isAuthenticated && !hideBottomBar
@@ -33,26 +39,43 @@ export const AppShellView = ({ children, hideBottomBar = false, status, onLogout
     <div className={styles.shell}>
       {!isLoading && (
         <>
-          <div className={clsx(styles.desktopHeader, isAuthenticated && styles.authDesktopHeader)}>
-            <Header
-              languageSelector={
-                <Select className={styles.languageSelector} options={LANGUAGE_OPTIONS} value="en" />
-              }
-              variant={isAuthenticated ? 'auth' : 'guest'}
-            />
+          <div className={styles.desktopHeader}>
+            {isAuthenticated ? (
+              <Header
+                languageSelector={
+                  <HeaderLanguageSwitcher value={language} onValueChange={setLanguage} />
+                }
+                variant="auth"
+              />
+            ) : (
+              <Header
+                languageSelector={
+                  <HeaderLanguageSwitcher value={language} onValueChange={setLanguage} />
+                }
+                showAuthActions={showGuestAuthActions}
+                variant="guest"
+              />
+            )}
           </div>
-          {isAuthenticated && (
-            <div className={styles.mobileHeader}>
+          <div className={styles.mobileHeader}>
+            {isAuthenticated ? (
               <HeaderMobile
                 languageSelector={
-                  <span aria-label="Russian" className={styles.mobileLanguage}>
-                    <Image alt="" height={24} src="/icons/flag-ru.svg" width={24} />
-                    <Icon iconId="icon-arrow-ios-down-outline" width={16} height={16} />
-                  </span>
+                  <HeaderLanguageSwitcher compact value={language} onValueChange={setLanguage} />
                 }
+                menu={<HeaderMobileMenu onLogout={onLogout} />}
+                variant="auth"
               />
-            </div>
-          )}
+            ) : (
+              <HeaderMobile
+                languageSelector={
+                  <HeaderLanguageSwitcher compact value={language} onValueChange={setLanguage} />
+                }
+                showAuthActions={showGuestAuthActions}
+                variant="guest"
+              />
+            )}
+          </div>
         </>
       )}
       <div className={styles.content}>
