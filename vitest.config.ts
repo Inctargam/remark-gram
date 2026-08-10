@@ -19,8 +19,9 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html'],
-      // Thresholds are scoped to the posts CRUD code only — the rest of the project
-      // predates the test setup and would drag the numbers below any useful gate.
+      // Thresholds are scoped to the posts CRUD code and the payments/subscriptions code —
+      // the rest of the project predates the test setup and would drag the numbers below
+      // any useful gate.
       // Listed slice by slice on purpose: a 'src/features/*-post/**' glob would also
       // pull in features/create-post, which belongs to another task and is not covered here.
       include: [
@@ -30,6 +31,12 @@ export default defineConfig({
         'src/features/post-actions/**',
         'src/widgets/profile-posts/**',
         'app/api/mock/posts/**',
+        'src/entities/subscription/**',
+        'src/entities/payment/**',
+        'src/shared/api/mock/subscriptionsStore.ts',
+        'app/api/mock/subscriptions/**',
+        'app/api/mock/payments/**',
+        'app/api/mock/_mock/**',
       ],
       // Only what the `unit` project can actually execute is measured. The project runs in
       // `node` and the repo has no jsdom/RTL, so components and React hooks cannot be

@@ -1,4 +1,4 @@
-import { withMockDelay } from './_mock/mockDelay'
+import { withMockDelay } from '../_mock/mockDelay'
 import { createPostHandler, getPostsListHandler } from './_mock/postsListHandler'
 
 export const GET = withMockDelay(getPostsListHandler)
