@@ -12,10 +12,15 @@ type Props = {
   onOpenChange: (open: boolean) => void
   title: string
   message: ReactNode
+  /** Optional feedback rendered above the confirmation message. */
+  error?: ReactNode
   confirmLabel?: string
   cancelLabel?: string
   /** Blocks the confirm button while the confirmed action is still running. */
   confirmDisabled?: boolean
+  cancelDisabled?: boolean
+  /** Blocks the close icon, Escape and outside dismissal. */
+  dismissDisabled?: boolean
   /**
    * Whether confirming closes the dialog by itself.
    * Turn off for an asynchronous action: the dialog has to stay until the request resolves,
@@ -41,9 +46,12 @@ export const ConfirmDialog = ({
   onOpenChange,
   title,
   message,
+  error,
   confirmLabel = 'Yes',
   cancelLabel = 'No',
   confirmDisabled = false,
+  cancelDisabled = false,
+  dismissDisabled = false,
   closeOnConfirm = true,
   className,
   onConfirm,
@@ -77,13 +85,15 @@ export const ConfirmDialog = ({
       open={open}
       onOpenChange={openChangeHandler}
       title={title}
-      disablePointerDismissal={disablePointerDismissal}>
+      disablePointerDismissal={disablePointerDismissal}
+      dismissDisabled={dismissDisabled}>
+      {error && <div className={styles.error}>{error}</div>}
       <div className={styles.message}>{message}</div>
       <div className={styles.actions}>
         <Button variant="outline" disabled={confirmDisabled} onClick={confirmHandler}>
           {confirmLabel}
         </Button>
-        <Button variant="primary" onClick={cancelHandler}>
+        <Button variant="primary" disabled={cancelDisabled} onClick={cancelHandler}>
           {cancelLabel}
         </Button>
       </div>

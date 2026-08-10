@@ -103,6 +103,19 @@ export const SingleError: Story = {
   },
 }
 
+export const ErrorWithLink: Story = {
+  args: {
+    ariaLabel: 'Date of birth',
+    label: 'Date of birth',
+    value: new Date(),
+    error: (
+      <>
+        A user under 13 cannot create a profile. <u>Privacy Policy</u>
+      </>
+    ),
+  },
+}
+
 export const Disabled: Story = {
   args: {
     label: 'Date select',

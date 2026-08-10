@@ -1,0 +1,100 @@
+.form {
+  width: 100%;
+}
+
+.profileContent {
+  display: grid;
+  grid-template-columns: 196px minmax(0, 1fr);
+  gap: 36px;
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.requiredMark {
+  color: var(--color-danger-500);
+}
+
+.dateField > div > button {
+  width: 100%;
+}
+
+.privacyPolicyLink {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.locationFields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.locationFields label {
+  color: var(--color-light-900);
+}
+
+.aboutField {
+  width: 100%;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+  padding-top: 23px;
+  border-top: 1px solid var(--color-dark-300);
+}
+
+.saveButton {
+  min-width: 160px;
+}
+
+.submitAlert {
+  position: fixed;
+  bottom: 24px;
+  left: 173px;
+  z-index: 90;
+  width: 427px;
+  min-height: 48px;
+}
+
+@media (width < 768px) {
+  .profileContent {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 39px;
+  }
+
+  .fields {
+    gap: 12px;
+  }
+
+  .locationFields {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .aboutField {
+    min-height: 101px;
+  }
+
+  .actions {
+    margin-top: 48px;
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .saveButton {
+    width: 100%;
+    height: 48px;
+  }
+
+  .submitAlert {
+    right: 15px;
+    left: 15px;
+    width: auto;
+  }
+}
