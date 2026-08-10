@@ -1,3 +1,5 @@
+import { Suspense } from 'react'
+
 import { Tabs } from '@/shared/ui/tabs'
 import { AccountManagement } from '@/widgets/account-management'
 
@@ -23,7 +25,10 @@ export default function Page() {
       </Tabs.List>
 
       <Tabs.Panel value="account-management">
-        <AccountManagement />
+        {/* The widget reads the payment result from the query string, hence the boundary. */}
+        <Suspense fallback={<p>Loading subscription…</p>}>
+          <AccountManagement />
+        </Suspense>
       </Tabs.Panel>
     </Tabs.Root>
   )

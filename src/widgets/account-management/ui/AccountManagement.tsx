@@ -1,5 +1,11 @@
 'use client'
 
+import {
+  PaymentConsentModal,
+  PaymentResultModal,
+  useBuySubscription,
+} from '@/features/buy-subscription'
+
 import { useAccountManagement } from '../model/useAccountManagement'
 import { AccountManagementView } from './AccountManagementView'
 
@@ -19,16 +25,38 @@ export const AccountManagement = () => {
     setSelectedPlanId,
   } = useAccountManagement()
 
+  const {
+    consentProvider,
+    isCheckoutPending,
+    paymentResult,
+    cancelPayment,
+    closePaymentResult,
+    confirmPayment,
+    startPayment,
+  } = useBuySubscription({ planId: selectedPlanId })
+
   return (
-    <AccountManagementView
-      accountType={accountType}
-      currentSubscription={currentSubscription}
-      errorMessage={errorMessage}
-      isLoading={isLoading}
-      isPersonalDisabled={isPersonalDisabled}
-      selectedPlanId={selectedPlanId}
-      onAccountTypeChange={setAccountType}
-      onPlanChange={setSelectedPlanId}
-    />
+    <>
+      <AccountManagementView
+        accountType={accountType}
+        currentSubscription={currentSubscription}
+        errorMessage={errorMessage}
+        isLoading={isLoading}
+        isPersonalDisabled={isPersonalDisabled}
+        selectedPlanId={selectedPlanId}
+        onAccountTypeChange={setAccountType}
+        onPlanChange={setSelectedPlanId}
+        onProviderSelect={startPayment}
+      />
+
+      <PaymentConsentModal
+        open={consentProvider !== null}
+        isPending={isCheckoutPending}
+        onConfirm={confirmPayment}
+        onOpenChange={cancelPayment}
+      />
+
+      <PaymentResultModal outcome={paymentResult} onClose={closePaymentResult} />
+    </>
   )
 }
