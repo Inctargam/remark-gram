@@ -52,3 +52,15 @@ export const Disabled: Story = {
     disabled: true,
   },
 }
+
+export const CustomRendering: Story = {
+  args: {
+    options: [
+      { label: 'English', value: 'en' },
+      { label: 'Russian', value: 'ru' },
+    ],
+    value: 'en',
+    renderOption: (option) => <span>Flag · {option.label}</span>,
+    renderValue: (value) => <span>Selected · {value}</span>,
+  },
+}
