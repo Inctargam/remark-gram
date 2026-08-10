@@ -70,6 +70,7 @@ const meta = {
   component: ProfilePage,
   tags: ['autodocs'],
   args: {
+    postId: null,
     userId: MOCK_CURRENT_USER_ID,
   },
   beforeEach: stubPostsFetch,

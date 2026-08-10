@@ -20,6 +20,7 @@ const PROFILE_PLACEHOLDER = {
 } as const
 
 type Props = {
+  postId: string | null
   userId: string
 }
 

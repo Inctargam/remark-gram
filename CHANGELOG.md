@@ -11,11 +11,19 @@
 - Добавлены публичные mock-данные профиля и server-safe reader `getPublicProfile()` для будущего SSR `/profile/{id}`.
 - Добавлены server-safe readers постов `getProfilePostsServer()` и `getPostServer()`, которые читают mock store напрямую без HTTP-запроса к route handler.
 - Mock store постов получил `countUserPosts()`; счетчик публикаций профиля теперь можно получать из фактического состояния постов.
+- Route `/profile/[id]` принимает async `searchParams`, нормализует `postId` из query string и передает его в page-level `ProfilePage`.
+- Добавлен route-local unit-тест нормализации `postId`, включая повторяющийся query param.
 
 #### Verification
 
 - `pnpm exec vitest run --project unit src/pages/profile/api/profile.server.test.ts src/entities/post/api/postsApi.server.test.ts src/shared/api/mock/postsStore.test.ts` прошёл успешно.
+- `pnpm exec vitest run --project unit app/'(main)'/profile/'[id]'/normalizePostId.test.ts` прошёл успешно.
+- `pnpm exec vitest run --project storybook src/pages/profile/ui/ProfilePage.stories.tsx` прошёл успешно.
+- `pnpm exec eslint app/'(main)'/profile/'[id]'/page.tsx app/'(main)'/profile/'[id]'/normalizePostId.ts app/'(main)'/profile/'[id]'/normalizePostId.test.ts src/pages/profile/ui/ProfilePage.tsx src/pages/profile/ui/ProfilePage.stories.tsx` прошёл успешно.
+- `pnpm exec prettier --check CHANGELOG.md app/'(main)'/profile/'[id]'/page.tsx app/'(main)'/profile/'[id]'/normalizePostId.ts app/'(main)'/profile/'[id]'/normalizePostId.test.ts src/pages/profile/ui/ProfilePage.tsx src/pages/profile/ui/ProfilePage.stories.tsx` прошёл успешно.
+- `pnpm exec tsc --noEmit` прошёл успешно.
 - `pnpm build` был остановлен вручную после длительного зависания на этапе `Creating an optimized production build ...` без вывода ошибок.
+- Storybook MCP `run-story-tests` для `ProfilePage` не завершился за 300 секунд; focused story-тест запущен локально через Vitest.
 - `pnpm lint` запускался, но не прошёл из-за прежних предупреждений Prettier в сгенерированном `src/shared/api/openapi/schema.d.ts` и существующего предупреждения React Compiler вне этой правки.
 
 ### 2026-08-03
