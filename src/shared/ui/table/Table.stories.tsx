@@ -7,7 +7,7 @@ const COLUMNS = [
   'End date of subscription',
   'Price',
   'Subscription Type',
-  'Payment Method',
+  'Payment Type',
 ]
 
 const PAYMENTS = [

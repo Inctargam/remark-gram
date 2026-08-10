@@ -37,6 +37,8 @@ export default defineConfig({
         'app/api/mock/subscriptions/**',
         'app/api/mock/payments/**',
         'app/api/mock/_mock/**',
+        'src/widgets/account-management/**',
+        'src/shared/lib/date/**',
       ],
       // Only what the `unit` project can actually execute is measured. The project runs in
       // `node` and the repo has no jsdom/RTL, so components and React hooks cannot be
