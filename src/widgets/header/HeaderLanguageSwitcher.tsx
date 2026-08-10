@@ -16,8 +16,8 @@ type Props = {
 }
 
 const LANGUAGES = {
-  en: { flag: '/icons/flag-uk.svg', label: 'English' },
-  ru: { flag: '/icons/flag-ru.svg', label: 'Russian' },
+  en: { flag: '/icons/flag-uk.svg', label: 'English', shortLabel: 'EN' },
+  ru: { flag: '/icons/flag-ru.svg', label: 'Russian', shortLabel: 'RU' },
 } as const
 
 const LANGUAGE_OPTIONS: SelectOption<HeaderLanguage>[] = [
@@ -39,7 +39,7 @@ export const HeaderLanguageSwitcher = ({ compact = false, value, onValueChange }
         return (
           <span className={styles.optionContent}>
             <Image alt="" className={styles.flag} height={24} src={language.flag} width={24} />
-            <span>{language.label}</span>
+            <span>{compact ? language.shortLabel : language.label}</span>
           </span>
         )
       }}
