@@ -5,6 +5,7 @@ import {
   PaymentResultModal,
   useBuySubscription,
 } from '@/features/buy-subscription'
+import { AutoRenewalCheckbox } from '@/features/cancel-auto-renewal'
 
 import { useAccountManagement } from '../model/useAccountManagement'
 import { AccountManagementView } from './AccountManagementView'
@@ -16,11 +17,12 @@ import { AccountManagementView } from './AccountManagementView'
 export const AccountManagement = () => {
   const {
     accountType,
-    currentSubscription,
     errorMessage,
+    isAutoRenewalOn,
     isLoading,
     isPersonalDisabled,
     selectedPlanId,
+    subscriptionQueue,
     setAccountType,
     setSelectedPlanId,
   } = useAccountManagement()
@@ -39,11 +41,12 @@ export const AccountManagement = () => {
     <>
       <AccountManagementView
         accountType={accountType}
-        currentSubscription={currentSubscription}
+        autoRenewalSlot={<AutoRenewalCheckbox checked={isAutoRenewalOn} />}
         errorMessage={errorMessage}
         isLoading={isLoading}
         isPersonalDisabled={isPersonalDisabled}
         selectedPlanId={selectedPlanId}
+        subscriptionQueue={subscriptionQueue}
         onAccountTypeChange={setAccountType}
         onPlanChange={setSelectedPlanId}
         onProviderSelect={startPayment}

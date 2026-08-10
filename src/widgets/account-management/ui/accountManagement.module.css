@@ -26,30 +26,31 @@
   line-height: var(--line-height-regular-14);
 }
 
-/* Current subscription: label above value, one column per field.
-   Not a table — the design shows a card, and the table lives on the payments tab. */
-.subscriptionCard {
-  display: grid;
-  gap: 24px;
-  padding: 12px 24px;
-  grid-template-columns: repeat(auto-fit, minmax(140px, max-content));
+/* Current subscription: labels once at the top, a row per subscription of the queue.
+   The card look of the design is kept — no header fill, no separator under it. */
+.subscriptionTable {
+  width: max-content;
+  max-width: 100%;
+  background-color: var(--color-dark-500);
 }
 
-.subscriptionItem {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin: 0;
+.subscriptionHead {
+  background-color: transparent;
+}
+
+.subscriptionBody tr:first-child {
+  border-top: none;
 }
 
 .subscriptionLabel {
+  padding-bottom: 0;
   color: var(--color-text-secondary);
   font-size: var(--font-size-regular-14);
+  font-weight: var(--font-weight-regular-14);
   line-height: var(--line-height-regular-14);
 }
 
 .subscriptionValue {
-  margin: 0;
   font-size: var(--font-size-bold-14);
   font-weight: var(--font-weight-bold-14);
   line-height: var(--line-height-bold-14);

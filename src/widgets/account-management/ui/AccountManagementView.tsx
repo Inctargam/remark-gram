@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react'
+
 import type { AccountType, PaymentProvider, SubscriptionPeriod } from '@/entities/subscription'
 import { SUBSCRIPTION_PLANS } from '@/entities/subscription'
 import { formatShortDate } from '@/shared/lib/date'
@@ -6,18 +8,22 @@ import { Card } from '@/shared/ui/card'
 import { Icon } from '@/shared/ui/icon'
 import type { RadioGroupOption } from '@/shared/ui/radio-group'
 import { RadioGroup } from '@/shared/ui/radio-group'
+import { Table } from '@/shared/ui/table'
 
-import type { CurrentSubscriptionInfo } from '../model/types'
+import type { SubscriptionQueueItem } from '../model/types'
 import styles from './accountManagement.module.css'
 
 type Props = {
   accountType: AccountType
-  currentSubscription: CurrentSubscriptionInfo | null
+  /** UC-2 checkbox; a slot so this view stays free of data fetching. */
+  autoRenewalSlot?: ReactNode
   errorMessage: string | null
   isLoading: boolean
   /** Downgrading to Personal is a backend job, so the option is locked while a plan is paid. */
   isPersonalDisabled: boolean
   selectedPlanId: SubscriptionPeriod
+  /** Oldest first: the active subscription and everything bought on top of it (UC-3). */
+  subscriptionQueue: SubscriptionQueueItem[]
   onAccountTypeChange: (accountType: AccountType) => void
   onPlanChange: (planId: SubscriptionPeriod) => void
   /** Left out until the payment flow exists: without it the provider buttons stay disabled. */
@@ -32,17 +38,19 @@ const NO_DATE_PLACEHOLDER = '—'
 
 export const AccountManagementView = ({
   accountType,
-  currentSubscription,
+  autoRenewalSlot,
   errorMessage,
   isLoading,
   isPersonalDisabled,
   selectedPlanId,
+  subscriptionQueue,
   onAccountTypeChange,
   onPlanChange,
   onProviderSelect,
 }: Props) => {
   const isBusiness = accountType === 'business'
-  const plansTitle = currentSubscription ? 'Change your subscription:' : 'Your subscription costs:'
+  const hasSubscription = subscriptionQueue.length > 0
+  const plansTitle = hasSubscription ? 'Change your subscription:' : 'Your subscription costs:'
 
   if (errorMessage) {
     return <Alert variant="error">{errorMessage}</Alert>
@@ -54,25 +62,32 @@ export const AccountManagementView = ({
 
   return (
     <div className={styles.root}>
-      {currentSubscription ? (
+      {hasSubscription ? (
         <section className={styles.section}>
           <h2 className={styles.title}>Current Subscription:</h2>
-          <Card className={styles.subscriptionCard} padding="none">
-            <dl className={styles.subscriptionItem}>
-              <dt className={styles.subscriptionLabel}>Expire at</dt>
-              <dd className={styles.subscriptionValue}>
-                {formatShortDate(currentSubscription.expiresAt)}
-              </dd>
-            </dl>
-            <dl className={styles.subscriptionItem}>
-              <dt className={styles.subscriptionLabel}>Next payment</dt>
-              <dd className={styles.subscriptionValue}>
-                {currentSubscription.nextPaymentAt
-                  ? formatShortDate(currentSubscription.nextPaymentAt)
-                  : NO_DATE_PLACEHOLDER}
-              </dd>
-            </dl>
-          </Card>
+          {/* One row per subscription: buying on top of an active plan queues it up. */}
+          <Table.Root wrapperClassName={styles.subscriptionTable}>
+            <Table.Head className={styles.subscriptionHead}>
+              <Table.Row>
+                <Table.HeadCell className={styles.subscriptionLabel}>Expire at</Table.HeadCell>
+                <Table.HeadCell className={styles.subscriptionLabel}>Next payment</Table.HeadCell>
+              </Table.Row>
+            </Table.Head>
+            <Table.Body className={styles.subscriptionBody}>
+              {subscriptionQueue.map(({ id, expiresAt, nextPaymentAt }) => (
+                <Table.Row key={id}>
+                  <Table.Cell className={styles.subscriptionValue}>
+                    {formatShortDate(expiresAt)}
+                  </Table.Cell>
+                  <Table.Cell className={styles.subscriptionValue}>
+                    {nextPaymentAt ? formatShortDate(nextPaymentAt) : NO_DATE_PLACEHOLDER}
+                  </Table.Cell>
+                </Table.Row>
+              ))}
+            </Table.Body>
+          </Table.Root>
+
+          {autoRenewalSlot}
         </section>
       ) : null}
 
