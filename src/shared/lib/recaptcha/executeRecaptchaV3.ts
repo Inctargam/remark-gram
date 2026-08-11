@@ -15,7 +15,6 @@ const loadScript = (): Promise<void> => {
 
       return
     }
-
     const script = document.createElement('script')
     script.src = SCRIPT_URL
     script.async = true
@@ -29,7 +28,6 @@ const loadScript = (): Promise<void> => {
 
     document.head.appendChild(script)
   })
-
   return scriptPromise
 }
 

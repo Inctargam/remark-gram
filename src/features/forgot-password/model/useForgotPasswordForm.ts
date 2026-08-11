@@ -50,9 +50,7 @@ export const useForgotPasswordForm = () => {
 
     try {
       const recaptchaToken = await executeRecaptchaV3('forgot_password')
-
       await mutateAsync({ email: email.trim(), recaptchaToken })
-
       setSubmittedEmail(email.trim())
       setIsConfirmationOpen(true)
     } catch {
