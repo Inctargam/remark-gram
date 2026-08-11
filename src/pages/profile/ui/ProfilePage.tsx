@@ -1,4 +1,7 @@
+import Link from 'next/link'
+
 import { isProfileOwner } from '@/shared/auth'
+import { ROUTES } from '@/shared/config'
 import { Button } from '@/shared/ui/button'
 import { ProfilePostsGrid } from '@/widgets/profile-posts'
 
@@ -25,7 +28,6 @@ type Props = {
 
 export const ProfilePage = ({ userId }: Props) => {
   const isOwner = isProfileOwner(userId)
-
   return (
     <section className={styles.page} aria-labelledby="profile-title">
       <div className={styles.header}>
@@ -37,7 +39,11 @@ export const ProfilePage = ({ userId }: Props) => {
               {PROFILE_PLACEHOLDER.username}
             </h1>
             {isOwner ? (
-              <Button className={styles.settingsButton} type="button" variant="secondary">
+              <Button
+                className={styles.settingsButton}
+                nativeButton={false}
+                variant="secondary"
+                render={<Link href={ROUTES.settings} />}>
                 Profile Settings
               </Button>
             ) : null}

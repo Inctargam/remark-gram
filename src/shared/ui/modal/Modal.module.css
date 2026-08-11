@@ -43,7 +43,7 @@
     margin: 0;
     color: var(--color-light-100);
     font-size: var(--font-size-h1);
-    font-weight: var(--font-weight-bold);
+    font-weight: var(--font-weight-h1);
 }
 
 .header[data-has-start] .title {
@@ -66,6 +66,11 @@
 
 .close:hover {
     color: var(--color-primary-100);
+}
+
+.close:disabled {
+    color: var(--color-light-900);
+    cursor: not-allowed;
 }
 
 .body {

@@ -18,6 +18,8 @@ type Props = {
   bodyClassName?: string
   disablePointerDismissal?: boolean
   headerStart?: ReactNode
+  /** Blocks every dismissal path while an irreversible action is pending. */
+  dismissDisabled?: boolean
 }
 
 export type { Props as ModalProps }
@@ -30,24 +32,35 @@ export const Modal = ({
   className,
   bodyClassName,
   disablePointerDismissal = false,
-  headerStart,
-}: Props) => (
-  <Dialog.Root
-    open={open}
-    onOpenChange={onOpenChange}
-    disablePointerDismissal={disablePointerDismissal}>
-    <Dialog.Portal>
-      <Dialog.Backdrop className={styles.backdrop} />
-      <Dialog.Popup className={clsx(styles.popup, className)}>
-        <div className={styles.header} data-has-start={headerStart ? true : undefined}>
-          {headerStart ? <div className={styles.headerStart}>{headerStart}</div> : null}
-          <Dialog.Title className={styles.title}>{title}</Dialog.Title>
-          <Dialog.Close className={styles.close} aria-label="Close">
-            <Icon iconId="icon-close-outline" width={24} height={24} />
-          </Dialog.Close>
-        </div>
-        <div className={clsx(styles.body, bodyClassName)}>{children}</div>
-      </Dialog.Popup>
-    </Dialog.Portal>
-  </Dialog.Root>
-)
+headerStart,
+  dismissDisabled = false,
+}: Props) => {
+  const openChangeHandler = (nextOpen: boolean) => {
+    if (!nextOpen && dismissDisabled) {
+      return
+    }
+
+    onOpenChange(nextOpen)
+  }
+
+  return (
+    <Dialog.Root
+      open={open}
+      onOpenChange={openChangeHandler}
+      disablePointerDismissal={disablePointerDismissal || dismissDisabled}>
+      <Dialog.Portal>
+        <Dialog.Backdrop className={styles.backdrop} />
+        <Dialog.Popup className={clsx(styles.popup, className)}>
+          <div className={styles.header} data-has-start={headerStart ? true : undefined}>
+            {headerStart ? <div className={styles.headerStart}>{headerStart}</div> : null}
+            <Dialog.Title className={styles.title}>{title}</Dialog.Title>
+            <Dialog.Close className={styles.close} aria-label="Close">
+              <Icon iconId="icon-close-outline" width={24} height={24} />
+            </Dialog.Close>
+          </div>
+          <div className={clsx(styles.body, bodyClassName)}>{children}</div>
+        </Dialog.Popup>
+      </Dialog.Portal>
+    </Dialog.Root>
+  )
+}

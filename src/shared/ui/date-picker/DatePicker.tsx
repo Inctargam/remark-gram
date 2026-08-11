@@ -1,4 +1,5 @@
 import clsx from 'clsx'
+import type { ReactNode } from 'react'
 import { useEffect, useRef, useState } from 'react'
 
 import { Icon } from '../icon'
@@ -9,14 +10,16 @@ type DatePickerMode = 'single' | 'range'
 
 export type DatePickerProps = {
   mode?: DatePickerMode
-  label?: string
-  error?: string
+  label?: ReactNode
+  ariaLabel?: string
+  error?: ReactNode
   className?: string
   disabled?: boolean
   placeholder?: string
   defaultOpen?: boolean
-  value?: Date | { from: Date; to: Date } | undefined
+  value?: Date | { from: Date; to: Date } | null
   onChange?: (value: Date | { from: Date; to: Date } | undefined) => void
+  onBlur?: () => void
 }
 
 const formatDate = (date: Date): string => {
@@ -27,7 +30,7 @@ const formatDate = (date: Date): string => {
   })
 }
 
-const formatValue = (value: Date | { from: Date; to: Date } | undefined): string => {
+const formatValue = (value: Date | { from: Date; to: Date } | null | undefined): string => {
   if (!value) return ''
   if (value instanceof Date) return formatDate(value)
   if (value.from && value.to) {
@@ -40,6 +43,7 @@ const formatValue = (value: Date | { from: Date; to: Date } | undefined): string
 export const DatePicker = ({
   mode = 'single',
   label,
+  ariaLabel,
   error,
   className,
   disabled,
@@ -47,12 +51,13 @@ export const DatePicker = ({
   defaultOpen = false,
   value,
   onChange,
+  onBlur,
 }: DatePickerProps) => {
   const [open, setOpen] = useState(defaultOpen)
-  const [internalValue, setInternalValue] = useState<Date | { from: Date; to: Date } | undefined>(
-    value
-  )
-  const [selectedUnderError, setSelectedUnderError] = useState<string | undefined>()
+  const [internalValue, setInternalValue] = useState<
+    Date | { from: Date; to: Date } | null | undefined
+  >(value)
+  const [selectedUnderError, setSelectedUnderError] = useState<ReactNode>()
   const rootRef = useRef<HTMLDivElement>(null)
 
   const isControlled = value !== undefined
@@ -60,38 +65,43 @@ export const DatePicker = ({
   const isRange = mode === 'range'
   const displayError = error !== selectedUnderError ? error : undefined
   const isError = Boolean(displayError)
-  const displayValue = formatValue(selected || new Date())
+  const displayValue = formatValue(selected)
+  const accessibleLabel = ariaLabel ?? (typeof label === 'string' ? label : placeholder)
 
   useEffect(() => {
     if (!open) return
 
-    const handler = (e: MouseEvent) => {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
+    const outsideClickHandler = (event: MouseEvent) => {
+      if (rootRef.current && !rootRef.current.contains(event.target as Node)) {
         setOpen(false)
+        onBlur?.()
       }
     }
 
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
-  }, [open])
+    document.addEventListener('mousedown', outsideClickHandler)
+    return () => document.removeEventListener('mousedown', outsideClickHandler)
+  }, [onBlur, open])
 
-  const close = () => setOpen(false)
+  const closeHandler = () => {
+    setOpen(false)
+    onBlur?.()
+  }
 
-  const handleSelect = (date: Date) => {
+  const selectHandler = (date: Date) => {
     onChange?.(date)
     if (!isControlled) {
       setInternalValue(date)
     }
-    close()
+    closeHandler()
   }
 
-  const handleRangeSelect = (range: { from: Date; to: Date }) => {
+  const rangeSelectHandler = (range: { from: Date; to: Date }) => {
     onChange?.(range)
     if (!isControlled) {
       setInternalValue(range)
     }
     if (range.from.getTime() !== range.to.getTime()) {
-      close()
+      closeHandler()
     }
   }
 
@@ -113,12 +123,18 @@ export const DatePicker = ({
           disabled={disabled}
           onClick={() => {
             if (!disabled) {
-              setOpen((prev) => !prev)
+              setOpen((previousOpen) => {
+                if (previousOpen) {
+                  onBlur?.()
+                }
+
+                return !previousOpen
+              })
               setSelectedUnderError(error)
             }
           }}
           aria-expanded={open}
-          aria-label={label || placeholder}>
+          aria-label={accessibleLabel}>
           <span
             className={clsx(
               styles.value,
@@ -134,10 +150,11 @@ export const DatePicker = ({
           <div className={styles.popup}>
             <Calendar
               mode={mode}
+              initialMonth={selected instanceof Date ? selected : undefined}
               selected={mode === 'single' ? (selected as Date) : undefined}
               rangeSelected={mode === 'range' ? (selected as { from: Date; to: Date }) : undefined}
-              onSelect={handleSelect}
-              onRangeSelect={handleRangeSelect}
+              onSelect={selectHandler}
+              onRangeSelect={rangeSelectHandler}
             />
           </div>
         )}

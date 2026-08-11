@@ -4,6 +4,17 @@
   min-height: 100vh;
 }
 
+.desktopHeader,
+.mobileHeader {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-index-header);
+}
+
+.mobileHeader {
+  display: none;
+}
+
 .content {
   display: flex;
   flex: 1;
@@ -29,6 +40,23 @@
 
 .languageSelector {
   width: 163px;
+}
+
+.mobileLanguage {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--color-light-100);
+}
+
+@media (width < 768px) {
+  .authDesktopHeader {
+    display: none;
+  }
+
+  .mobileHeader {
+    display: block;
+  }
 }
 
 @media (width >= 768px) {

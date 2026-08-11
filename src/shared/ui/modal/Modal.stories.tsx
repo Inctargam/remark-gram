@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { useState } from 'react'
+import { expect, screen, userEvent } from 'storybook/test'
 
 import { Button } from '@/shared/ui/button'
 
@@ -55,6 +56,19 @@ export const DisablePointerDismissal: StoryObj<typeof Modal> = {
         </Modal>
       </>
     )
+  },
+}
+
+export const DismissDisabled: StoryObj<typeof Modal> = {
+  render: () => (
+    <Modal open onOpenChange={() => {}} title="Uploading" dismissDisabled>
+      <p style={{ margin: 0, color: 'white' }}>The request is pending.</p>
+    </Modal>
+  ),
+  play: async () => {
+    await expect(screen.getByRole('button', { name: 'Close' })).toBeDisabled()
+    await userEvent.keyboard('{Escape}')
+    await expect(screen.getByRole('dialog')).toBeVisible()
   },
 }
 
