@@ -4,7 +4,9 @@ import type { ReactNode } from 'react'
 
 import { LogoutButton } from '@/features/logout'
 import type { SessionStatus } from '@/shared/auth'
+import { useGlobalLoading } from '@/shared/lib/tanstack'
 import { Icon } from '@/shared/ui/icon'
+import { ProgressBar } from '@/shared/ui/progress-bar'
 import type { SelectOption } from '@/shared/ui/select'
 import { Select } from '@/shared/ui/select'
 import { Header, HeaderMobile } from '@/widgets/header'
@@ -28,9 +30,11 @@ export const AppShellView = ({ children, hideBottomBar = false, status, onLogout
   const isAuthenticated = status === 'authenticated'
   const isLoading = status === 'loading'
   const showBottomBar = isAuthenticated && !hideBottomBar
+  const globalLoading = useGlobalLoading()
 
   return (
     <div className={styles.shell}>
+      <ProgressBar isLoading={globalLoading} />
       {!isLoading && (
         <>
           <div className={clsx(styles.desktopHeader, isAuthenticated && styles.authDesktopHeader)}>
