@@ -1,3 +1,5 @@
+'use client'
+
 import { useIsFetching, useIsMutating } from '@tanstack/react-query'
 import { useDeferredValue } from 'react'
 
