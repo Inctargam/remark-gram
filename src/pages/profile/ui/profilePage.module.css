@@ -1,5 +1,5 @@
 .page {
-  min-height: calc(100vh - 60px);
+  min-height: calc(100vh - var(--layout-header-height));
   padding: 36px 24px 84px;
   background-color: var(--color-dark-700);
   color: var(--color-text-primary);
@@ -26,8 +26,8 @@
 
 .topRow {
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
   gap: 24px;
 }
 
@@ -83,7 +83,15 @@
   margin-top: 48px;
 }
 
-@media (max-width: 1023px) {
+@media (width >= 768px) {
+  .page {
+    height: calc(100dvh - var(--layout-header-height));
+    min-height: 0;
+    overflow-y: auto;
+  }
+}
+
+@media (width <= 1023px) {
   .page {
     padding: 36px 16px 84px;
   }
@@ -98,8 +106,8 @@
   }
 
   .topRow {
-    align-items: flex-start;
     flex-direction: column;
+    align-items: flex-start;
     gap: 12px;
   }
 
@@ -109,12 +117,74 @@
   }
 }
 
-@media (max-width: 767px) {
+@media (width <= 767px) {
+  .page {
+    padding: 24px 15px 84px;
+  }
+
   .header {
-    grid-template-columns: 1fr;
+    grid-template-columns: 72px minmax(0, 1fr);
+    gap: 6px 27px;
   }
 
   .avatar {
-    width: 112px;
+    grid-column: 1;
+    grid-row: 1;
+    width: 72px;
+  }
+
+  .summary {
+    display: contents;
+  }
+
+  .topRow {
+    display: block;
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .title {
+    font-size: var(--font-size-bold-16);
+    font-weight: var(--font-weight-bold-16);
+    line-height: var(--line-height-bold-16);
+  }
+
+  .settingsButton {
+    display: none;
+  }
+
+  .stats {
+    justify-content: space-between;
+    gap: 0;
+    width: 100%;
+    margin: 20px 0 0;
+    align-self: start;
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .stat {
+    align-items: center;
+    font-size: var(--font-size-small);
+    line-height: var(--line-height-small);
+  }
+
+  .statValue {
+    font-size: var(--font-size-bold-14);
+    line-height: var(--line-height-small);
+  }
+
+  .statLabel {
+    font-weight: var(--font-weight-small);
+  }
+
+  .description {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    margin-top: 7px;
+  }
+
+  .posts {
+    margin-top: 29px;
   }
 }

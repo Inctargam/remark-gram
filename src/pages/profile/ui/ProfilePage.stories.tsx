@@ -3,6 +3,7 @@ import { expect, screen, userEvent, waitFor, within } from 'storybook/test'
 
 import type { Post, PostsPage } from '@/entities/post'
 import { MOCK_CURRENT_USER_ID } from '@/shared/auth'
+import { AppShellView } from '@/widgets/app-shell'
 
 import { ProfilePage } from './ProfilePage'
 
@@ -94,6 +95,71 @@ export const OwnProfile: Story = {
     await expect(await canvas.findByAltText('Mock publication 1')).toBeInTheDocument()
     await expect(canvas.getAllByRole('img')).toHaveLength(8)
     await expect(canvas.getByRole('button', { name: 'Profile Settings' })).toBeInTheDocument()
+  },
+}
+
+export const DesktopLayout: Story = {
+  globals: {
+    viewport: {
+      value: 'desktop',
+      isRotated: false,
+    },
+  },
+  render: (args) => (
+    <AppShellView status="authenticated" onLogout={() => Promise.resolve()}>
+      <ProfilePage {...args} />
+    </AppShellView>
+  ),
+  play: async ({ canvas, canvasElement }) => {
+    await expect(await canvas.findByAltText('Mock publication 1')).toBeInTheDocument()
+
+    const profile = canvas.getByRole('region', { name: 'UserName' })
+    const sidebar = canvas.getByRole('navigation', { name: 'Primary navigation' })
+    const sidebarTop = sidebar.getBoundingClientRect().top
+    const view = canvasElement.ownerDocument.defaultView
+
+    await expect(view?.getComputedStyle(profile).overflowY).toBe('auto')
+
+    // Storybook's desktop viewport is taller than the Figma frame, so constrain only this
+    // interaction check to exercise the same short-viewport scroll behavior.
+    profile.style.height = '480px'
+    await expect(profile.scrollHeight).toBeGreaterThan(profile.clientHeight)
+
+    profile.scrollTo(0, 200)
+    await waitFor(() => expect(profile.scrollTop).toBeGreaterThan(0))
+
+    await expect(sidebar.getBoundingClientRect().top).toBe(sidebarTop)
+    await expect(view?.scrollY).toBe(0)
+
+    profile.scrollTo(0, 0)
+    profile.style.removeProperty('height')
+  },
+}
+
+export const MobileLayout: Story = {
+  globals: {
+    viewport: {
+      value: 'mobile1',
+      isRotated: false,
+    },
+  },
+  render: (args) => (
+    <AppShellView status="authenticated" onLogout={() => Promise.resolve()}>
+      <ProfilePage {...args} />
+    </AppShellView>
+  ),
+  play: async ({ canvas }) => {
+    const images = await canvas.findAllByRole('img')
+    const tiles = images.map((image) => image.closest('button')?.getBoundingClientRect())
+    const [firstTile, secondTile, thirdTile, fourthTile] = tiles
+
+    await expect(canvas.getByRole('navigation', { name: 'Mobile navigation' })).toBeVisible()
+    await expect(canvas.queryByRole('button', { name: 'Profile Settings' })).not.toBeInTheDocument()
+    await expect(firstTile).toBeDefined()
+    await expect(Math.round(firstTile?.width ?? 0)).toBe(Math.round(firstTile?.height ?? 1))
+    await expect(Math.round(secondTile?.top ?? -1)).toBe(Math.round(firstTile?.top ?? 0))
+    await expect(Math.round(thirdTile?.top ?? -1)).toBe(Math.round(firstTile?.top ?? 0))
+    await expect(fourthTile?.top ?? 0).toBeGreaterThan(firstTile?.bottom ?? 0)
   },
 }
 
