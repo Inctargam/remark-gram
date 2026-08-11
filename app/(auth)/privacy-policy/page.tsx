@@ -1,5 +1,5 @@
-import { LegalDocumentPage } from '@/pages/legal-document'
+import { PrivacyPolicyPage } from '@/pages/legal-document'
 
 export default function Page() {
-  return <LegalDocumentPage title="Privacy Policy" />
+  return <PrivacyPolicyPage />
 }

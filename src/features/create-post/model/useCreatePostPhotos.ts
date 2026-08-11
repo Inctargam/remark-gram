@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import {
   createImagePreview,
@@ -41,110 +41,118 @@ export const useCreatePostPhotos = () => {
     []
   )
 
-  const addPhotosHandler = useCallback((files: File[]) => {
-    setPhotos((currentPhotos) => {
-      const nextPhotos = [...currentPhotos, ...files.map(createImagePreview)]
+  const commitPhotosHandler = (nextPhotos: CreatePostPhoto[]) => {
+    photosRef.current = nextPhotos
+    setPhotos(nextPhotos)
+  }
 
-      setSelectedPhotoId((currentSelectedPhotoId) => currentSelectedPhotoId ?? nextPhotos[0].id)
+  const addPhotosHandler = (files: File[]) => {
+    const addedPhotos = files.map(createImagePreview)
+    const nextPhotos = [...photosRef.current, ...addedPhotos]
+    const fallbackSelectedPhotoId = photosRef.current[0]?.id ?? addedPhotos[0]?.id ?? null
 
-      return nextPhotos
-    })
-  }, [])
+    commitPhotosHandler(nextPhotos)
+    setSelectedPhotoId(
+      (currentSelectedPhotoId) => currentSelectedPhotoId ?? fallbackSelectedPhotoId
+    )
+  }
 
-  const selectPhotoHandler = useCallback((photoId: string) => {
+  const selectPhotoHandler = (photoId: string) => {
     setSelectedPhotoId(photoId)
-  }, [])
+  }
 
-  const selectFirstPhotoHandler = useCallback(() => {
+  const selectFirstPhotoHandler = () => {
     setSelectedPhotoId(photosRef.current[0]?.id ?? null)
-  }, [])
+  }
 
-  const resetPhotosHandler = useCallback(() => {
+  const removePhotoHandler = (photoId: string) => {
+    const currentPhotos = photosRef.current
+    const removedPhotoIndex = currentPhotos.findIndex((photo) => photo.id === photoId)
+
+    if (removedPhotoIndex === -1) {
+      return
+    }
+
+    const removedPhoto = currentPhotos[removedPhotoIndex]
+    const nextPhotos = currentPhotos.filter((photo) => photo.id !== photoId)
+    const currentSelectedPhotoId = selectedPhotoId ?? currentPhotos[0]?.id ?? null
+    const nextSelectedPhotoId =
+      currentSelectedPhotoId !== photoId &&
+      nextPhotos.some(({ id }) => id === currentSelectedPhotoId)
+        ? currentSelectedPhotoId
+        : (nextPhotos[Math.min(removedPhotoIndex, nextPhotos.length - 1)]?.id ?? null)
+
+    URL.revokeObjectURL(removedPhoto.previewUrl)
+    commitPhotosHandler(nextPhotos)
+    setSelectedPhotoId(nextSelectedPhotoId)
+  }
+
+  const resetPhotosHandler = () => {
     revokePhotoPreviewUrls(photosRef.current)
-    setPhotos([])
+    commitPhotosHandler([])
     setSelectedPhotoId(null)
-  }, [])
+  }
 
-  const restorePhotosHandler = useCallback(
-    (draftPhotos: CreatePostPhotoPreviewSource[], draftSelectedPhotoId: string | null) => {
-      const restoredPhotos = draftPhotos.map(restoreImagePreview)
-      const hasDraftSelectedPhoto = restoredPhotos.some(({ id }) => id === draftSelectedPhotoId)
+  const restorePhotosHandler = (
+    draftPhotos: CreatePostPhotoPreviewSource[],
+    draftSelectedPhotoId: string | null
+  ) => {
+    const restoredPhotos = draftPhotos.map(restoreImagePreview)
+    const hasDraftSelectedPhoto = restoredPhotos.some(({ id }) => id === draftSelectedPhotoId)
 
-      revokePhotoPreviewUrls(photosRef.current)
-      setPhotos(restoredPhotos)
-      setSelectedPhotoId(
-        hasDraftSelectedPhoto ? draftSelectedPhotoId : (restoredPhotos[0]?.id ?? null)
-      )
-    },
-    []
-  )
+    revokePhotoPreviewUrls(photosRef.current)
+    commitPhotosHandler(restoredPhotos)
+    setSelectedPhotoId(
+      hasDraftSelectedPhoto ? draftSelectedPhotoId : (restoredPhotos[0]?.id ?? null)
+    )
+  }
 
-  const updateSelectedPhotoHandler = useCallback(
-    (updatePhoto: (photo: CreatePostPhoto) => CreatePostPhoto) => {
-      if (!selectedPhoto) {
-        return
-      }
+  const updateSelectedPhotoHandler = (updatePhoto: (photo: CreatePostPhoto) => CreatePostPhoto) => {
+    if (!selectedPhoto) {
+      return
+    }
 
-      setPhotos((currentPhotos) =>
-        currentPhotos.map((photo) => (photo.id === selectedPhoto.id ? updatePhoto(photo) : photo))
-      )
-    },
-    [selectedPhoto]
-  )
+    setPhotos((currentPhotos) =>
+      currentPhotos.map((photo) => (photo.id === selectedPhoto.id ? updatePhoto(photo) : photo))
+    )
+  }
 
-  const updateSelectedPhotoCropHandler = useCallback(
-    (crop: CreatePostPoint) => {
-      updateSelectedPhotoHandler((photo) => ({ ...photo, crop }))
-    },
-    [updateSelectedPhotoHandler]
-  )
+  const updateSelectedPhotoCropHandler = (crop: CreatePostPoint) => {
+    updateSelectedPhotoHandler((photo) => ({ ...photo, crop }))
+  }
 
-  const updateSelectedPhotoZoomHandler = useCallback(
-    (zoom: number) => {
-      updateSelectedPhotoHandler((photo) => ({ ...photo, zoom }))
-    },
-    [updateSelectedPhotoHandler]
-  )
+  const updateSelectedPhotoZoomHandler = (zoom: number) => {
+    updateSelectedPhotoHandler((photo) => ({ ...photo, zoom }))
+  }
 
-  const updateSelectedPhotoAspectHandler = useCallback(
-    (aspectId: CreatePostAspectId) => {
-      updateSelectedPhotoHandler((photo) => ({
-        ...photo,
-        aspectId,
-        crop: { ...DEFAULT_CREATE_POST_CROP },
-        zoom: DEFAULT_CREATE_POST_ZOOM,
-        croppedAreaPixels: null,
-      }))
-    },
-    [updateSelectedPhotoHandler]
-  )
+  const updateSelectedPhotoAspectHandler = (aspectId: CreatePostAspectId) => {
+    updateSelectedPhotoHandler((photo) => ({
+      ...photo,
+      aspectId,
+      crop: { ...DEFAULT_CREATE_POST_CROP },
+      zoom: DEFAULT_CREATE_POST_ZOOM,
+      croppedAreaPixels: null,
+    }))
+  }
 
-  const updateSelectedPhotoCroppedAreaHandler = useCallback(
-    (croppedAreaPixels: CreatePostCropArea) => {
-      updateSelectedPhotoHandler((photo) => ({ ...photo, croppedAreaPixels }))
-    },
-    [updateSelectedPhotoHandler]
-  )
+  const updateSelectedPhotoCroppedAreaHandler = (croppedAreaPixels: CreatePostCropArea) => {
+    updateSelectedPhotoHandler((photo) => ({ ...photo, croppedAreaPixels }))
+  }
 
-  const updateSelectedPhotoFilterHandler = useCallback(
-    (filterId: CreatePostFilterId) => {
-      updateSelectedPhotoHandler((photo) => ({ ...photo, filterId }))
-    },
-    [updateSelectedPhotoHandler]
-  )
+  const updateSelectedPhotoFilterHandler = (filterId: CreatePostFilterId) => {
+    updateSelectedPhotoHandler((photo) => ({ ...photo, filterId }))
+  }
 
-  const updateSelectedPhotoImageSizeHandler = useCallback(
-    (imageSize: CreatePostImageSize) => {
-      updateSelectedPhotoHandler((photo) => ({ ...photo, imageSize }))
-    },
-    [updateSelectedPhotoHandler]
-  )
+  const updateSelectedPhotoImageSizeHandler = (imageSize: CreatePostImageSize) => {
+    updateSelectedPhotoHandler((photo) => ({ ...photo, imageSize }))
+  }
 
   return {
     photos,
     selectedPhoto,
     selectedPhotoId: effectiveSelectedPhotoId,
     addPhotosHandler,
+    removePhotoHandler,
     resetPhotosHandler,
     restorePhotosHandler,
     selectFirstPhotoHandler,

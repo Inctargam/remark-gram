@@ -1,5 +1,8 @@
+import Link from 'next/link'
+
 import type { Post, PostsPage } from '@/entities/post'
 import { isProfileOwner } from '@/shared/auth'
+import { ROUTES } from '@/shared/config'
 import { Button } from '@/shared/ui/button'
 import { ProfilePostsGrid } from '@/widgets/profile-posts'
 
@@ -50,7 +53,11 @@ export const ProfilePageView = ({
               {profile.username}
             </h1>
             {isOwner ? (
-              <Button className={styles.settingsButton} type="button" variant="secondary">
+              <Button
+                className={styles.settingsButton}
+                nativeButton={false}
+                render={<Link href={ROUTES.settings} />}
+                variant="secondary">
                 Profile Settings
               </Button>
             ) : null}
