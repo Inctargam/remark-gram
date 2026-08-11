@@ -19,9 +19,9 @@ type Props = {
 
 const LOAD_ERROR_MESSAGE = 'Failed to load publications. Please try again.'
 
-export const ProfilePostsGrid = ({ userId }: Props) => {
+export const ProfilePostsGrid = ({ initialPage, userId }: Props) => {
   const { posts, error, hasNextPage, isFetchingNextPage, isPending, fetchNextPage } =
-    useProfilePostsQuery(userId)
+    useProfilePostsQuery(userId, initialPage)
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null)
   const [isEditing, setIsEditing] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
