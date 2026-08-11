@@ -1,10 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { expect, screen, userEvent, waitFor, within } from 'storybook/test'
 
-import type { Post, PostsPage } from '@/entities/post'
-import { MOCK_CURRENT_USER_ID } from '@/shared/auth'
-
-import { ProfilePage } from './ProfilePage'
+import type { Post, PostsPage } from '../../../entities/post'
+import { MOCK_CURRENT_USER_ID } from '../../../shared/auth'
+import { ProfilePageView } from './ProfilePageView'
 
 const OTHER_USER_ID = 'mock-user-2'
 
@@ -30,6 +29,19 @@ const createPage = (ownerId: string): PostsPage => ({
     })
   ),
   nextCursor: null,
+})
+
+const createProfile = (userId: string) => ({
+  id: userId,
+  username: userId === OTHER_USER_ID ? 'OtherUser' : 'UserName',
+  description:
+    userId === OTHER_USER_ID
+      ? 'Mock profile for a second author. Used to verify public profile SSR states.'
+      : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+  followingCount: userId === OTHER_USER_ID ? 128 : 2218,
+  followersCount: userId === OTHER_USER_ID ? 642 : 2358,
+  publicationsCount: userId === OTHER_USER_ID ? 4 : 20,
+  avatarUrl: null,
 })
 
 /**
@@ -67,10 +79,12 @@ const stubPostsFetch = () => {
 
 const meta = {
   title: 'pages/ProfilePage',
-  component: ProfilePage,
+  component: ProfilePageView,
   tags: ['autodocs'],
   args: {
-    postId: null,
+    initialPostsPage: createPage(MOCK_CURRENT_USER_ID),
+    initialSelectedPost: null,
+    profile: createProfile(MOCK_CURRENT_USER_ID),
     userId: MOCK_CURRENT_USER_ID,
   },
   beforeEach: stubPostsFetch,
@@ -82,7 +96,7 @@ const meta = {
       },
     },
   },
-} satisfies Meta<typeof ProfilePage>
+} satisfies Meta<typeof ProfilePageView>
 
 export default meta
 
@@ -159,6 +173,8 @@ export const DeleteOwnPost: Story = {
 
 export const OtherUserProfile: Story = {
   args: {
+    initialPostsPage: createPage(OTHER_USER_ID),
+    profile: createProfile(OTHER_USER_ID),
     userId: OTHER_USER_ID,
   },
   play: async ({ canvasElement }) => {

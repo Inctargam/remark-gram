@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 
-import type { Post } from '@/entities/post'
+import type { Post, PostsPage } from '@/entities/post'
 import { PostViewModal, useProfilePostsQuery } from '@/entities/post'
 import { DeletePostDialog } from '@/features/delete-post'
 import { EditPostModal } from '@/features/edit-post'
@@ -12,6 +12,8 @@ import { isProfileOwner } from '@/shared/auth'
 import { ProfilePostsGridView } from './ProfilePostsGridView'
 
 type Props = {
+  initialPage?: PostsPage
+  initialSelectedPost?: Post | null
   userId: string
 }
 

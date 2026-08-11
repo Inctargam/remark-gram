@@ -13,17 +13,24 @@
 - Mock store постов получил `countUserPosts()`; счетчик публикаций профиля теперь можно получать из фактического состояния постов.
 - Route `/profile/[id]` принимает async `searchParams`, нормализует `postId` из query string и передает его в page-level `ProfilePage`.
 - Добавлен route-local unit-тест нормализации `postId`, включая повторяющийся query param.
+- `ProfilePage` переведена в server container: на сервере загружает публичный профиль, первую страницу постов и выбранный пост из `postId`, а некорректные profile/post сочетания отправляет в `notFound()`.
+- Синхронный `ProfilePageView` получает server data пропсами и рендерит публичный профиль без placeholder-статистики.
+- Добавлена unit-проверка, что выбранный пост принадлежит открытому профилю.
 
 #### Verification
 
 - `pnpm exec vitest run --project unit src/pages/profile/api/profile.server.test.ts src/entities/post/api/postsApi.server.test.ts src/shared/api/mock/postsStore.test.ts` прошёл успешно.
 - `pnpm exec vitest run --project unit app/'(main)'/profile/'[id]'/normalizePostId.test.ts` прошёл успешно.
+- `pnpm exec vitest run --project unit src/pages/profile/model/selectedProfilePost.test.ts src/pages/profile/api/profile.server.test.ts src/entities/post/api/postsApi.server.test.ts src/shared/api/mock/postsStore.test.ts` прошёл успешно.
 - `pnpm exec vitest run --project storybook src/pages/profile/ui/ProfilePage.stories.tsx` прошёл успешно.
 - `pnpm exec eslint app/'(main)'/profile/'[id]'/page.tsx app/'(main)'/profile/'[id]'/normalizePostId.ts app/'(main)'/profile/'[id]'/normalizePostId.test.ts src/pages/profile/ui/ProfilePage.tsx src/pages/profile/ui/ProfilePage.stories.tsx` прошёл успешно.
+- `pnpm exec eslint src/pages/profile/ui/ProfilePage.tsx src/pages/profile/ui/ProfilePageView.tsx src/pages/profile/ui/ProfilePage.stories.tsx src/pages/profile/model/selectedProfilePost.ts src/pages/profile/model/selectedProfilePost.test.ts src/widgets/profile-posts/ui/ProfilePostsGrid.tsx` прошёл успешно.
 - `pnpm exec prettier --check CHANGELOG.md app/'(main)'/profile/'[id]'/page.tsx app/'(main)'/profile/'[id]'/normalizePostId.ts app/'(main)'/profile/'[id]'/normalizePostId.test.ts src/pages/profile/ui/ProfilePage.tsx src/pages/profile/ui/ProfilePage.stories.tsx` прошёл успешно.
+- `pnpm exec prettier --check src/pages/profile/ui/ProfilePage.tsx src/pages/profile/ui/ProfilePageView.tsx src/pages/profile/ui/ProfilePage.stories.tsx src/pages/profile/model/selectedProfilePost.ts src/pages/profile/model/selectedProfilePost.test.ts src/widgets/profile-posts/ui/ProfilePostsGrid.tsx` прошёл успешно.
 - `pnpm exec tsc --noEmit` прошёл успешно.
 - `pnpm build` был остановлен вручную после длительного зависания на этапе `Creating an optimized production build ...` без вывода ошибок.
 - Storybook MCP `run-story-tests` для `ProfilePage` не завершился за 300 секунд; focused story-тест запущен локально через Vitest.
+- Storybook MCP `get-storybook-story-instructions` и `preview-stories` для `ProfilePage` не завершились за 300 секунд.
 - `pnpm lint` запускался, но не прошёл из-за прежних предупреждений Prettier в сгенерированном `src/shared/api/openapi/schema.d.ts` и существующего предупреждения React Compiler вне этой правки.
 
 ### 2026-08-03
