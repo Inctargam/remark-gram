@@ -83,14 +83,6 @@
   margin-top: 48px;
 }
 
-@media (width >= 768px) {
-  .page {
-    height: calc(100dvh - var(--layout-header-height));
-    min-height: 0;
-    overflow-y: auto;
-  }
-}
-
 @media (width <= 1023px) {
   .page {
     padding: 36px 16px 84px;

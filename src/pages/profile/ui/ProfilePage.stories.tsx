@@ -118,21 +118,18 @@ export const DesktopLayout: Story = {
     const sidebarTop = sidebar.getBoundingClientRect().top
     const view = canvasElement.ownerDocument.defaultView
 
-    await expect(view?.getComputedStyle(profile).overflowY).toBe('auto')
+    await expect(view?.getComputedStyle(profile).overflowY).toBe('visible')
 
-    // Storybook's desktop viewport is taller than the Figma frame, so constrain only this
-    // interaction check to exercise the same short-viewport scroll behavior.
-    profile.style.height = '480px'
-    await expect(profile.scrollHeight).toBeGreaterThan(profile.clientHeight)
+    // Storybook's desktop viewport is taller than the Figma frame, so extend only this
+    // interaction check to exercise document scrolling with the sticky app chrome.
+    profile.style.minHeight = `${(view?.innerHeight ?? 720) + 200}px`
+    view?.scrollTo(0, 200)
+    await waitFor(() => expect(view?.scrollY).toBeGreaterThan(0))
 
-    profile.scrollTo(0, 200)
-    await waitFor(() => expect(profile.scrollTop).toBeGreaterThan(0))
+    await expect(Math.abs(sidebar.getBoundingClientRect().top - sidebarTop)).toBeLessThanOrEqual(1)
 
-    await expect(sidebar.getBoundingClientRect().top).toBe(sidebarTop)
-    await expect(view?.scrollY).toBe(0)
-
-    profile.scrollTo(0, 0)
-    profile.style.removeProperty('height')
+    view?.scrollTo(0, 0)
+    profile.style.removeProperty('min-height')
   },
 }
 
