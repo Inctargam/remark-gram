@@ -12,12 +12,18 @@
 - Для SSR-seed данных задан короткий `staleTime`, чтобы после гидрации клиент не отправлял дублирующий запрос за той же первой страницей.
 - Добавлена unit-проверка формы `pages/pageParams`, которую ожидает TanStack Query для infinite query.
 
+#### Shared UI
+
+- Кнопка закрытия `Modal` теперь получает `disabled` при `dismissDisabled`, чтобы pending-состояния блокировали все способы закрытия и Storybook-сценарий соответствовал поведению компонента.
+
 #### Verification
 
 - `pnpm exec vitest run --project unit src/entities/post/api/profilePostsQueryData.test.ts` прошёл успешно.
 - `pnpm exec vitest run --project storybook src/pages/profile/ui/ProfilePage.stories.tsx` прошёл успешно.
+- `pnpm exec vitest run --project storybook src/shared/ui/modal/Modal.stories.tsx` прошёл успешно.
 - `pnpm exec eslint src/entities/post/api/useProfilePostsQuery.ts src/entities/post/api/profilePostsQueryData.ts src/entities/post/api/profilePostsQueryData.test.ts src/widgets/profile-posts/ui/ProfilePostsGrid.tsx` прошёл успешно.
 - `pnpm exec tsc --noEmit` прошёл успешно.
+- `pnpm exec tsc --noEmit --pretty false` прошёл успешно.
 - `pnpm exec prettier --check CHANGELOG.md src/entities/post/api/useProfilePostsQuery.ts src/entities/post/api/profilePostsQueryData.ts src/entities/post/api/profilePostsQueryData.test.ts src/widgets/profile-posts/ui/ProfilePostsGrid.tsx` прошёл успешно.
 
 ### 2026-08-10
