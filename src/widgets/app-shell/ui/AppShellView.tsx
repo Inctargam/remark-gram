@@ -17,7 +17,7 @@ import styles from './AppShell.module.css'
 
 type Props = {
   children: ReactNode
-  hideBottomBar?: boolean
+  showBottomBarOnCurrentRoute?: boolean
   showGuestAuthActions?: boolean
   status: SessionStatus
   onLogout: () => Promise<void>
@@ -25,7 +25,7 @@ type Props = {
 
 export const AppShellView = ({
   children,
-  hideBottomBar = false,
+  showBottomBarOnCurrentRoute = false,
   showGuestAuthActions = true,
   status,
   onLogout,
@@ -33,7 +33,13 @@ export const AppShellView = ({
   const [language, setLanguage] = useState<HeaderLanguage>('en')
   const isAuthenticated = status === 'authenticated'
   const isLoading = status === 'loading'
-  const showBottomBar = isAuthenticated && !hideBottomBar
+  const showBottomBar = isAuthenticated && !showBottomBarOnCurrentRoute
+  const desktopLanguageSelector = (
+    <HeaderLanguageSwitcher value={language} onValueChange={setLanguage} />
+  )
+  const mobileLanguageSelector = (
+    <HeaderLanguageSwitcher compact value={language} onValueChange={setLanguage} />
+  )
 
   return (
     <div className={styles.shell}>
@@ -41,17 +47,10 @@ export const AppShellView = ({
         <>
           <div className={styles.desktopHeader}>
             {isAuthenticated ? (
-              <Header
-                languageSelector={
-                  <HeaderLanguageSwitcher value={language} onValueChange={setLanguage} />
-                }
-                variant="auth"
-              />
+              <Header languageSelector={desktopLanguageSelector} variant="auth" />
             ) : (
               <Header
-                languageSelector={
-                  <HeaderLanguageSwitcher value={language} onValueChange={setLanguage} />
-                }
+                languageSelector={desktopLanguageSelector}
                 showAuthActions={showGuestAuthActions}
                 variant="guest"
               />
@@ -60,17 +59,13 @@ export const AppShellView = ({
           <div className={styles.mobileHeader}>
             {isAuthenticated ? (
               <HeaderMobile
-                languageSelector={
-                  <HeaderLanguageSwitcher compact value={language} onValueChange={setLanguage} />
-                }
+                languageSelector={mobileLanguageSelector}
                 menu={<HeaderMobileMenu onLogout={onLogout} />}
                 variant="auth"
               />
             ) : (
               <HeaderMobile
-                languageSelector={
-                  <HeaderLanguageSwitcher compact value={language} onValueChange={setLanguage} />
-                }
+                languageSelector={mobileLanguageSelector}
                 showAuthActions={showGuestAuthActions}
                 variant="guest"
               />

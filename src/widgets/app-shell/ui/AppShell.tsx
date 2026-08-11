@@ -17,12 +17,12 @@ export const AppShell = ({ children }: Props) => {
   const pathname = usePathname()
   const status = useSessionStatus()
   const { mutateAsync: logout } = useLogoutMutation()
-  const hideBottomBar = ROUTES_WITHOUT_BOTTOM_BAR.some((route) => pathname === route)
+  const showBottomBarOnCurrentRoute = ROUTES_WITHOUT_BOTTOM_BAR.some((route) => pathname === route)
   const showGuestAuthActions = AUTH_ROUTES.every((route) => pathname !== route)
 
   return (
     <AppShellView
-      hideBottomBar={hideBottomBar}
+      showBottomBarOnCurrentRoute={showBottomBarOnCurrentRoute}
       showGuestAuthActions={showGuestAuthActions}
       status={status}
       onLogout={logout}>
