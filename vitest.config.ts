@@ -38,6 +38,7 @@ export default defineConfig({
         'app/api/mock/payments/**',
         'app/api/mock/_mock/**',
         'src/widgets/account-management/**',
+        'src/widgets/my-payments/**',
         'src/shared/lib/date/**',
       ],
       // Only what the `unit` project can actually execute is measured. The project runs in

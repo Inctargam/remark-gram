@@ -16,6 +16,7 @@ export {
   DEFAULT_SUBSCRIPTION_PLAN_ID,
   findSubscriptionPlan,
   formatPriceCents,
+  SUBSCRIPTION_PERIOD_LABELS,
   SUBSCRIPTION_PLANS,
 } from './model/plans'
 export type {

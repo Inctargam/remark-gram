@@ -24,6 +24,16 @@ export const SUBSCRIPTION_PLANS: readonly SubscriptionPlan[] = [
 
 export const DEFAULT_SUBSCRIPTION_PLAN_ID: SubscriptionPeriod = SUBSCRIPTION_PLANS[0].id
 
+/**
+ * The period on its own, as the payments table prints it (`Subscription Type` column).
+ * Separate from `SubscriptionPlan.label`, which also carries the price.
+ */
+export const SUBSCRIPTION_PERIOD_LABELS: Record<SubscriptionPeriod, string> = {
+  day: '1 day',
+  week: '7 days',
+  month: '1 month',
+}
+
 export const findSubscriptionPlan = (planId: string): SubscriptionPlan | null =>
   SUBSCRIPTION_PLANS.find((plan) => plan.id === planId) ?? null
 
