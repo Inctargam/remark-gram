@@ -1,3 +1,4 @@
+import { Progress } from '@base-ui/react/progress'
 import clsx from 'clsx'
 
 import styles from './ProgressBar.module.css'
@@ -8,9 +9,9 @@ type Props = {
 }
 
 export const ProgressBar = ({ isLoading, className }: Props) => (
-  <div
-    className={clsx(styles.bar, isLoading && styles.active, className)}
-    role="progressbar"
-    aria-hidden={!isLoading}
-  />
+  <Progress.Root value={isLoading ? null : 100} className={clsx(styles.root, className)}>
+    <Progress.Track className={styles.track}>
+      <Progress.Indicator className={styles.indicator} />
+    </Progress.Track>
+  </Progress.Root>
 )
