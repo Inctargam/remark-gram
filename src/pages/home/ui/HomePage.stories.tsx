@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { expect, within } from 'storybook/test'
 
 import type { Post } from '@/entities/post'
+import { AppShellView } from '@/widgets/app-shell'
 
 import { HomePage } from './HomePage'
 
@@ -54,5 +55,54 @@ export const NoPosts: Story = {
 
     await expect(canvas.getByText('1,000 registered users')).toBeInTheDocument()
     await expect(canvasElement.querySelectorAll('article')).toHaveLength(0)
+  },
+}
+
+export const AuthenticatedDesktop: Story = {
+  globals: {
+    viewport: {
+      value: 'desktop',
+      isRotated: false,
+    },
+  },
+  render: (args) => (
+    <AppShellView status="authenticated" onLogout={() => Promise.resolve()}>
+      <HomePage {...args} />
+    </AppShellView>
+  ),
+  play: async ({ canvas, canvasElement }) => {
+    const placeholders = canvasElement.querySelectorAll('article')
+
+    await expect(canvas.getByRole('navigation', { name: 'Primary navigation' })).toBeVisible()
+    await expect(placeholders).toHaveLength(4)
+    await expect(Math.round(placeholders[0].getBoundingClientRect().width)).toBe(234)
+    await expect(Math.round(placeholders[0].getBoundingClientRect().height)).toBe(391)
+  },
+}
+
+export const AuthenticatedMobile: Story = {
+  globals: {
+    viewport: {
+      value: 'mobile2',
+      isRotated: false,
+    },
+  },
+  render: (args) => (
+    <AppShellView status="authenticated" onLogout={() => Promise.resolve()}>
+      <HomePage {...args} />
+    </AppShellView>
+  ),
+  play: async ({ canvas, canvasElement }) => {
+    const placeholders = canvasElement.querySelectorAll('article')
+    const firstPlaceholderBounds = placeholders[0].getBoundingClientRect()
+    const secondPlaceholderBounds = placeholders[1].getBoundingClientRect()
+
+    await expect(canvas.getByRole('navigation', { name: 'Mobile navigation' })).toBeVisible()
+    await expect(placeholders).toHaveLength(4)
+    await expect(Math.round(firstPlaceholderBounds.width)).toBe(382)
+    await expect(Math.round(secondPlaceholderBounds.left)).toBe(
+      Math.round(firstPlaceholderBounds.left)
+    )
+    await expect(secondPlaceholderBounds.top).toBeGreaterThan(firstPlaceholderBounds.bottom)
   },
 }
