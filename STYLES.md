@@ -90,6 +90,13 @@
 > `regular_link` и `small_link` имеют `text-decoration: underline`.  
 > Letter-spacing везде 0.
 
+### CSS Custom Properties
+
+- Использовать только custom properties, существующие в `src/app/styles/tokens.css`.
+- Перед добавлением нового дизайн-токена проверить, что существующий токен с той же семантикой отсутствует.
+- Runtime custom properties сторонних UI-библиотек должны иметь fallback в `var()`, поскольку они недоступны в статическом реестре токенов.
+- Stylelint проверяет обращения к custom properties правилом `no-unknown-custom-properties`, используя `tokens.css` как reference file.
+
 ---
 
 ## Spacing & Radius

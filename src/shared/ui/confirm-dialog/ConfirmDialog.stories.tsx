@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { expect, fn, screen, userEvent } from 'storybook/test'
 
+import { Alert } from '@/shared/ui/alert'
+
 import { ConfirmDialog } from './ConfirmDialog'
 
 const meta = {
@@ -58,6 +60,38 @@ export const CustomLabels: Story = {
       'Do you really want to finish editing? If you close the changes you have made will not be saved',
     confirmLabel: 'Discard',
     cancelLabel: 'Keep editing',
+  },
+}
+
+export const WithError: Story = {
+  args: {
+    error: (
+      <Alert variant="error">
+        <>
+          <b>Error!</b> Server unavailable.
+        </>
+      </Alert>
+    ),
+  },
+  play: async () => {
+    await expect(screen.getByRole('alert')).toHaveTextContent('Error! Server unavailable.')
+    await expect(screen.getByText('Are you sure you want to delete this post?')).toBeVisible()
+  },
+}
+
+export const Pending: Story = {
+  args: {
+    confirmDisabled: true,
+    cancelDisabled: true,
+    dismissDisabled: true,
+    closeOnConfirm: false,
+  },
+  play: async () => {
+    await expect(screen.getByRole('button', { name: 'Yes' })).toBeDisabled()
+    await expect(screen.getByRole('button', { name: 'No' })).toBeDisabled()
+    await expect(screen.getByRole('button', { name: 'Close' })).toBeDisabled()
+    await userEvent.keyboard('{Escape}')
+    await expect(screen.getByRole('dialog')).toBeVisible()
   },
 }
 

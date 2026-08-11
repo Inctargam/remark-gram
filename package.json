@@ -9,6 +9,7 @@
     "build:production": "pnpm build",
     "start": "next start",
     "lint": "eslint",
+    "locations:generate": "node scripts/generateLocations.mjs",
     "api:generate": "openapi-typescript https://remark-gram.com/api/v1/docs-json -o ./src/shared/api/openapi/schema.d.ts --root-types",
     "api:generate:insecure": "powershell -ExecutionPolicy Bypass -Command \"$env:NODE_TLS_REJECT_UNAUTHORIZED='0'; pnpm.cmd exec openapi-typescript https://remark-gram.com/api/v1/docs-json -o ./src/shared/api/openapi/schema.d.ts --root-types\"",
     "storybook": "storybook dev -p 6006",
@@ -33,6 +34,7 @@
   },
   "devDependencies": {
     "@chromatic-com/storybook": "5.2.1",
+    "@countrystatecity/countries": "1.0.7",
     "@storybook/addon-a11y": "10.4.1",
     "@storybook/addon-docs": "10.4.1",
     "@storybook/addon-mcp": "0.6.0",

@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 
 import { LegalDocumentPage } from './LegalDocumentPage'
+import { PrivacyPolicyPage } from './PrivacyPolicyPage'
 
 const meta = {
   title: 'pages/LegalDocumentPage',
@@ -26,9 +27,7 @@ type Story = StoryObj<typeof meta>
 export const TermsOfService: Story = {}
 
 export const PrivacyPolicy: Story = {
-  args: {
-    title: 'Privacy Policy',
-  },
+  render: () => <PrivacyPolicyPage />,
   parameters: {
     nextjs: {
       navigation: {
