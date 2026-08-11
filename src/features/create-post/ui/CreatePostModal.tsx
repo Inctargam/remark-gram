@@ -84,6 +84,7 @@ export const CreatePostModal = ({
 
   return (
     <Modal
+      bodyClassName={isEditorStep ? styles.editorModalBody : undefined}
       className={isEditorStep ? styles.editorModal : styles.addPhotoModal}
       open={open}
       onOpenChange={onOpenChange}

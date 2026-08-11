@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { useEffect, useRef, useState } from 'react'
+import { expect, waitFor, within } from 'storybook/test'
 
 import type {
   CreatePostAspectId,
@@ -184,6 +185,36 @@ export const CropWithOnePhoto: Story = {
 
 export const CropWithSeveralPhotos: Story = {
   render: () => <CreatePostFlowStory step="crop" photosCount={3} />,
+}
+
+export const CropOnShortMobile: Story = {
+  globals: {
+    viewport: {
+      value: '360-740',
+      isRotated: false,
+    },
+  },
+  render: () => <CreatePostFlowStory step="crop" photosCount={1} />,
+  play: async ({ canvasElement }) => {
+    const ownerDocument = canvasElement.ownerDocument
+    const documentCanvas = within(ownerDocument.body)
+    const viewportHeight = ownerDocument.defaultView?.innerHeight ?? 740
+    const dialog = documentCanvas.getByRole('dialog')
+    const dialogBounds = dialog.getBoundingClientRect()
+    const nextButton = documentCanvas.getByRole('button', { name: 'Next' })
+
+    await expect(dialogBounds.top).toBeGreaterThanOrEqual(0)
+    await expect(dialogBounds.bottom).toBeLessThanOrEqual(viewportHeight)
+
+    nextButton.scrollIntoView({ block: 'nearest' })
+
+    await waitFor(() => {
+      const nextButtonBounds = nextButton.getBoundingClientRect()
+
+      expect(nextButtonBounds.top).toBeGreaterThanOrEqual(dialogBounds.top)
+      expect(nextButtonBounds.bottom).toBeLessThanOrEqual(dialogBounds.bottom)
+    })
+  },
 }
 
 export const Filters: Story = {

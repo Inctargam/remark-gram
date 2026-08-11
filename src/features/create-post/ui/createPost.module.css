@@ -18,15 +18,14 @@
   overflow: hidden;
   width: 1px;
   height: 1px;
-  clip: rect(0 0 0 0);
   white-space: nowrap;
   clip-path: inset(50%);
 }
 
 .placeholder {
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   width: 222px;
   height: 228px;
   border-radius: 2px;
@@ -52,8 +51,8 @@
 .actions {
   display: flex;
   flex-direction: column;
-  gap: 20px;
   align-items: stretch;
+  gap: 20px;
   width: 219px;
   margin-top: 28px;
 }
@@ -84,6 +83,7 @@
   border-radius: 2px;
 }
 
+/* stylelint-disable-next-line selector-pseudo-class-no-unknown, selector-class-pattern */
 .cropperFrame :global(.reactEasyCrop_CropArea) {
   box-shadow: none;
   color: transparent;
@@ -91,8 +91,8 @@
 
 .selectedPhotosList {
   display: flex;
-  gap: 8px;
   align-items: center;
+  gap: 8px;
   max-width: 100%;
   margin-top: 12px;
   overflow-x: auto;
@@ -137,8 +137,8 @@
   flex-direction: column;
   gap: 12px;
   min-width: 0;
-  padding: 0;
   margin: 0;
+  padding: 0;
   border: 0;
 }
 
@@ -157,18 +157,18 @@
 
 .aspectButton {
   display: inline-flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   min-height: 36px;
   padding: 6px 10px;
   border: 1px solid var(--color-dark-100);
   border-radius: 2px;
   background: var(--color-dark-500);
   color: var(--color-light-100);
-  font-family: var(--font-base);
   font-size: var(--font-size-regular-14);
   line-height: var(--line-height-regular-14);
   cursor: pointer;
+  font-family: var(--font-base);
 }
 
 .aspectButton[data-selected] {
@@ -208,12 +208,12 @@
 .filterPreviewFrame {
   position: relative;
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   width: 100%;
   height: clamp(360px, calc(100vh - 260px), 492px);
-  overflow: hidden;
   border-radius: 2px;
+  overflow: hidden;
 }
 
 .editedPreviewViewport {
@@ -234,8 +234,8 @@
   top: 50%;
   z-index: 1;
   display: inline-flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   width: 48px;
   height: 48px;
   padding: 0;
@@ -270,9 +270,9 @@
   left: 50%;
   z-index: 1;
   display: flex;
-  gap: 12px;
-  align-items: center;
   justify-content: center;
+  align-items: center;
+  gap: 12px;
   padding: 0;
   transform: translateX(-50%);
 }
@@ -312,16 +312,16 @@
 .filterButton {
   display: flex;
   flex-direction: column;
-  gap: 8px;
   align-items: center;
+  gap: 8px;
   min-width: 0;
   padding: 8px;
   border: 1px solid var(--color-dark-100);
   border-radius: 2px;
   background: var(--color-dark-500);
   color: var(--color-light-100);
-  font-family: var(--font-base);
   cursor: pointer;
+  font-family: var(--font-base);
 }
 
 .filterButton[data-selected] {
@@ -361,8 +361,8 @@
 
 .stepActions {
   display: flex;
-  gap: 12px;
   justify-content: flex-end;
+  gap: 12px;
   margin-top: auto;
 }
 
@@ -379,12 +379,12 @@
 .publicationPreviewFrame {
   position: relative;
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   width: 100%;
   height: clamp(360px, calc(100vh - 260px), 492px);
-  overflow: hidden;
   border-radius: 2px;
+  overflow: hidden;
 }
 
 .publicationForm {
@@ -421,8 +421,8 @@
 
 .closeConfirmActions {
   display: flex;
-  gap: 24px;
   justify-content: flex-end;
+  gap: 24px;
 }
 
 @media (width <= 560px) {
@@ -449,5 +449,26 @@
   .filterPreviewFrame,
   .publicationPreviewFrame {
     height: clamp(280px, calc(100vh - 360px), 420px);
+  }
+}
+
+@media (width <= 560px) and (height <= 800px) {
+  .editorModal {
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100dvh - 32px);
+    overflow: hidden;
+  }
+
+  .editorModalBody {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .cropperFrame,
+  .filterPreviewFrame,
+  .publicationPreviewFrame {
+    height: clamp(200px, 34dvh, 280px);
   }
 }
