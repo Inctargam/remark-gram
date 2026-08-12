@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { useEffect, useRef, useState } from 'react'
-import { expect, waitFor, within } from 'storybook/test'
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test'
 
 import type {
   CreatePostAspectId,
@@ -16,6 +16,9 @@ import { CreatePostModal } from '../CreatePostModal'
 
 type StoryState = {
   description?: string
+  onBackToCrop?: () => void
+  onBackToFilters?: () => void
+  onPhotoRemove?: (photoId: string) => void
   photosCount?: 1 | 3
   step: CreatePostStep
   uploadError?: string | null
@@ -58,6 +61,9 @@ const createStoryPhoto = (index: number): CreatePostPhoto => {
 
 const CreatePostFlowStory = ({
   description: initialDescription = '',
+  onBackToCrop,
+  onBackToFilters,
+  onPhotoRemove,
   photosCount = 1,
   step,
   uploadError = null,
@@ -115,6 +121,11 @@ const CreatePostFlowStory = ({
     updateSelectedPhotoHandler((photo) => ({ ...photo, zoom }))
   }
 
+  const photoRemoveHandler = (photoId: string) => {
+    setPhotos((currentPhotos) => currentPhotos.filter((photo) => photo.id !== photoId))
+    onPhotoRemove?.(photoId)
+  }
+
   return (
     <CreatePostModal
       open
@@ -128,8 +139,8 @@ const CreatePostFlowStory = ({
       step={step}
       uploadError={uploadError}
       onAspectChange={aspectChangeHandler}
-      onBackToCrop={() => undefined}
-      onBackToFilters={() => undefined}
+      onBackToCrop={onBackToCrop ?? (() => undefined)}
+      onBackToFilters={onBackToFilters ?? (() => undefined)}
       onCropChange={cropChangeHandler}
       onCropComplete={cropCompleteHandler}
       onDescriptionChange={setDescription}
@@ -139,6 +150,7 @@ const CreatePostFlowStory = ({
       onNextFromCrop={() => undefined}
       onNextFromFilters={() => undefined}
       onOpenChange={() => undefined}
+      onPhotoRemove={photoRemoveHandler}
       onPhotoSelect={setSelectedPhotoId}
       onPhotosSelect={() => undefined}
       onPublish={() => undefined}
@@ -181,10 +193,30 @@ export const ValidationError: Story = {
 
 export const CropWithOnePhoto: Story = {
   render: () => <CreatePostFlowStory step="crop" photosCount={1} />,
+  play: async ({ canvasElement }) => {
+    const documentCanvas = within(canvasElement.ownerDocument.body)
+
+    await expect(
+      documentCanvas.queryByRole('button', { name: /back to previous create post step/i })
+    ).toBeNull()
+  },
 }
 
 export const CropWithSeveralPhotos: Story = {
-  render: () => <CreatePostFlowStory step="crop" photosCount={3} />,
+  args: {
+    onPhotoRemove: fn(),
+  },
+  render: ({ onPhotoRemove }) => (
+    <CreatePostFlowStory step="crop" photosCount={3} onPhotoRemove={onPhotoRemove} />
+  ),
+  play: async ({ args, canvasElement }) => {
+    const documentCanvas = within(canvasElement.ownerDocument.body)
+
+    await userEvent.click(documentCanvas.getByRole('button', { name: /remove photo 1/i }))
+    await expect(args.onPhotoRemove).toHaveBeenCalledTimes(1)
+    await expect(args.onPhotoRemove).toHaveBeenCalledWith('story-photo-1')
+    await expect(documentCanvas.getAllByRole('button', { name: /select photo/i })).toHaveLength(2)
+  },
 }
 
 export const CropOnShortMobile: Story = {

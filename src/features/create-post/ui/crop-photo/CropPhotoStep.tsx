@@ -1,4 +1,5 @@
 import type { ChangeEvent } from 'react'
+import { useRef } from 'react'
 import Cropper, { type Area, type MediaSize, type Point } from 'react-easy-crop'
 
 import { Button } from '@/shared/ui/button'
@@ -19,11 +20,14 @@ type Props = {
   photos: CreatePostPhoto[]
   selectedPhoto: CreatePostPhoto
   selectedPhotoId: string | null
+  uploadError: string | null
   onAspectChange: (aspectId: CreatePostAspectId) => void
   onCropChange: (crop: Point) => void
   onCropComplete: (croppedAreaPixels: Area) => void
   onImageSizeChange: (imageSize: CreatePostImageSize) => void
   onNext: () => void
+  onPhotosSelect: (files: File[]) => void
+  onPhotoRemove: (photoId: string) => void
   onPhotoSelect: (photoId: string) => void
   onZoomChange: (zoom: number) => void
 }
@@ -32,14 +36,18 @@ export const CropPhotoStep = ({
   photos,
   selectedPhoto,
   selectedPhotoId,
+  uploadError,
   onAspectChange,
   onCropChange,
   onCropComplete,
   onImageSizeChange,
   onNext,
+  onPhotosSelect,
+  onPhotoRemove,
   onPhotoSelect,
   onZoomChange,
 }: Props) => {
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const selectedAspect =
     CREATE_POST_ASPECTS.find(({ id }) => id === selectedPhoto.aspectId) ?? CREATE_POST_ASPECTS[0]
   const selectedAspectValue =
@@ -54,6 +62,17 @@ export const CropPhotoStep = ({
     onZoomChange(Number(event.currentTarget.value))
   }
 
+  const addPhotosHandler = () => {
+    fileInputRef.current?.click()
+  }
+
+  const fileChangeHandler = (event: ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(event.currentTarget.files ?? [])
+
+    onPhotosSelect(selectedFiles)
+    event.currentTarget.value = ''
+  }
+
   const mediaLoadedHandler = (mediaSize: MediaSize) => {
     onImageSizeChange({
       width: mediaSize.naturalWidth,
@@ -64,6 +83,16 @@ export const CropPhotoStep = ({
   return (
     <div className={styles.cropContent}>
       <div className={styles.cropperPanel}>
+        <input
+          ref={fileInputRef}
+          className={styles.fileInput}
+          type="file"
+          aria-label="Add photos"
+          accept="image/jpeg,image/png"
+          multiple
+          onChange={fileChangeHandler}
+        />
+
         <div className={styles.cropperFrame}>
           <Cropper
             image={selectedPhoto.previewUrl}
@@ -82,8 +111,16 @@ export const CropPhotoStep = ({
         <SelectedPhotosList
           photos={photos}
           selectedPhotoId={selectedPhotoId}
+          onAddPhotos={addPhotosHandler}
+          onPhotoRemove={onPhotoRemove}
           onPhotoSelect={onPhotoSelect}
         />
+
+        {uploadError && (
+          <p className={styles.cropUploadError} role="alert">
+            {uploadError}
+          </p>
+        )}
       </div>
 
       <div className={styles.cropControls}>

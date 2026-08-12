@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useState } from 'react'
 
 import { normalizePostDescription } from '@/entities/post'
 
@@ -27,6 +27,7 @@ export const useCreatePostFlow = () => {
     selectedPhoto,
     selectedPhotoId,
     addPhotosHandler,
+    removePhotoHandler,
     resetPhotosHandler,
     restorePhotosHandler,
     selectFirstPhotoHandler,
@@ -40,53 +41,60 @@ export const useCreatePostFlow = () => {
   } = useCreatePostPhotos()
   const hasUnsavedChanges = photos.length > 0 || description.length > 0
 
-  const selectPhotosHandler = useCallback(
-    (files: File[]) => {
-      const validation = validateCreatePostFiles(files, photos.length)
+  const selectPhotosHandler = (files: File[]) => {
+    const validation = validateCreatePostFiles(files, photos.length)
 
-      if (!validation.isValid) {
-        setUploadError(validation.error)
-        return
-      }
+    if (!validation.isValid) {
+      setUploadError(validation.error)
+      return
+    }
 
-      if (files.length === 0) {
-        return
-      }
+    if (files.length === 0) {
+      return
+    }
 
-      setUploadError(null)
-      addPhotosHandler(files)
-      setStep('crop')
-    },
-    [addPhotosHandler, photos.length]
-  )
+    setUploadError(null)
+    addPhotosHandler(files)
+    setStep((currentStep) =>
+      currentStep === 'add-photo' && photos.length > 0 ? currentStep : 'crop'
+    )
+  }
 
-  const openCropStepHandler = useCallback(() => {
+  const openCropStepHandler = () => {
     setStep('crop')
-  }, [])
+  }
 
-  const openFiltersStepHandler = useCallback(() => {
+  const openFiltersStepHandler = () => {
     selectFirstPhotoHandler()
     setStep('filters')
-  }, [selectFirstPhotoHandler])
+  }
 
-  const openPublicationStepHandler = useCallback(() => {
+  const openPublicationStepHandler = () => {
     selectFirstPhotoHandler()
     setStep('publication')
-  }, [selectFirstPhotoHandler])
+  }
 
-  const updateDescriptionHandler = useCallback((descriptionValue: string) => {
+  const removePhotoFromFlowHandler = (photoId: string) => {
+    removePhotoHandler(photoId)
+
+    if (photos.length <= 1) {
+      setStep('add-photo')
+    }
+  }
+
+  const updateDescriptionHandler = (descriptionValue: string) => {
     setDescription(normalizePostDescription(descriptionValue))
-  }, [])
+  }
 
-  const resetFlowHandler = useCallback(() => {
+  const resetFlowHandler = () => {
     resetPhotosHandler()
     setDescription('')
     setPublishError(null)
     setUploadError(null)
     setStep('add-photo')
-  }, [resetPhotosHandler])
+  }
 
-  const saveCurrentDraftHandler = useCallback(() => {
+  const saveCurrentDraftHandler = () => {
     if (!hasUnsavedChanges) {
       return
     }
@@ -99,9 +107,9 @@ export const useCreatePostFlow = () => {
         step,
       })
     )
-  }, [description, hasUnsavedChanges, photos, saveDraftToMemoryHandler, selectedPhotoId, step])
+  }
 
-  const openDraftHandler = useCallback(() => {
+  const openDraftHandler = () => {
     const draft = getDraftHandler()
 
     if (!draft) {
@@ -113,39 +121,36 @@ export const useCreatePostFlow = () => {
     setPublishError(null)
     setUploadError(null)
     setStep(draft.step)
-  }, [getDraftHandler, restorePhotosHandler])
+  }
 
-  const discardCreationHandler = useCallback(() => {
+  const discardCreationHandler = () => {
     clearDraftHandler()
     resetFlowHandler()
-  }, [clearDraftHandler, resetFlowHandler])
+  }
 
-  const publishPostHandler = useCallback(
-    async (onSuccess: () => void) => {
-      setPublishError(null)
+  const publishPostHandler = async (onSuccess: () => void) => {
+    setPublishError(null)
 
-      try {
-        const editedPhotos = await Promise.all(photos.map(exportEditedImage))
+    try {
+      const editedPhotos = await Promise.all(photos.map(exportEditedImage))
 
-        publishPostMutation.mutate(
-          { description, photos: editedPhotos },
-          {
-            onSuccess: () => {
-              clearDraftHandler()
-              resetFlowHandler()
-              onSuccess()
-            },
-            onError: () => {
-              setPublishError('Failed to publish the post. Please try again.')
-            },
-          }
-        )
-      } catch {
-        setPublishError('Failed to prepare photos for publication.')
-      }
-    },
-    [clearDraftHandler, description, photos, publishPostMutation, resetFlowHandler]
-  )
+      publishPostMutation.mutate(
+        { description, photos: editedPhotos },
+        {
+          onSuccess: () => {
+            clearDraftHandler()
+            resetFlowHandler()
+            onSuccess()
+          },
+          onError: () => {
+            setPublishError('Failed to publish the post. Please try again.')
+          },
+        }
+      )
+    } catch {
+      setPublishError('Failed to prepare photos for publication.')
+    }
+  }
 
   return {
     description,
@@ -164,6 +169,7 @@ export const useCreatePostFlow = () => {
     openFiltersStepHandler,
     openPublicationStepHandler,
     publishPostHandler,
+    removePhotoHandler: removePhotoFromFlowHandler,
     resetFlowHandler,
     saveCurrentDraftHandler,
     selectPhotosHandler,

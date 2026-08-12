@@ -171,7 +171,6 @@
 - После устранения дублирования повторно прошли Storybook-тесты `AppShellView`: 1 файл, 5 тестов; TypeScript и ESLint изменённого компонента прошли без ошибок.
 - TypeScript, ESLint затронутых компонентов и stylelint мобильных стилей прошли.
 - В браузере подтверждены мобильные варианты `EN` / `RU` и ширина popup 88 px.
-
 ### 2026-08-10
 
 #### Home
@@ -381,6 +380,22 @@
 
 ### 2026-08-05
 
+#### Create Post
+
+- Хуки создания поста приведены к более чистой модели для React 19: побочные эффекты `URL.createObjectURL`/`URL.revokeObjectURL` и синхронизация выбранного фото больше не выполняются внутри updater-функций `setState`.
+- Ручные `useCallback` убраны из create-post hooks там, где они не дают полезного стабильного контракта и дублируют работу React Compiler.
+- Скрытый file input на шаге `Cropping` получил доступное имя `Add photos`, поэтому новый критичный Storybook a11y label-issue закрыт.
+- Storybook-проверка удаления фото теперь проверяет количество оставшихся thumbnail-кнопок, а не нестабильную подпись после переиндексации.
+
+#### Verification
+
+- `pnpm lint` прошёл без ошибок; остаются существующие предупреждения проекта в `src/shared/api/openapi/schema.d.ts` и `src/features/sign-up/model/useSignUpForm.ts`.
+- `pnpm exec tsc --noEmit` прошёл без ошибок.
+- `pnpm test:unit` прошёл: 28 файлов, 151 тест.
+- Storybook MCP focused tests для `CreatePostModal` (`crop`, `filters`, `publication`) прошли с `a11y: false`.
+- Storybook a11y для тех же сценариев больше не показывает label-ошибку file input; остаются существующие contrast-нарушения общей цветовой системы `Button`/`TextArea`, визуальные цвета в этой правке не менялись.
+- `pnpm build` был запущен, но остановлен вручную: Next.js/Turbopack завис на этапе `Creating an optimized production build ...` без дальнейшего вывода.
+
 #### Profile Settings
 
 - Статический демонстрационный PNG-аватар удалён; до подключения пользовательских данных отображается нейтральный placeholder без неработающей кнопки удаления фотографии.
@@ -406,6 +421,26 @@
 - `node_modules/.bin/vitest.cmd run --project storybook ...` прошёл: 3 story-файла, 11 тестов, включая authenticated- и guest-состояния настроек.
 - `pnpm run build` прошёл; Next.js собрал 19 маршрутов, включая приватный `/settings`.
 - Верстка вручную сверена в Storybook при размерах 1280×794 и 360×1068.
+
+### 2026-08-04
+
+#### Create Post
+
+- В шагах `Filters` и `Publication` добавлена стрелка назад в заголовке модального wizard-а создания поста; на `Cropping` стрелки назад нет, потому что управление выбранными фото доступно прямо на этом шаге.
+- Нижние текстовые кнопки `Back` в editor-шагах убраны, чтобы не дублировать действие.
+- В `Cropping` рядом с выбранными миниатюрами появилась icon-кнопка добавления фото, а на самих миниатюрах — крестик удаления отдельного фото.
+- Ошибки дозагрузки фото на `Cropping` теперь показываются рядом с миниатюрами, включая лимит 10 фото и неверный формат/размер файла.
+- `shared/ui/Modal` получил необязательный левый слот заголовка `headerStart`; без него существующие модалки сохраняют прежнюю раскладку.
+- Storybook-сценарии `Crop With One Photo` и `Crop With Several Photos` проверяют отсутствие header back-кнопки на crop и удаление выбранного фото из миниатюр.
+
+#### Verification
+
+- `pnpm lint` прошёл без ошибок; остаются существующие предупреждения проекта в `src/shared/api/openapi/schema.d.ts` и `src/features/sign-up/model/useSignUpForm.ts`.
+- `pnpm exec vitest run --project storybook src/features/create-post/ui/stories/CreatePostFlow.stories.tsx` прошёл: 6 story-тестов.
+- Storybook MCP focused tests для `CreatePostModal` (`crop`, `filters`, `publication`) прошли с `a11y: false`.
+- Storybook a11y для `crop` не проходит из-за существующего contrast у primary-кнопки `Next`; цветовую систему кнопок в этом фиксе не меняли.
+- `pnpm exec stylelint src/shared/ui/modal/Modal.module.css src/features/create-post/ui/createPost.module.css` не прошёл из-за существующих нарушений в `createPost.module.css` (`clip`, порядок старых свойств, `:global`).
+- `pnpm exec tsc --noEmit` не прошёл из-за stale `.next/types/validator.ts`, который ссылается на отсутствующие route-файлы.
 
 ### 2026-08-03
 
@@ -441,7 +476,7 @@
 - Созданы мок-эндпоинты: `GET /api/mock/posts?limit=4` (глобальный список постов без `userId`), `GET /api/mock/registered-users-count` (возвращает `{ totalCount: 2150 }`), `GET /api/mock/auth/me` (проверяет `Authorization: Bearer mock-token`).
 - Мок-хранилища `postsStore` и `usersCountStore` вынесены из `app/api/mock/` в `src/shared/api/mock/` для доступа через `@/shared/api/mock/` из серверных компонентов.
 - `SessionBootstrap` в mock-режиме (`NEXT_PUBLIC_AUTH_MOCK=true`) вызывает `checkMockAuth()` вместо `refreshSession()`.
-- Компонент `HomePage` принимает `posts` и `registeredUsersCount`, рендерит заголовок приложения, счётчик пользователей и сетку из 4 `PostThumbnail`.
+- Компонент `HomePage` принимает `posts` и `registeredUsersCount`, рендерит заголовок «Inctagram», счётчик пользователей и сетку из 4 `PostThumbnail`.
 - Добавлены Storybook-истории (`Default`, `NoPosts`).
 - В `.env.local` добавлены `NEXT_PUBLIC_POSTS_API_MOCK=true` и `NEXT_PUBLIC_AUTH_MOCK=true`.
 
@@ -478,7 +513,6 @@
 - `pnpm exec eslint src/widgets` — чисто.
 - `pnpm exec vitest run --project=storybook` — 37 файлов, 158 тестов, прошло. Скрипта `pnpm test:storybook` в проекте нет.
 - Новая стори проверена на ловлю регрессии: при временном снятии `sticky` с шапки и со слота сайдбара она падает.
-
 ### 2026-08-02 — Причёсывание кода постов перед PR
 
 #### Posts
@@ -785,7 +819,6 @@
 
 - Для прогона story-тестов локально понадобилось доустановить браузер: `pnpm exec playwright install chromium`.
 - Пропсы существующих компонентов сверялись по исходникам (`Modal.tsx`, `Button.tsx`) и типам `@base-ui/react`, а не через MCP `inctagram-storybook`: этот сервер настроен для Codex и в текущем окружении недоступен.
-
 ### 2026-08-01
 
 #### Tooling
@@ -799,7 +832,6 @@
 - `pnpm exec vitest run --project unit` прошёл успешно: 19 файлов, 84 теста.
 - `pnpm exec vitest run --project storybook` прошёл успешно: 37 файлов, 157 тестов.
 - `pnpm build` прошёл успешно.
-
 ### 2026-07-31
 
 #### Auth
@@ -914,7 +946,6 @@
 - `pnpm exec tsc --noEmit` прошёл успешно.
 - `pnpm build` был остановлен вручную после длительного зависания на этапе `Creating an optimized production build ...` без вывода ошибок.
 - Storybook tests не запускались, потому что stories не изменялись и Storybook MCP tools недоступны в текущей сессии.
-
 ### 2026-07-14
 
 #### Auth
@@ -1198,7 +1229,6 @@
 #### Verification
 
 - Не запускались; изменение только документационное.
-
 ### 2026-06-14
 
 #### Shared UI

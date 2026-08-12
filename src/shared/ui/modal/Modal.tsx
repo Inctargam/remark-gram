@@ -17,6 +17,7 @@ type Props = {
   /** Class for the body wrapper — for dialogs whose content must ignore the default padding. */
   bodyClassName?: string
   disablePointerDismissal?: boolean
+  headerStart?: ReactNode
   /** Blocks every dismissal path while an irreversible action is pending. */
   dismissDisabled?: boolean
 }
@@ -31,6 +32,7 @@ export const Modal = ({
   className,
   bodyClassName,
   disablePointerDismissal = false,
+  headerStart,
   dismissDisabled = false,
 }: Props) => {
   const openChangeHandler = (nextOpen: boolean) => {
@@ -49,7 +51,8 @@ export const Modal = ({
       <Dialog.Portal>
         <Dialog.Backdrop className={styles.backdrop} />
         <Dialog.Popup className={clsx(styles.popup, className)}>
-          <div className={styles.header}>
+          <div className={styles.header} data-has-start={headerStart ? true : undefined}>
+            {headerStart ? <div className={styles.headerStart}>{headerStart}</div> : null}
             <Dialog.Title className={styles.title}>{title}</Dialog.Title>
             <Dialog.Close className={styles.close} aria-label="Close" disabled={dismissDisabled}>
               <Icon iconId="icon-close-outline" width={24} height={24} />
