@@ -32,7 +32,7 @@ export const Modal = ({
   className,
   bodyClassName,
   disablePointerDismissal = false,
-headerStart,
+  headerStart,
   dismissDisabled = false,
 }: Props) => {
   const openChangeHandler = (nextOpen: boolean) => {
@@ -54,7 +54,7 @@ headerStart,
           <div className={styles.header} data-has-start={headerStart ? true : undefined}>
             {headerStart ? <div className={styles.headerStart}>{headerStart}</div> : null}
             <Dialog.Title className={styles.title}>{title}</Dialog.Title>
-            <Dialog.Close className={styles.close} aria-label="Close">
+            <Dialog.Close className={styles.close} aria-label="Close" disabled={dismissDisabled}>
               <Icon iconId="icon-close-outline" width={24} height={24} />
             </Dialog.Close>
           </div>
