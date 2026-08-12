@@ -72,6 +72,12 @@ export const Default: Story = {
     await expect(window.location.search).toBe('?postId=mock-user-1-post-01&returnTo=%2F')
     await expect(screen.getByText('Latest publications')).toBeInTheDocument()
     await expect(await screen.findByRole('dialog')).toBeVisible()
+
+    await userEvent.keyboard('{Escape}')
+
+    await expect(window.location.pathname).toBe('/')
+    await expect(window.location.search).toBe('')
+    await expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   },
 }
 

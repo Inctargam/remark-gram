@@ -1,10 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { getRouter } from '@storybook/nextjs-vite/navigation.mock'
+import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
 import { expect, screen, userEvent, waitFor, within } from 'storybook/test'
 
 import type { Post, PostsPage } from '../../../entities/post'
+import { postsQueryKeys, PROFILE_POSTS_INITIAL_PAGE_PARAM } from '../../../entities/post'
 import type { CurrentUser } from '../../../shared/auth'
 import { MOCK_CURRENT_USER_ID, sessionStore } from '../../../shared/auth'
+import type { ProfilePageViewProps } from './ProfilePageView'
 import { ProfilePageView } from './ProfilePageView'
 
 const OTHER_USER_ID = 'mock-user-2'
@@ -98,9 +101,28 @@ const setLoadingSession = () => {
   sessionStore.setState({ accessToken: null, currentUser: null, status: 'loading' })
 }
 
+type StoryProps = ProfilePageViewProps & {
+  initialPostsPage: PostsPage
+}
+
+const ProfilePageStory = ({ initialPostsPage, ...args }: StoryProps) => {
+  const queryClient = new QueryClient()
+
+  queryClient.setQueryData(postsQueryKeys.list(args.userId), {
+    pages: [initialPostsPage],
+    pageParams: [PROFILE_POSTS_INITIAL_PAGE_PARAM],
+  })
+
+  return (
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <ProfilePageView {...args} />
+    </HydrationBoundary>
+  )
+}
+
 const meta = {
   title: 'pages/ProfilePage',
-  component: ProfilePageView,
+  component: ProfilePageStory,
   tags: ['autodocs'],
   args: {
     initialPostsPage: createPage(MOCK_CURRENT_USER_ID),
@@ -117,7 +139,7 @@ const meta = {
       },
     },
   },
-} satisfies Meta<typeof ProfilePageView>
+} satisfies Meta<typeof ProfilePageStory>
 
 export default meta
 
@@ -303,6 +325,33 @@ export const OtherUserProfile: Story = {
 
     await expect(await canvas.findByAltText('Mock publication 1')).toBeInTheDocument()
     await expect(canvas.queryByRole('button', { name: 'Profile Settings' })).not.toBeInTheDocument()
+  },
+}
+
+export const OpenOtherUserPost: Story = {
+  beforeEach: setOwnerSession,
+  args: {
+    initialPostsPage: createPage(OTHER_USER_ID),
+    initialSelectedPost: createPage(OTHER_USER_ID).items[0],
+    profile: createProfile(OTHER_USER_ID),
+    userId: OTHER_USER_ID,
+  },
+  parameters: {
+    nextjs: {
+      navigation: {
+        pathname: `/profile/${OTHER_USER_ID}`,
+        query: {
+          postId: `${OTHER_USER_ID}-post-1`,
+        },
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    await expect(await canvas.findByAltText('Mock publication 1')).toBeInTheDocument()
+    await expect(await screen.findByRole('dialog')).toBeVisible()
+    await expect(screen.queryByRole('button', { name: 'Post actions' })).not.toBeInTheDocument()
   },
 }
 

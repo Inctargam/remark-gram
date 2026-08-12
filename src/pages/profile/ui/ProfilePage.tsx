@@ -1,6 +1,7 @@
+import { HydrationBoundary } from '@tanstack/react-query'
 import { notFound } from 'next/navigation'
 
-import { getProfilePostServer, getProfilePostsServer } from '@/entities/post/index.server'
+import { getProfilePostServer, prefetchProfilePostsQueryServer } from '@/entities/post/index.server'
 
 import { getPublicProfile } from '../api/publicProfile.server'
 import { ProfilePageView } from './ProfilePageView'
@@ -11,13 +12,13 @@ type Props = {
 }
 
 export const ProfilePage = async ({ postId, userId }: Props) => {
-  const [profile, initialPostsPage, initialSelectedPost] = await Promise.all([
+  const [profile, prefetchedPosts, initialSelectedPost] = await Promise.all([
     getPublicProfile(userId),
-    getProfilePostsServer({ userId }),
+    prefetchProfilePostsQueryServer(userId),
     postId ? getProfilePostServer({ userId, postId }) : null,
   ])
 
-  if (!profile || !initialPostsPage) {
+  if (!profile || !prefetchedPosts) {
     notFound()
   }
 
@@ -26,11 +27,12 @@ export const ProfilePage = async ({ postId, userId }: Props) => {
   }
 
   return (
-    <ProfilePageView
-      initialPostsPage={initialPostsPage}
-      initialSelectedPost={initialSelectedPost}
-      profile={profile}
-      userId={userId}
-    />
+    <HydrationBoundary state={prefetchedPosts.dehydratedState}>
+      <ProfilePageView
+        initialSelectedPost={initialSelectedPost}
+        profile={profile}
+        userId={userId}
+      />
+    </HydrationBoundary>
   )
 }

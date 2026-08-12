@@ -7,6 +7,11 @@ export {
   PROFILE_POSTS_PAGE_SIZE,
   updatePost,
 } from './api/postsApi'
+export {
+  getProfilePostsNextPageParam,
+  PROFILE_POSTS_INITIAL_PAGE_PARAM,
+  PROFILE_POSTS_STALE_TIME_MS,
+} from './api/profilePostsQueryData'
 export { postsQueryKeys } from './api/queryKeys'
 export { useProfilePostsQuery } from './api/useProfilePostsQuery'
 export {

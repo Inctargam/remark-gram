@@ -1,6 +1,6 @@
 'use client'
 
-import type { Post, PostsPage } from '@/entities/post'
+import type { Post } from '@/entities/post'
 import { PostViewModal, useProfilePostsQuery } from '@/entities/post'
 import { DeletePostDialog } from '@/features/delete-post'
 import { EditPostModal } from '@/features/edit-post'
@@ -10,16 +10,15 @@ import { ProfilePostOwnerActions } from './ProfilePostOwnerActions'
 import { ProfilePostsGridView } from './ProfilePostsGridView'
 
 type Props = {
-  initialPage?: PostsPage
   initialSelectedPost?: Post | null
   userId: string
 }
 
 const LOAD_ERROR_MESSAGE = 'Failed to load publications. Please try again.'
 
-export const ProfilePostsGrid = ({ initialPage, initialSelectedPost = null, userId }: Props) => {
+export const ProfilePostsGrid = ({ initialSelectedPost = null, userId }: Props) => {
   const { posts, error, hasNextPage, isFetchingNextPage, isPending, fetchNextPage } =
-    useProfilePostsQuery(userId, initialPage)
+    useProfilePostsQuery(userId)
   const {
     deleteOpenChangeHandler,
     deleteStartHandler,

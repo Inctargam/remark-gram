@@ -1,4 +1,4 @@
-import type { Post, PostsPage } from '@/entities/post'
+import type { Post } from '@/entities/post'
 import { ProfilePostsGrid } from '@/widgets/profile-posts'
 
 import type { PublicProfile } from '../model/publicProfile'
@@ -11,7 +11,6 @@ type ProfileStat = {
 }
 
 export type ProfilePageViewProps = {
-  initialPostsPage: PostsPage
   initialSelectedPost: Post | null
   profile: PublicProfile
   userId: string
@@ -29,12 +28,7 @@ const getProfileStats = ({
   { label: 'Publications', value: formatProfileCount(publicationsCount) },
 ]
 
-export const ProfilePageView = ({
-  initialPostsPage,
-  initialSelectedPost,
-  profile,
-  userId,
-}: ProfilePageViewProps) => {
+export const ProfilePageView = ({ initialSelectedPost, profile, userId }: ProfilePageViewProps) => {
   const stats = getProfileStats(profile)
 
   return (
@@ -64,11 +58,7 @@ export const ProfilePageView = ({
       </div>
 
       <div className={styles.posts}>
-        <ProfilePostsGrid
-          initialPage={initialPostsPage}
-          initialSelectedPost={initialSelectedPost}
-          userId={userId}
-        />
+        <ProfilePostsGrid initialSelectedPost={initialSelectedPost} userId={userId} />
       </div>
     </section>
   )

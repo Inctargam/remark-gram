@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
 import type { PostsPage } from '../model/types'
-import { createProfilePostsInitialData } from './profilePostsQueryData'
+import {
+  getProfilePostsNextPageParam,
+  PROFILE_POSTS_INITIAL_PAGE_PARAM,
+  PROFILE_POSTS_STALE_TIME_MS,
+} from './profilePostsQueryData'
 
 const initialPage: PostsPage = {
   items: [
@@ -19,15 +23,16 @@ const initialPage: PostsPage = {
   nextCursor: 'post-2',
 }
 
-describe('createProfilePostsInitialData', () => {
-  it('does not seed the infinite query without an initial page', () => {
-    expect(createProfilePostsInitialData(undefined)).toBeUndefined()
+describe('profile posts query data', () => {
+  it('uses null as the first infinite query page param', () => {
+    expect(PROFILE_POSTS_INITIAL_PAGE_PARAM).toBeNull()
   })
 
-  it('wraps the initial posts page into TanStack infinite query data', () => {
-    expect(createProfilePostsInitialData(initialPage)).toEqual({
-      pages: [initialPage],
-      pageParams: [null],
-    })
+  it('uses a short stale time for SSR-hydrated profile posts', () => {
+    expect(PROFILE_POSTS_STALE_TIME_MS).toBe(30_000)
+  })
+
+  it('reads the next cursor from a posts page', () => {
+    expect(getProfilePostsNextPageParam(initialPage)).toBe('post-2')
   })
 })
