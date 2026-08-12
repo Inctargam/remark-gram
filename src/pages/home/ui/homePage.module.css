@@ -54,6 +54,12 @@
   gap: 12px;
 }
 
+.postLink {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
 @media (width <= 1024px) {
   .postsGrid {
     grid-template-columns: repeat(2, 1fr);

@@ -4,6 +4,23 @@
 
 ## Unreleased
 
+### 2026-08-12
+
+#### Profile SSR
+
+- Переходы к просмотру публикации унифицированы: посты на главной ведут на `/profile/{ownerId}?postId={postId}&returnTo=/`, а профильная модалка использует общий helper для закрытия.
+- На главной просмотр поста открывается поверх текущего списка публикаций без визуального перехода на профильный список автора; прямой вход по URL всё ещё открывает профиль с выбранным постом.
+- Закрытие post modal теперь возвращает на `/` только при безопасном `returnTo=/`; внешние и небезопасные значения игнорируются, а обычное закрытие остаётся на профиле автора без `postId`.
+- Storybook-сценарии главной и профиля проверяют URL открытия поста с главной, прямой вход с `postId` и возврат через `returnTo`.
+
+#### Verification
+
+- `pnpm exec vitest run --project unit src/widgets/profile-posts/lib/profilePostUrl.test.ts` прошёл успешно.
+- `pnpm test:unit` прошёл: 44 файла, 257 тестов.
+- `pnpm exec vitest run --project storybook src/pages/home/ui/HomePage.stories.tsx src/pages/profile/ui/ProfilePage.stories.tsx` прошёл успешно.
+- `pnpm exec tsc --noEmit --pretty false` прошёл успешно.
+- `pnpm exec eslint src/pages/home/model/useHomePostModal.ts src/pages/home/ui/HomePostsGrid.tsx src/pages/home/ui/HomePage.tsx src/pages/home/ui/HomePage.stories.tsx src/widgets/profile-posts/lib/profilePostUrl.ts src/widgets/profile-posts/lib/profilePostUrl.test.ts src/widgets/profile-posts/ui/ProfilePostsGrid.tsx src/widgets/profile-posts/index.ts src/pages/profile/ui/ProfilePage.stories.tsx` прошёл успешно.
+
 ### 2026-08-11
 
 #### Profile SSR

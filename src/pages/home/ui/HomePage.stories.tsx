@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
-import { expect, within } from 'storybook/test'
+import { expect, screen, userEvent, within } from 'storybook/test'
 
 import type { Post } from '@/entities/post'
 
@@ -61,6 +61,17 @@ export const Default: Story = {
     await expect(canvas.getByText(usersCountMatcher('2,150 registered users'))).toBeInTheDocument()
     await expect(canvas.getByText('Latest publications')).toBeInTheDocument()
     await expect(canvas.getAllByAltText(/Mock publication \d\. Seeded/)).toHaveLength(4)
+    await expect(canvas.getByRole('link', { name: /Mock publication 1\. Seeded/ })).toHaveAttribute(
+      'href',
+      '/profile/mock-user-1?postId=mock-user-1-post-01&returnTo=%2F'
+    )
+
+    await userEvent.click(canvas.getByRole('link', { name: /Mock publication 1\. Seeded/ }))
+
+    await expect(window.location.pathname).toBe('/profile/mock-user-1')
+    await expect(window.location.search).toBe('?postId=mock-user-1-post-01&returnTo=%2F')
+    await expect(screen.getByText('Latest publications')).toBeInTheDocument()
+    await expect(await screen.findByRole('dialog')).toBeVisible()
   },
 }
 

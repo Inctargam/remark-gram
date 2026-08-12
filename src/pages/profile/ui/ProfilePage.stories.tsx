@@ -161,6 +161,39 @@ export const OpenPost: Story = {
   },
 }
 
+/** A post opened from home keeps an explicit safe return target for closing the modal. */
+export const OpenPostFromHome: Story = {
+  beforeEach: () => {
+    const router = getRouter()
+
+    router.replace.mockClear()
+  },
+  args: {
+    initialSelectedPost: createPage(MOCK_CURRENT_USER_ID).items[1],
+  },
+  parameters: {
+    nextjs: {
+      navigation: {
+        pathname: `/profile/${MOCK_CURRENT_USER_ID}`,
+        query: {
+          postId: `${MOCK_CURRENT_USER_ID}-post-2`,
+          returnTo: '/',
+        },
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    await expect(await canvas.findByAltText('Mock publication 2')).toBeInTheDocument()
+    await expect(await screen.findByRole('dialog')).toBeVisible()
+
+    await userEvent.keyboard('{Escape}')
+
+    await expect(getRouter().replace).toHaveBeenLastCalledWith('/', { scroll: false })
+  },
+}
+
 /** UC-2 entry point: the owner reaches the edit form through the three-dot menu on the post. */
 export const EditOwnPost: Story = {
   args: {

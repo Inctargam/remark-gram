@@ -1,7 +1,7 @@
 import type { Post } from '@/entities/post'
-import { PostThumbnail } from '@/entities/post'
 
 import styles from './homePage.module.css'
+import { HomePostsGrid } from './HomePostsGrid'
 
 type Props = {
   posts: Post[]
@@ -19,11 +19,7 @@ export const HomePage = ({ posts, registeredUsersCount }: Props) => (
       <p className={styles.latestLabel}>Latest publications</p>
     </section>
     <section className={styles.posts}>
-      <div className={styles.postsGrid}>
-        {posts.map((post) => (
-          <PostThumbnail key={post.id} post={post} />
-        ))}
-      </div>
+      <HomePostsGrid posts={posts} />
     </section>
   </div>
 )

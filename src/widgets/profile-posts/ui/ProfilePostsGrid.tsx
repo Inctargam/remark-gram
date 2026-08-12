@@ -10,7 +10,7 @@ import { EditPostModal } from '@/features/edit-post'
 import { PostActionsMenu } from '@/features/post-actions'
 import { isProfileOwner } from '@/shared/auth'
 
-import { buildProfilePostUrl } from '../lib/profilePostUrl'
+import { buildPostModalCloseUrl, buildProfilePostUrl } from '../lib/profilePostUrl'
 import { ProfilePostsGridView } from './ProfilePostsGridView'
 
 type Props = {
@@ -63,7 +63,7 @@ export const ProfilePostsGrid = ({ initialPage, initialSelectedPost = null, user
     if (!open) {
       setEditingPostId(null)
       setDeletingPostId(null)
-      router.replace(buildProfilePostUrl({ searchParams: currentSearchParams, userId }), {
+      router.replace(buildPostModalCloseUrl({ searchParams: currentSearchParams, userId }), {
         scroll: false,
       })
     }
@@ -94,7 +94,7 @@ export const ProfilePostsGrid = ({ initialPage, initialSelectedPost = null, user
   // their home page, so UC-3 needs the view closed, not a navigation.
   const postDeletedHandler = () => {
     setDeletingPostId(null)
-    router.replace(buildProfilePostUrl({ searchParams: currentSearchParams, userId }), {
+    router.replace(buildPostModalCloseUrl({ searchParams: currentSearchParams, userId }), {
       scroll: false,
     })
   }
