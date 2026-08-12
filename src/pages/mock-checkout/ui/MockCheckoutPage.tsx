@@ -13,6 +13,12 @@ import { buildPaymentReturnUrl } from '../lib/buildPaymentReturnUrl'
 import styles from './mockCheckout.module.css'
 
 /**
+ * `returnUrl` is normally the settings tab the checkout was started from — this only
+ * covers the edge case where the query string had none or an off-origin one (Б2/этап 7).
+ */
+const SUBSCRIPTIONS_TAB_FALLBACK = `${ROUTES.settings}?part=subscriptions`
+
+/**
  * Stand-in for the hosted page of a payment service (Р1): no Stripe SDK, no keys. It reports
  * the outcome the tester picks back to the mock API and returns the browser to `returnUrl`.
  * Deleted together with the mock API once real payments exist.
@@ -36,7 +42,7 @@ export const MockCheckoutPage = () => {
               returnUrl,
               outcome: result?.outcome ?? 'failed',
               origin: window.location.origin,
-              fallbackPath: ROUTES.profileSettings,
+              fallbackPath: SUBSCRIPTIONS_TAB_FALLBACK,
             })
           )
         },
@@ -49,7 +55,7 @@ export const MockCheckoutPage = () => {
       <Card className={styles.card}>
         <h1 className={styles.title}>Payment service</h1>
         <p className={styles.message}>This page opens only from a checkout session.</p>
-        <Link className={styles.link} href={ROUTES.profileSettings}>
+        <Link className={styles.link} href={SUBSCRIPTIONS_TAB_FALLBACK}>
           Back to settings
         </Link>
       </Card>

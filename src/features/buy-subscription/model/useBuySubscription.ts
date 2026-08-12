@@ -102,8 +102,14 @@ export const useBuySubscription = ({ planId }: Params): BuySubscriptionState => 
   const closePaymentResult = () => {
     setHasCheckoutFailed(false)
     setDismissedResult(outcomeFromUrl)
-    // Drop the result from the url, otherwise a reload would show the modal again.
-    router.replace(pathname ?? window.location.pathname)
+
+    // Drop only the result, not the whole query: the settings shell needs `part` to stay
+    // on this tab, otherwise the next server render falls back to the default one.
+    const remainingParams = new URLSearchParams(searchParams?.toString())
+    remainingParams.delete(PAYMENT_RESULT_PARAM)
+    const query = remainingParams.toString()
+
+    router.replace(`${pathname ?? window.location.pathname}${query ? `?${query}` : ''}`)
   }
 
   const resultFromUrl = outcomeFromUrl === dismissedResult ? null : outcomeFromUrl
