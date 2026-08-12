@@ -55,7 +55,7 @@ export const HeaderLanguageSwitcher = ({ compact = false, value, onValueChange }
           </span>
         )
       }}
-      triggerClassName={compact ? styles.compactTrigger : undefined}
+      triggerClassName={compact ? styles.compactTrigger : styles.desktopTrigger}
       value={value}
       onValueChange={(selectedValue) => {
         if (selectedValue) {

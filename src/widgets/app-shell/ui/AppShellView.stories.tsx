@@ -61,7 +61,7 @@ export const Authenticated: Story = {
   },
 }
 
-/** Guards the sticky shell: header and sidebar must survive a long scrollable page. */
+/** Guards the desktop shell: the header scrolls away while the sidebar remains available. */
 export const AuthenticatedLongContent: Story = {
   args: {
     status: 'authenticated',
@@ -70,14 +70,23 @@ export const AuthenticatedLongContent: Story = {
   play: async ({ canvas, canvasElement }) => {
     const { defaultView: view, documentElement } = canvasElement.ownerDocument
     const header = canvas.getByRole('banner')
+    const sidebar = canvas.getByRole('navigation', { name: 'Primary navigation' })
     const logout = canvas.getByRole('button', { name: 'Log Out' })
+    const desktopContent = sidebar.parentElement?.parentElement
+
+    canvasElement.style.width = '1440px'
+
+    await expect(desktopContent).toBeDefined()
+    await expect(desktopContent?.getBoundingClientRect().width).toBe(1280)
+    await expect(desktopContent?.getBoundingClientRect().left).toBe(80)
+
+    canvasElement.style.removeProperty('width')
 
     view?.scrollTo(0, 1500)
     await waitFor(() => expect(view?.scrollY).toBeGreaterThan(0))
 
-    // Sticky elements keep top === 0 / stay inside the viewport regardless of scroll offset
-    await expect(header.getBoundingClientRect().top).toBeLessThan(1)
-    await expect(header.getBoundingClientRect().top).toBeGreaterThanOrEqual(0)
+    await expect(header.getBoundingClientRect().bottom).toBeLessThanOrEqual(0)
+    await expect(Math.abs(sidebar.getBoundingClientRect().top)).toBeLessThanOrEqual(1)
     const logoutBottom = logout.getBoundingClientRect().bottom
 
     await expect(logoutBottom).toBeLessThanOrEqual(documentElement.clientHeight)

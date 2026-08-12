@@ -19,6 +19,10 @@
   height: 24px;
 }
 
+.desktopTrigger {
+  padding-block: 5px;
+}
+
 .compactTrigger {
   padding-inline: 0;
   background-color: transparent;
