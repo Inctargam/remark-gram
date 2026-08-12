@@ -16,3 +16,17 @@ export const getProfilePostsServer = ({
 }: GetProfilePostsServerParams): PostsPage | null => listPosts({ userId, cursor, pageSize })
 
 export const getPostServer = (postId: string): Post | null => findPost(postId)
+
+type GetProfilePostServerParams = {
+  userId: string
+  postId: string
+}
+
+export const getProfilePostServer = ({
+  userId,
+  postId,
+}: GetProfilePostServerParams): Post | null => {
+  const post = findPost(postId)
+
+  return post?.ownerId === userId ? post : null
+}

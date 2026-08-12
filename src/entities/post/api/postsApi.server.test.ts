@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 
-import { resetPostsMockStore } from '@/shared/api/mock/postsStore'
+import { MOCK_OTHER_USER_ID, resetPostsMockStore } from '@/shared/api/mock/postsStore'
 import { MOCK_CURRENT_USER_ID } from '@/shared/auth'
 
-import { getPostServer, getProfilePostsServer } from './postsApi.server'
+import { getPostServer, getProfilePostServer, getProfilePostsServer } from './postsApi.server'
 
 beforeEach(() => {
   resetPostsMockStore()
@@ -33,5 +33,28 @@ describe('getPostServer', () => {
 
   it('returns null for an unknown post', () => {
     expect(getPostServer('missing-post')).toBeNull()
+  })
+})
+
+describe('getProfilePostServer', () => {
+  it('returns a post that belongs to the requested profile user', () => {
+    expect(
+      getProfilePostServer({ userId: MOCK_CURRENT_USER_ID, postId: 'mock-user-1-post-01' })
+    ).toMatchObject({
+      id: 'mock-user-1-post-01',
+      ownerId: MOCK_CURRENT_USER_ID,
+    })
+  })
+
+  it('returns null when the selected post belongs to another profile user', () => {
+    expect(
+      getProfilePostServer({ userId: MOCK_OTHER_USER_ID, postId: 'mock-user-1-post-01' })
+    ).toBeNull()
+  })
+
+  it('returns null for an unknown post', () => {
+    expect(
+      getProfilePostServer({ userId: MOCK_CURRENT_USER_ID, postId: 'missing-post' })
+    ).toBeNull()
   })
 })

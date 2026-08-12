@@ -14,6 +14,8 @@
 - Storybook-сценарии главной и профиля проверяют URL открытия поста с главной, прямой вход с `postId` и возврат через `returnTo`.
 - Owner-only элементы профиля больше не вычисляются на сервере через mock owner id: `Profile Settings` и меню действий поста появляются только после клиентского `/me`, а на время `loading` показываются skeleton-состояния.
 - Route/modal state для просмотра, редактирования и удаления поста вынесен из `ProfilePostsGrid` в отдельный hook, чтобы widget-компонент отвечал только за загрузку списка и композицию UI.
+- SSR selected post reader перенесён в `entities/post` server API boundary: `getProfilePostServer()` сразу проверяет принадлежность `postId` к `userId`, поэтому профильная page больше не держит отдельную domain-проверку.
+- Home SSR reader покрыт unit-тестом на контракт latest posts и registered users count перед будущим переключением mock layer на backend.
 
 #### Auth
 
@@ -24,7 +26,8 @@
 
 - `pnpm exec vitest run --project unit src/widgets/profile-posts/lib/profilePostUrl.test.ts` прошёл успешно.
 - `pnpm exec vitest run --project unit src/shared/auth/sessionStore.test.ts src/shared/auth/checkMockAuth.test.ts src/shared/auth/refreshSession.test.ts src/features/logout/api/useLogoutMutation.test.ts` прошёл успешно.
-- `pnpm test:unit` прошёл: 45 файлов, 260 тестов.
+- `pnpm exec vitest run --project unit src/entities/post/api/postsApi.server.test.ts src/pages/profile/api/profile.server.test.ts src/shared/api/homePageData.test.ts` прошёл успешно.
+- `pnpm test:unit` прошёл: 45 файлов, 263 теста.
 - `pnpm exec vitest run --project storybook src/pages/home/ui/HomePage.stories.tsx src/pages/profile/ui/ProfilePage.stories.tsx` прошёл успешно.
 - `pnpm exec vitest run --project storybook src/pages/profile/ui/ProfilePage.stories.tsx src/app/providers/ProtectedRoute.stories.tsx` прошёл успешно.
 - `pnpm exec vitest run --project storybook src/pages/profile/ui/ProfilePage.stories.tsx` прошёл успешно после выноса modal state в hook.
@@ -32,6 +35,7 @@
 - `pnpm exec eslint src/pages/home/model/useHomePostModal.ts src/pages/home/ui/HomePostsGrid.tsx src/pages/home/ui/HomePage.tsx src/pages/home/ui/HomePage.stories.tsx src/widgets/profile-posts/lib/profilePostUrl.ts src/widgets/profile-posts/lib/profilePostUrl.test.ts src/widgets/profile-posts/ui/ProfilePostsGrid.tsx src/widgets/profile-posts/index.ts src/pages/profile/ui/ProfilePage.stories.tsx` прошёл успешно.
 - `pnpm exec eslint src/shared/auth/sessionStore.ts src/shared/auth/useCurrentUser.ts src/shared/auth/checkMockAuth.ts src/shared/auth/index.ts src/shared/auth/sessionStore.test.ts src/shared/auth/refreshSession.test.ts src/shared/auth/checkMockAuth.test.ts src/features/logout/api/useLogoutMutation.test.ts src/app/providers/ProtectedRoute.stories.tsx src/pages/profile/ui/ProfilePageView.tsx src/pages/profile/ui/ProfileSettingsControl.tsx src/pages/profile/ui/ProfilePage.stories.tsx src/widgets/profile-posts/ui/ProfilePostsGrid.tsx src/widgets/profile-posts/ui/ProfilePostOwnerActions.tsx` прошёл успешно.
 - `pnpm exec eslint src/widgets/profile-posts/model/useProfilePostModal.ts src/widgets/profile-posts/ui/ProfilePostsGrid.tsx src/widgets/profile-posts/ui/ProfilePostOwnerActions.tsx src/pages/profile/ui/ProfilePage.stories.tsx src/shared/auth/sessionStore.ts src/shared/auth/useCurrentUser.ts src/shared/auth/checkMockAuth.ts` прошёл успешно.
+- `pnpm exec eslint src/entities/post/api/postsApi.server.ts src/entities/post/api/postsApi.server.test.ts src/entities/post/index.server.ts src/pages/profile/ui/ProfilePage.tsx src/shared/api/homePageData.ts src/shared/api/homePageData.test.ts` прошёл успешно.
 - `pnpm build` был остановлен вручную после длительного зависания на этапе `Creating an optimized production build ...` без вывода ошибок.
 - Storybook MCP `get-storybook-story-instructions`, `run-story-tests` и `preview-stories` не завершились за 300 секунд; focused story-тесты запущены локально через Vitest.
 
