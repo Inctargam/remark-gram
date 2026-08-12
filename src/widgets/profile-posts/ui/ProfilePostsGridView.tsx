@@ -67,8 +67,8 @@ export const ProfilePostsGridView = ({
     <>
       <div className={styles.grid} aria-label="Profile publications">
         {posts.map((post) => (
-          // The tile is a button, not a link: the post opens in a modal and keeps the URL.
-          // Its accessible name comes from the image alt inside the thumbnail.
+          // The connected controller turns this selection into URL navigation.
+          // The accessible name comes from the image alt inside the thumbnail.
           <button
             className={styles.thumbnailButton}
             type="button"

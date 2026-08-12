@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
+import { getRouter } from '@storybook/nextjs-vite/navigation.mock'
 import { expect, screen, userEvent, waitFor, within } from 'storybook/test'
 
 import type { Post, PostsPage } from '../../../entities/post'
@@ -103,23 +104,50 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const OwnProfile: Story = {
+  beforeEach: () => {
+    const router = getRouter()
+
+    router.push.mockClear()
+  },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
 
     await expect(await canvas.findByAltText('Mock publication 1')).toBeInTheDocument()
     await expect(canvas.getAllByRole('img')).toHaveLength(8)
     await expect(canvas.getByRole('button', { name: 'Profile Settings' })).toBeInTheDocument()
+
+    await userEvent.click(canvas.getByAltText('Mock publication 2'))
+    await expect(getRouter().push).toHaveBeenLastCalledWith(
+      `/profile/${MOCK_CURRENT_USER_ID}?postId=${MOCK_CURRENT_USER_ID}-post-2`,
+      { scroll: false }
+    )
   },
 }
 
-/** Opening a post keeps the URL: the view is a modal over the profile, not a route. */
+/** Direct post URL opens the view as a modal over the profile page. */
 export const OpenPost: Story = {
+  beforeEach: () => {
+    const router = getRouter()
+
+    router.replace.mockClear()
+  },
+  args: {
+    initialSelectedPost: createPage(MOCK_CURRENT_USER_ID).items[1],
+  },
+  parameters: {
+    nextjs: {
+      navigation: {
+        pathname: `/profile/${MOCK_CURRENT_USER_ID}`,
+        query: {
+          postId: `${MOCK_CURRENT_USER_ID}-post-2`,
+        },
+      },
+    },
+  },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
 
-    await userEvent.click(await canvas.findByAltText('Mock publication 2'))
-
-    // The modal renders in a portal, so it is looked up in the whole document.
+    await expect(await canvas.findByAltText('Mock publication 2')).toBeInTheDocument()
     const dialog = await screen.findByRole('dialog')
 
     await expect(within(dialog).getByText('Mock publication 2')).toBeVisible()
@@ -127,16 +155,31 @@ export const OpenPost: Story = {
 
     await userEvent.keyboard('{Escape}')
 
-    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    await expect(getRouter().replace).toHaveBeenLastCalledWith(`/profile/${MOCK_CURRENT_USER_ID}`, {
+      scroll: false,
+    })
   },
 }
 
 /** UC-2 entry point: the owner reaches the edit form through the three-dot menu on the post. */
 export const EditOwnPost: Story = {
+  args: {
+    initialSelectedPost: createPage(MOCK_CURRENT_USER_ID).items[0],
+  },
+  parameters: {
+    nextjs: {
+      navigation: {
+        pathname: `/profile/${MOCK_CURRENT_USER_ID}`,
+        query: {
+          postId: `${MOCK_CURRENT_USER_ID}-post-1`,
+        },
+      },
+    },
+  },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
 
-    await userEvent.click(await canvas.findByAltText('Mock publication 1'))
+    await expect(await canvas.findByAltText('Mock publication 1')).toBeInTheDocument()
     await userEvent.click(await screen.findByRole('button', { name: 'Post actions' }))
     await userEvent.click(await screen.findByRole('menuitem', { name: 'Edit Post' }))
 
@@ -151,10 +194,28 @@ export const EditOwnPost: Story = {
 
 /** UC-3 end to end: menu → confirmation → post gone from the feed, user stays on the profile. */
 export const DeleteOwnPost: Story = {
+  beforeEach: () => {
+    const router = getRouter()
+
+    router.replace.mockClear()
+  },
+  args: {
+    initialSelectedPost: createPage(MOCK_CURRENT_USER_ID).items[2],
+  },
+  parameters: {
+    nextjs: {
+      navigation: {
+        pathname: `/profile/${MOCK_CURRENT_USER_ID}`,
+        query: {
+          postId: `${MOCK_CURRENT_USER_ID}-post-3`,
+        },
+      },
+    },
+  },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
 
-    await userEvent.click(await canvas.findByAltText('Mock publication 3'))
+    await expect(await canvas.findByAltText('Mock publication 3')).toBeInTheDocument()
     await userEvent.click(await screen.findByRole('button', { name: 'Post actions' }))
     await userEvent.click(await screen.findByRole('menuitem', { name: 'Delete Post' }))
 
@@ -164,8 +225,9 @@ export const DeleteOwnPost: Story = {
 
     await userEvent.click(screen.getByRole('button', { name: 'Yes' }))
 
-    // Both the confirmation and the post view close; the profile grid is what stays.
-    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    await expect(getRouter().replace).toHaveBeenLastCalledWith(`/profile/${MOCK_CURRENT_USER_ID}`, {
+      scroll: false,
+    })
     await waitFor(() => expect(canvas.queryByAltText('Mock publication 3')).not.toBeInTheDocument())
     await expect(canvas.getByAltText('Mock publication 1')).toBeInTheDocument()
   },

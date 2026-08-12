@@ -1,5 +1,6 @@
 'use client'
 
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 
 import type { Post, PostsPage } from '@/entities/post'
@@ -9,6 +10,7 @@ import { EditPostModal } from '@/features/edit-post'
 import { PostActionsMenu } from '@/features/post-actions'
 import { isProfileOwner } from '@/shared/auth'
 
+import { buildProfilePostUrl } from '../lib/profilePostUrl'
 import { ProfilePostsGridView } from './ProfilePostsGridView'
 
 type Props = {
@@ -18,17 +20,25 @@ type Props = {
 }
 
 const LOAD_ERROR_MESSAGE = 'Failed to load publications. Please try again.'
+const EMPTY_SEARCH_PARAMS = new URLSearchParams()
 
-export const ProfilePostsGrid = ({ initialPage, userId }: Props) => {
+export const ProfilePostsGrid = ({ initialPage, initialSelectedPost = null, userId }: Props) => {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const currentSearchParams = searchParams ?? EMPTY_SEARCH_PARAMS
   const { posts, error, hasNextPage, isFetchingNextPage, isPending, fetchNextPage } =
     useProfilePostsQuery(userId, initialPage)
-  const [selectedPostId, setSelectedPostId] = useState<string | null>(null)
-  const [isEditing, setIsEditing] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
+  const [editingPostId, setEditingPostId] = useState<string | null>(null)
+  const [deletingPostId, setDeletingPostId] = useState<string | null>(null)
 
+  const selectedPostId = searchParams?.get('postId') ?? null
+  const isEditing = selectedPostId !== null && editingPostId === selectedPostId
+  const isDeleting = selectedPostId !== null && deletingPostId === selectedPostId
   // The open post is looked up in the feed by id instead of being copied into state:
   // an edited post re-renders with fresh data, and a deleted one closes the modal by itself.
-  const selectedPost = posts.find(({ id }) => id === selectedPostId) ?? null
+  const selectedPost =
+    posts.find(({ id }) => id === selectedPostId) ??
+    (initialSelectedPost?.id === selectedPostId ? initialSelectedPost : null)
   // Editing and deleting belong to the post owner — the check follows the post, not the route.
   const canManageSelectedPost = selectedPost !== null && isProfileOwner(selectedPost.ownerId)
 
@@ -39,40 +49,54 @@ export const ProfilePostsGrid = ({ initialPage, userId }: Props) => {
   }
 
   const postSelectHandler = (post: Post) => {
-    setSelectedPostId(post.id)
+    setEditingPostId(null)
+    setDeletingPostId(null)
+    router.push(
+      buildProfilePostUrl({ searchParams: currentSearchParams, userId, postId: post.id }),
+      {
+        scroll: false,
+      }
+    )
   }
 
   const modalOpenChangeHandler = (open: boolean) => {
     if (!open) {
-      setSelectedPostId(null)
+      setEditingPostId(null)
+      setDeletingPostId(null)
+      router.replace(buildProfilePostUrl({ searchParams: currentSearchParams, userId }), {
+        scroll: false,
+      })
     }
   }
 
   const editStartHandler = () => {
-    setIsEditing(true)
+    setEditingPostId(selectedPostId)
   }
 
   // Saving and discarding both land back on the post, so only the edit form closes here.
   const editOpenChangeHandler = (open: boolean) => {
     if (!open) {
-      setIsEditing(false)
+      setEditingPostId(null)
     }
   }
 
   const deleteStartHandler = () => {
-    setIsDeleting(true)
+    setDeletingPostId(selectedPostId)
   }
 
   const deleteOpenChangeHandler = (open: boolean) => {
     if (!open) {
-      setIsDeleting(false)
+      setDeletingPostId(null)
     }
   }
 
   // After a deletion the user stays on the profile — the page behind the modal is already
   // their home page, so UC-3 needs the view closed, not a navigation.
   const postDeletedHandler = () => {
-    setSelectedPostId(null)
+    setDeletingPostId(null)
+    router.replace(buildProfilePostUrl({ searchParams: currentSearchParams, userId }), {
+      scroll: false,
+    })
   }
 
   return (

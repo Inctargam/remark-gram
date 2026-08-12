@@ -11,6 +11,8 @@
 - Первая SSR-страница постов профиля теперь передается в `useProfilePostsQuery()` как `initialData` React Query infinite query.
 - Для SSR-seed данных задан короткий `staleTime`, чтобы после гидрации клиент не отправлял дублирующий запрос за той же первой страницей.
 - Добавлена unit-проверка формы `pages/pageParams`, которую ожидает TanStack Query для infinite query.
+- Выбранный пост на странице профиля теперь синхронизирован с URL `?postId=...`: открытие публикации делает client navigation, закрытие удаляет параметр, а прямой SSR-вход использует `initialSelectedPost`.
+- Добавлен внутренний helper сборки URL профиля с unit-проверками сохранения сторонних query params и удаления `postId`.
 
 #### Shared UI
 
@@ -19,9 +21,13 @@
 #### Verification
 
 - `pnpm exec vitest run --project unit src/entities/post/api/profilePostsQueryData.test.ts` прошёл успешно.
+- `pnpm exec vitest run --project unit src/widgets/profile-posts/lib/profilePostUrl.test.ts src/entities/post/api/profilePostsQueryData.test.ts` прошёл успешно.
+- `pnpm test:unit` прошёл: 44 файла, 253 теста.
 - `pnpm exec vitest run --project storybook src/pages/profile/ui/ProfilePage.stories.tsx` прошёл успешно.
+- `pnpm exec vitest run --project storybook src/pages/profile/ui/ProfilePage.stories.tsx src/shared/ui/modal/Modal.stories.tsx` прошёл успешно.
 - `pnpm exec vitest run --project storybook src/shared/ui/modal/Modal.stories.tsx` прошёл успешно.
 - `pnpm exec eslint src/entities/post/api/useProfilePostsQuery.ts src/entities/post/api/profilePostsQueryData.ts src/entities/post/api/profilePostsQueryData.test.ts src/widgets/profile-posts/ui/ProfilePostsGrid.tsx` прошёл успешно.
+- `pnpm exec eslint src/widgets/profile-posts/ui/ProfilePostsGrid.tsx src/widgets/profile-posts/lib/profilePostUrl.ts src/widgets/profile-posts/lib/profilePostUrl.test.ts src/pages/profile/ui/ProfilePage.stories.tsx src/shared/ui/modal/Modal.tsx` прошёл успешно.
 - `pnpm exec tsc --noEmit` прошёл успешно.
 - `pnpm exec tsc --noEmit --pretty false` прошёл успешно.
 - `pnpm exec prettier --check CHANGELOG.md src/entities/post/api/useProfilePostsQuery.ts src/entities/post/api/profilePostsQueryData.ts src/entities/post/api/profilePostsQueryData.test.ts src/widgets/profile-posts/ui/ProfilePostsGrid.tsx` прошёл успешно.
