@@ -16,7 +16,7 @@ export type HeaderMobileProps = {
 export const HeaderMobile = ({ languageSelector, onMenuClick }: HeaderMobileProps) => (
   <header className={styles.header}>
     <Link className={styles.logo} href={ROUTES.home}>
-      remarkgram
+      Inctagram
     </Link>
 
     <div className={styles.controls}>

@@ -17,7 +17,9 @@ export const ProfilePostOwnerActions = ({ onDelete, onEdit, post }: Props) => {
   const currentUser = useCurrentUser()
 
   if (status === 'loading') {
-    return <span className={styles.actionsSkeleton} aria-label="Loading post actions" />
+    return (
+      <span className={styles.actionsSkeleton} role="status" aria-label="Loading post actions" />
+    )
   }
 
   const canManagePost = status === 'authenticated' && currentUser?.id === post.ownerId

@@ -1,0 +1,45 @@
+.commentForm {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.commentInput {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-light-100);
+  font-family: inherit;
+  font-size: var(--font-size-regular-14);
+  font-weight: var(--font-weight-regular-14);
+  line-height: var(--line-height-regular-14);
+  outline: none;
+}
+
+.commentInput::placeholder {
+  color: var(--color-light-900);
+}
+
+.commentInput:focus-visible {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 4px;
+}
+
+.publishButton {
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-primary-500);
+  font-size: var(--font-size-medium-14);
+  font-weight: var(--font-weight-medium-14);
+  line-height: var(--line-height-medium-14);
+  cursor: pointer;
+}
+
+.publishButton:disabled {
+  color: var(--color-light-900);
+  cursor: default;
+}

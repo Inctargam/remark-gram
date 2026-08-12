@@ -6,6 +6,38 @@
 
 ### 2026-08-12
 
+#### Home
+
+- Главная страница приведена ближе к Figma frame `26786:11274`: добавлен счетчик registered users с шестью цифровыми ячейками, сетка из четырех карточек шириной по макету и карточка публикации с изображением, аватаром, username, временем, описанием и ссылочным `Show more`.
+- Карточка публикации на главной показывает только preview первого фото; стрелки и точки для нескольких фото остаются только внутри post modal.
+- Первые seeded mock-посты теперь содержат по 5 фото, чтобы открытая post modal показывала реальные стрелки и точки галереи как в Figma-макете.
+- Цвета и рамка post modal выровнены с Figma: popup получил border `Dark/100`, radius `2px`, а gallery controls используют `Dark/300` поверх изображения.
+- Mock-счетчик зарегистрированных пользователей обновлен до `9 213`, чтобы стартовое состояние соответствовало макету.
+- Логотип desktop/mobile header переименован в `Inctagram`, как в макете и metadata приложения.
+- `formatPostRelativeTime()` и `getPostImageAlt()` открыты через публичный API `entities/post`, чтобы home-компоненты не импортировали приватные internals.
+
+#### Post Modal
+
+- Comment form в post modal заменён с disabled-заглушки на локальный mock: пользователь может ввести комментарий, нажать `Publish`, увидеть комментарий в списке и очищенное поле ввода.
+- Static comments list вынесен из stub-файлов в обычный UI-компонент, а mock-данные и нормализация комментария оформлены в model-слое `entities/post`.
+
+#### Verification
+
+- `pnpm exec tsc --noEmit --pretty false` прошёл успешно.
+- `pnpm exec vitest run --project unit src/shared/api/homePageData.test.ts src/entities/post/lib/formatPostRelativeTime.test.ts` прошёл успешно.
+- `pnpm exec vitest run --project unit src/entities/post/model/postComments.test.ts` прошёл успешно.
+- `pnpm exec vitest run --project unit src/shared/api/mock/postsStore.test.ts src/entities/post/lib/postGallery.test.ts src/shared/api/homePageData.test.ts` прошёл успешно.
+- `pnpm exec eslint src/pages/home/ui/HomePage.tsx src/pages/home/ui/HomePostsGrid.tsx src/pages/home/ui/HomePostCard.tsx src/pages/home/ui/HomeRegisteredUsersCounter.tsx src/widgets/header/Header.tsx src/widgets/header/HeaderMobile.tsx src/pages/home/ui/HomePage.stories.tsx src/widgets/header/Header.stories.tsx src/widgets/header/HeaderMobile.stories.tsx src/shared/api/homePageData.test.ts src/entities/post/index.ts` прошёл успешно.
+- `pnpm exec eslint src/shared/api/mock/postsStore.ts src/entities/post/ui/PostView.stories.tsx src/entities/post/index.ts src/pages/home/ui/HomePostCard.tsx src/pages/home/ui/HomePostsGrid.tsx src/pages/home/ui/HomePage.stories.tsx` прошёл успешно.
+- `pnpm exec eslint src/entities/post/ui/PostView.stories.tsx src/entities/post/index.ts src/shared/api/mock/postsStore.ts` прошёл успешно.
+- `pnpm exec prettier --check CHANGELOG.md src/entities/post/ui/postGallery.module.css src/entities/post/ui/postViewModal.module.css src/entities/post/ui/PostView.stories.tsx` прошёл успешно.
+- `pnpm lint` прошёл без ошибок; остались существующие warnings в generated OpenAPI schema и `useSignUpForm`.
+- `pnpm exec prettier --check CHANGELOG.md src/entities/post/index.ts src/pages/home/ui/HomePage.tsx src/pages/home/ui/HomePostsGrid.tsx src/pages/home/ui/HomePostCard.tsx src/pages/home/ui/HomeRegisteredUsersCounter.tsx src/pages/home/ui/homePage.module.css src/pages/home/ui/HomePage.stories.tsx src/shared/api/homePageData.test.ts src/shared/api/mock/usersCountStore.ts src/widgets/header/Header.tsx src/widgets/header/HeaderMobile.tsx src/widgets/header/Header.stories.tsx src/widgets/header/HeaderMobile.stories.tsx` прошёл успешно.
+- Storybook MCP `run-story-tests` для `pages-home-homepage--default` и `pages-home-homepage--no-posts` прошёл успешно.
+- Storybook MCP `run-story-tests` для `entities-post-postview--publish-comment`, `entities-post-postview--other-user-post` и `entities-post-postview--several-photos` функционально прошёл; a11y по-прежнему показывает contrast warning у Figma-серого `#8d9094` на `#333333`.
+- Storybook MCP `run-story-tests` для `entities-post-postview--several-photos` и `pages-home-homepage--default` функционально прошёл; a11y по-прежнему показывает contrast warning у Figma-серого `#8d9094` на `#333333`.
+- Storybook MCP `run-story-tests` для `widgets-header--logo-link` и `widgets-headermobile--logo-link` прошёл успешно без a11y; a11y для desktop header по-прежнему показывает contrast warning у существующей primary-кнопки `Sign up` на Figma-синем фоне.
+
 #### Profile SSR
 
 - Переходы к просмотру публикации унифицированы: посты на главной ведут на `/profile/{ownerId}?postId={postId}&returnTo=/`, а профильная модалка использует общий helper для закрытия.
@@ -13,6 +45,7 @@
 - Закрытие post modal теперь возвращает на `/` только при безопасном `returnTo=/`; внешние и небезопасные значения игнорируются, а обычное закрытие остаётся на профиле автора без `postId`.
 - Storybook-сценарии главной и профиля проверяют URL открытия поста с главной, прямой вход с `postId` и возврат через `returnTo`.
 - Owner-only элементы профиля больше не вычисляются на сервере через mock owner id: `Profile Settings` и меню действий поста появляются только после клиентского `/me`, а на время `loading` показываются skeleton-состояния.
+- Skeleton-состояния owner-only элементов получили `role="status"`, чтобы их доступные имена были валидными для Storybook a11y.
 - Route/modal state для просмотра, редактирования и удаления поста вынесен из `ProfilePostsGrid` в отдельный hook, чтобы widget-компонент отвечал только за загрузку списка и композицию UI.
 - SSR selected post reader перенесён в `entities/post` server API boundary: `getProfilePostServer()` сразу проверяет принадлежность `postId` к `userId`, поэтому профильная page больше не держит отдельную domain-проверку.
 - Home SSR reader покрыт unit-тестом на контракт latest posts и registered users count перед будущим переключением mock layer на backend.
@@ -34,6 +67,8 @@
 - `pnpm exec vitest run --project unit src/entities/post/api/profilePostsHydration.server.test.ts src/entities/post/api/profilePostsQueryData.test.ts` прошёл успешно.
 - `pnpm exec vitest run --project unit src/widgets/profile-posts/lib/profilePostUrl.test.ts src/entities/post/api/postsApi.server.test.ts src/pages/profile/api/profile.server.test.ts src/shared/api/homePageData.test.ts src/shared/auth/sessionStore.test.ts src/shared/auth/checkMockAuth.test.ts` прошёл успешно.
 - `pnpm test:unit` прошёл: 46 файлов, 266 тестов.
+- `pnpm exec tsc --noEmit --pretty false`, `pnpm test:unit` и `pnpm exec eslint --quiet` прошли успешно при финальной проверке ветки.
+- Playwright smoke проверил открытие post modal с Home с возвратом на `/` и direct/profile URL с возвратом на профиль автора.
 - `pnpm exec vitest run --project storybook src/pages/home/ui/HomePage.stories.tsx src/pages/profile/ui/ProfilePage.stories.tsx` прошёл успешно.
 - `pnpm exec vitest run --project storybook src/pages/profile/ui/ProfilePage.stories.tsx src/app/providers/ProtectedRoute.stories.tsx` прошёл успешно.
 - `pnpm exec vitest run --project storybook src/pages/profile/ui/ProfilePage.stories.tsx` прошёл успешно после выноса modal state в hook.

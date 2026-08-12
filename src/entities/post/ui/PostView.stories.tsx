@@ -74,9 +74,31 @@ export const OtherUserPost: Story = {
     const canvas = within(canvasElement)
 
     await expect(canvas.queryByRole('button', { name: 'Post actions' })).not.toBeInTheDocument()
-    // Stub controls stay disabled: the like and comment features do not exist yet.
+    // Like/share controls are still visual stubs, but comment publishing is mocked.
     await expect(canvas.getByRole('button', { name: 'Like' })).toBeDisabled()
-    await expect(canvas.getByLabelText('Add a comment')).toBeDisabled()
+    await expect(canvas.getByLabelText('Add a comment')).toBeEnabled()
+    await expect(canvas.getByRole('button', { name: 'Publish' })).toBeDisabled()
+  },
+}
+
+export const PublishComment: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const commentInput = canvas.getByLabelText('Add a comment')
+    const publishButton = canvas.getByRole('button', { name: 'Publish' })
+
+    await expect(publishButton).toBeDisabled()
+
+    await userEvent.type(commentInput, 'Nice mock comment')
+
+    await expect(publishButton).toBeEnabled()
+
+    await userEvent.click(publishButton)
+
+    await expect(canvas.getByText('Nice mock comment')).toBeVisible()
+    await expect(canvas.getByText('Just now')).toBeVisible()
+    await expect(commentInput).toHaveValue('')
+    await expect(publishButton).toBeDisabled()
   },
 }
 
@@ -117,6 +139,8 @@ export const SeveralPhotos: Story = {
         { url: createImageUrl('1', 210), width: 1080, height: 1080 },
         { url: createImageUrl('2', 40), width: 1080, height: 1080 },
         { url: createImageUrl('3', 120), width: 1080, height: 1080 },
+        { url: createImageUrl('4', 280), width: 1080, height: 1080 },
+        { url: createImageUrl('5', 320), width: 1080, height: 1080 },
       ],
     },
   },
@@ -140,7 +164,7 @@ export const SeveralPhotos: Story = {
     )
     await expect(canvas.getByRole('button', { name: 'Show previous photo' })).toBeInTheDocument()
 
-    await userEvent.click(canvas.getByRole('button', { name: 'Show photo 3' }))
+    await userEvent.click(canvas.getByRole('button', { name: 'Show photo 5' }))
 
     await expect(canvas.queryByRole('button', { name: 'Show next photo' })).not.toBeInTheDocument()
   },

@@ -14,6 +14,9 @@ export {
 } from './api/profilePostsQueryData'
 export { postsQueryKeys } from './api/queryKeys'
 export { useProfilePostsQuery } from './api/useProfilePostsQuery'
+export { formatPostRelativeTime } from './lib/formatPostRelativeTime'
+export { getPostImageAlt } from './lib/getPostImageAlt'
+export { getGalleryIndex, hasGalleryControls } from './lib/postGallery'
 export {
   isValidPostDescription,
   normalizePostDescription,

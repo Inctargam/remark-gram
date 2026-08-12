@@ -17,7 +17,13 @@ export const ProfileSettingsControl = ({ userId }: Props) => {
   const currentUser = useCurrentUser()
 
   if (status === 'loading') {
-    return <span className={styles.settingsSkeleton} aria-label="Loading profile settings" />
+    return (
+      <span
+        className={styles.settingsSkeleton}
+        role="status"
+        aria-label="Loading profile settings"
+      />
+    )
   }
 
   const isOwner = status === 'authenticated' && currentUser?.id === userId

@@ -48,6 +48,19 @@ const createSeedImageUrl = (label: string, hue: number) => {
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`
 }
 
+const createSeedImages = (label: string, index: number): Post['images'] => {
+  const imagesCount = index < 4 ? 5 : 1
+
+  return Array.from({ length: imagesCount }, (_, imageIndex) => ({
+    url: createSeedImageUrl(
+      imagesCount > 1 ? `${label}.${imageIndex + 1}` : label,
+      (index * 37 + imageIndex * 53) % 360
+    ),
+    width: IMAGE_WIDTH,
+    height: IMAGE_HEIGHT,
+  }))
+}
+
 const createSeedPost = (ownerId: string, index: number): Post => {
   const createdAt = new Date(SEED_BASE_TIME - index * HOUR_IN_MS).toISOString()
   const label = `${index + 1}`
@@ -57,13 +70,7 @@ const createSeedPost = (ownerId: string, index: number): Post => {
     ownerId,
     ownerUsername: getUsername(ownerId),
     ownerAvatarUrl: null,
-    images: [
-      {
-        url: createSeedImageUrl(label, (index * 37) % 360),
-        width: IMAGE_WIDTH,
-        height: IMAGE_HEIGHT,
-      },
-    ],
+    images: createSeedImages(label, index),
     description: `Mock publication ${label}. Seeded post used until the posts backend is ready.`,
     createdAt,
     updatedAt: createdAt,

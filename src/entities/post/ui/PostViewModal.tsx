@@ -51,7 +51,7 @@ export const PostViewModal = ({
           <Dialog.Close className={styles.close} aria-label="Close">
             <Icon iconId="icon-close-outline" width={24} height={24} />
           </Dialog.Close>
-          <PostView post={post} actions={actions} />
+          <PostView post={post} actions={actions} key={post.id} />
         </Dialog.Popup>
       </Dialog.Portal>
     </Dialog.Root>

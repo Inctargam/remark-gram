@@ -7,11 +7,12 @@ import { Scroll } from '@/shared/ui/scroll'
 import { formatPostDate } from '../lib/formatPostDate'
 import { formatPostRelativeTime } from '../lib/formatPostRelativeTime'
 import type { Post } from '../model/types'
+import { usePostComments } from '../model/usePostComments'
 import { PostAuthor } from './PostAuthor'
+import { PostCommentForm } from './PostCommentForm'
+import { PostComments } from './PostComments'
 import { PostGallery } from './PostGallery'
 import styles from './postView.module.css'
-import { PostCommentFormStub } from './stubs/PostCommentFormStub'
-import { PostCommentsStub } from './stubs/PostCommentsStub'
 import { PostEngagementStub } from './stubs/PostEngagementStub'
 
 type Props = {
@@ -26,6 +27,8 @@ type Props = {
 export const PostView = ({ post, actions }: Props) => {
   const publishedAt = formatPostDate(post.createdAt)
   const postedAgo = formatPostRelativeTime(post.createdAt)
+  const { comments, draftComment, canPublishComment, commentChangeHandler, commentPublishHandler } =
+    usePostComments(post.id)
 
   return (
     <div className={styles.post}>
@@ -49,7 +52,7 @@ export const PostView = ({ post, actions }: Props) => {
             </div>
           ) : null}
 
-          <PostCommentsStub />
+          <PostComments comments={comments} />
         </Scroll>
 
         <div className={styles.footer}>
@@ -60,7 +63,12 @@ export const PostView = ({ post, actions }: Props) => {
           </div>
 
           <div className={styles.commentForm}>
-            <PostCommentFormStub />
+            <PostCommentForm
+              comment={draftComment}
+              canPublish={canPublishComment}
+              onCommentChange={commentChangeHandler}
+              onPublish={commentPublishHandler}
+            />
           </div>
         </div>
       </div>

@@ -1,15 +1,15 @@
 'use client'
 
-import Link from 'next/link'
 import type { MouseEvent } from 'react'
 
 import type { Post } from '@/entities/post'
-import { PostThumbnail, PostViewModal } from '@/entities/post'
+import { PostViewModal } from '@/entities/post'
 import { ROUTES } from '@/shared/config'
 import { buildProfilePostUrl } from '@/widgets/profile-posts'
 
 import { useHomePostModal } from '../model/useHomePostModal'
 import styles from './homePage.module.css'
+import { HomePostCard } from './HomePostCard'
 
 type Props = {
   posts: Post[]
@@ -27,17 +27,16 @@ export const HomePostsGrid = ({ posts }: Props) => {
     <>
       <div className={styles.postsGrid}>
         {posts.map((post) => (
-          <Link
-            className={styles.postLink}
+          <HomePostCard
             href={buildProfilePostUrl({
               userId: post.ownerId,
               postId: post.id,
               returnTo: ROUTES.home,
             })}
             key={post.id}
-            onClick={(event) => postClickHandler(event, post)}>
-            <PostThumbnail post={post} />
-          </Link>
+            post={post}
+            onOpen={postClickHandler}
+          />
         ))}
       </div>
 

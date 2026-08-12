@@ -32,7 +32,7 @@ export const Header = (props: HeaderProps) => {
     <header className={styles.header}>
       <div className={styles.inner}>
         <Link className={styles.logo} href={ROUTES.home}>
-          remarkgram
+          Inctagram
         </Link>
 
         <div className={styles.controls}>

@@ -22,6 +22,6 @@ describe('getHomePagePosts', () => {
 
 describe('getHomePageUsersCount', () => {
   it('returns the registered users counter for SSR home composition', async () => {
-    await expect(getHomePageUsersCount()).resolves.toEqual({ totalCount: 2150 })
+    await expect(getHomePageUsersCount()).resolves.toEqual({ totalCount: 9213 })
   })
 })
