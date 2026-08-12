@@ -14,6 +14,10 @@
   overflow: hidden;
 }
 
+.mobileHeader {
+  display: none;
+}
+
 .panel {
   padding: 24px 0 0;
 }
@@ -24,14 +28,50 @@
     padding: 0 15px 24px;
   }
 
+  .mobileHeader {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 60px;
+  }
+
+  .backLink {
+    position: absolute;
+    top: 17px;
+    left: 0;
+    display: flex;
+    width: 24px;
+    height: 24px;
+    color: var(--color-light-100);
+  }
+
+  .backLink:focus-visible {
+    border-radius: 2px;
+    outline: 2px solid var(--color-primary-500);
+    outline-offset: 2px;
+  }
+
+  .mobileTitle {
+    margin: 0;
+    font-size: var(--font-size-h2);
+    font-weight: var(--font-weight-h2);
+    line-height: var(--line-height-h2);
+  }
+
   .tabsViewport {
     width: calc(100vw - 15px);
-    overflow: hidden;
+    overflow: auto hidden;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: none;
+  }
+
+  .tabsViewport::-webkit-scrollbar {
+    display: none;
   }
 
   .tabsList {
     width: max-content;
-    min-width: 710px;
   }
 
   .tabsList > * {
@@ -43,19 +83,18 @@
   }
 
   .tabsList > :nth-child(2) {
-    width: 100px;
+    width: 84px;
   }
 
   .tabsList > :nth-child(3) {
-    width: 190px;
+    width: 185px;
   }
 
   .tabsList > :nth-child(4) {
-    width: 140px;
+    width: 124px;
   }
 
   .panel {
     padding-top: 24px;
   }
-
 }
