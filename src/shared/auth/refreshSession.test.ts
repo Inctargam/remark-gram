@@ -13,7 +13,7 @@ const createApiClient = (postMock: ReturnType<typeof vi.fn>) =>
 
 describe('createRefreshSession', () => {
   afterEach(() => {
-    sessionStore.setState({ accessToken: null, status: 'loading' })
+    sessionStore.setState({ accessToken: null, currentUser: null, status: 'loading' })
     vi.restoreAllMocks()
   })
 
@@ -28,6 +28,7 @@ describe('createRefreshSession', () => {
     expect(postMock).toHaveBeenCalledWith('/api/v1/auth/refresh-token')
     expect(sessionStore.getState()).toMatchObject({
       accessToken: 'new-token',
+      currentUser: null,
       status: 'authenticated',
     })
   })
@@ -63,6 +64,10 @@ describe('createRefreshSession', () => {
     const refreshSession = createRefreshSession(createApiClient(postMock))
 
     await expect(refreshSession()).resolves.toBeNull()
-    expect(sessionStore.getState()).toMatchObject({ accessToken: null, status: 'guest' })
+    expect(sessionStore.getState()).toMatchObject({
+      accessToken: null,
+      currentUser: null,
+      status: 'guest',
+    })
   })
 })

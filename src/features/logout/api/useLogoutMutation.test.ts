@@ -7,7 +7,7 @@ import { logout } from './useLogoutMutation'
 
 describe('logout', () => {
   afterEach(() => {
-    sessionStore.setState({ accessToken: null, status: 'loading' })
+    sessionStore.setState({ accessToken: null, currentUser: null, status: 'loading' })
     vi.restoreAllMocks()
   })
 
@@ -18,6 +18,10 @@ describe('logout', () => {
 
     await expect(logout()).resolves.toBeUndefined()
     expect(postMock).toHaveBeenCalledWith('/api/v1/auth/logout')
-    expect(sessionStore.getState()).toMatchObject({ accessToken: null, status: 'guest' })
+    expect(sessionStore.getState()).toMatchObject({
+      accessToken: null,
+      currentUser: null,
+      status: 'guest',
+    })
   })
 })

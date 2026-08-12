@@ -1,13 +1,9 @@
-import Link from 'next/link'
-
 import type { Post, PostsPage } from '@/entities/post'
-import { isProfileOwner } from '@/shared/auth'
-import { ROUTES } from '@/shared/config'
-import { Button } from '@/shared/ui/button'
 import { ProfilePostsGrid } from '@/widgets/profile-posts'
 
 import type { PublicProfile } from '../model/publicProfile'
 import styles from './profilePage.module.css'
+import { ProfileSettingsControl } from './ProfileSettingsControl'
 
 type ProfileStat = {
   label: string
@@ -39,7 +35,6 @@ export const ProfilePageView = ({
   profile,
   userId,
 }: ProfilePageViewProps) => {
-  const isOwner = isProfileOwner(userId)
   const stats = getProfileStats(profile)
 
   return (
@@ -52,15 +47,7 @@ export const ProfilePageView = ({
             <h1 className={styles.title} id="profile-title">
               {profile.username}
             </h1>
-            {isOwner ? (
-              <Button
-                className={styles.settingsButton}
-                nativeButton={false}
-                render={<Link href={ROUTES.settings} />}
-                variant="secondary">
-                Profile Settings
-              </Button>
-            ) : null}
+            <ProfileSettingsControl userId={userId} />
           </div>
 
           <dl className={styles.stats} aria-label="Profile statistics">

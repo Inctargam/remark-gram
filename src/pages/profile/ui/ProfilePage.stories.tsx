@@ -3,10 +3,18 @@ import { getRouter } from '@storybook/nextjs-vite/navigation.mock'
 import { expect, screen, userEvent, waitFor, within } from 'storybook/test'
 
 import type { Post, PostsPage } from '../../../entities/post'
-import { MOCK_CURRENT_USER_ID } from '../../../shared/auth'
+import type { CurrentUser } from '../../../shared/auth'
+import { MOCK_CURRENT_USER_ID, sessionStore } from '../../../shared/auth'
 import { ProfilePageView } from './ProfilePageView'
 
 const OTHER_USER_ID = 'mock-user-2'
+
+const CURRENT_USER: CurrentUser = {
+  id: MOCK_CURRENT_USER_ID,
+  username: 'UserName',
+  email: 'user@example.com',
+  avatarUrl: null,
+}
 
 const createImageUrl = (label: string, hue: number) =>
   `data:image/svg+xml;utf8,${encodeURIComponent(
@@ -78,6 +86,18 @@ const stubPostsFetch = () => {
   }
 }
 
+const setOwnerSession = () => {
+  sessionStore.getState().setAuthenticated('mock-token', CURRENT_USER)
+}
+
+const setGuestSession = () => {
+  sessionStore.getState().setGuest()
+}
+
+const setLoadingSession = () => {
+  sessionStore.setState({ accessToken: null, currentUser: null, status: 'loading' })
+}
+
 const meta = {
   title: 'pages/ProfilePage',
   component: ProfilePageView,
@@ -107,6 +127,7 @@ export const OwnProfile: Story = {
   beforeEach: () => {
     const router = getRouter()
 
+    setOwnerSession()
     router.push.mockClear()
   },
   play: async ({ canvasElement }) => {
@@ -129,6 +150,7 @@ export const OpenPost: Story = {
   beforeEach: () => {
     const router = getRouter()
 
+    setGuestSession()
     router.replace.mockClear()
   },
   args: {
@@ -166,6 +188,7 @@ export const OpenPostFromHome: Story = {
   beforeEach: () => {
     const router = getRouter()
 
+    setGuestSession()
     router.replace.mockClear()
   },
   args: {
@@ -196,6 +219,7 @@ export const OpenPostFromHome: Story = {
 
 /** UC-2 entry point: the owner reaches the edit form through the three-dot menu on the post. */
 export const EditOwnPost: Story = {
+  beforeEach: setOwnerSession,
   args: {
     initialSelectedPost: createPage(MOCK_CURRENT_USER_ID).items[0],
   },
@@ -230,6 +254,7 @@ export const DeleteOwnPost: Story = {
   beforeEach: () => {
     const router = getRouter()
 
+    setOwnerSession()
     router.replace.mockClear()
   },
   args: {
@@ -267,6 +292,7 @@ export const DeleteOwnPost: Story = {
 }
 
 export const OtherUserProfile: Story = {
+  beforeEach: setOwnerSession,
   args: {
     initialPostsPage: createPage(OTHER_USER_ID),
     profile: createProfile(OTHER_USER_ID),
@@ -277,5 +303,30 @@ export const OtherUserProfile: Story = {
 
     await expect(await canvas.findByAltText('Mock publication 1')).toBeInTheDocument()
     await expect(canvas.queryByRole('button', { name: 'Profile Settings' })).not.toBeInTheDocument()
+  },
+}
+
+export const OwnerControlsLoading: Story = {
+  beforeEach: setLoadingSession,
+  args: {
+    initialSelectedPost: createPage(MOCK_CURRENT_USER_ID).items[0],
+  },
+  parameters: {
+    nextjs: {
+      navigation: {
+        pathname: `/profile/${MOCK_CURRENT_USER_ID}`,
+        query: {
+          postId: `${MOCK_CURRENT_USER_ID}-post-1`,
+        },
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    await expect(await canvas.findByLabelText('Loading profile settings')).toBeInTheDocument()
+    await expect(await screen.findByLabelText('Loading post actions')).toBeInTheDocument()
+    await expect(screen.queryByRole('button', { name: 'Profile Settings' })).not.toBeInTheDocument()
+    await expect(screen.queryByRole('button', { name: 'Post actions' })).not.toBeInTheDocument()
   },
 }

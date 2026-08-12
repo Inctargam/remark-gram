@@ -1,3 +1,4 @@
+import type { CurrentUser } from './sessionStore'
 import { sessionStore } from './sessionStore'
 
 export const checkMockAuth = async () => {
@@ -7,7 +8,9 @@ export const checkMockAuth = async () => {
     })
 
     if (response.ok) {
-      sessionStore.getState().setAuthenticated('mock-token')
+      const currentUser = (await response.json()) as CurrentUser
+
+      sessionStore.getState().setAuthenticated('mock-token', currentUser)
 
       return
     }
