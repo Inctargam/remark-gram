@@ -1,4 +1,4 @@
-import { withMockDelay } from '../_mock/mockDelay'
+import { withMockDelay } from '../../_mock/mockDelay'
 import { deletePostHandler, getPostHandler, updatePostHandler } from '../_mock/postHandler'
 
 type PostRouteContext = {

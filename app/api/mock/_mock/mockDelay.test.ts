@@ -40,7 +40,7 @@ describe('waitMockDelay', () => {
   })
 
   it('waits out the configured delay', async () => {
-    vi.stubEnv('POSTS_API_MOCK_DELAY_MS', '500')
+    vi.stubEnv('MOCK_API_DELAY_MS', '500')
     vi.useFakeTimers()
 
     let settled = false
@@ -70,7 +70,7 @@ describe('withMockDelay', () => {
   })
 
   it('delays the handler instead of running it right away', async () => {
-    vi.stubEnv('POSTS_API_MOCK_DELAY_MS', '500')
+    vi.stubEnv('MOCK_API_DELAY_MS', '500')
     vi.useFakeTimers()
 
     const handler = vi.fn(async () => Response.json({ ok: true }))

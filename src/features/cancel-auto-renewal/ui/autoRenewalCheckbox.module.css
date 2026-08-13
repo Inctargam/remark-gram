@@ -1,0 +1,12 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-family: var(--font-base);
+}
+
+.error {
+  color: var(--color-danger-500);
+  font-size: var(--font-size-regular-14);
+  line-height: var(--line-height-regular-14);
+}
