@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
+import { useState } from 'react'
 
 import type { CheckoutOutcome } from '@/entities/subscription'
 import { ROUTES } from '@/shared/config'
@@ -29,8 +30,23 @@ export const MockCheckoutPage = () => {
   const returnUrl = searchParams?.get('returnUrl') ?? ''
 
   const { isPending, mutate } = useCompleteCheckoutMutation()
+  /**
+   * `isPending` alone settles as soon as the response lands, but the actual exit is the
+   * `window.location.assign` in `onSettled` — a real navigation that can lag behind on a
+   * slow connection. Stays true once either button is clicked so both stay locked (and
+   * don't fire a second, conflicting outcome) for the whole click-to-navigate window.
+   */
+  const [isFinished, setIsFinished] = useState(false)
 
   const finishHandler = (outcome: CheckoutOutcome) => {
+    // `disabled` on the buttons lags a render behind this state, so a click fired before
+    // that commit would otherwise still reach here — guard the logic itself.
+    if (isFinished) {
+      return
+    }
+
+    setIsFinished(true)
+
     mutate(
       { sessionId, outcome },
       {
@@ -74,11 +90,14 @@ export const MockCheckoutPage = () => {
         <Button
           type="button"
           variant="outline"
-          disabled={isPending}
+          disabled={isPending || isFinished}
           onClick={() => finishHandler('failed')}>
           Cancel
         </Button>
-        <Button type="button" disabled={isPending} onClick={() => finishHandler('success')}>
+        <Button
+          type="button"
+          disabled={isPending || isFinished}
+          onClick={() => finishHandler('success')}>
           Pay
         </Button>
       </div>

@@ -16,15 +16,25 @@ type Props = {
 }
 
 export const AutoRenewalCheckbox = ({ checked }: Props) => {
-  const { isError, mutate } = useAutoRenewalMutation()
+  const { isError, isPending, mutate } = useAutoRenewalMutation()
 
   // Not `mutate` itself: base-ui passes event details as the second argument, and the
-  // mutation reads that position as its options object.
-  const autoRenewalChangeHandler = (nextChecked: boolean) => mutate(nextChecked)
+  // mutation reads that position as its options object. Also guards `isPending` here rather
+  // than trusting `disabled` alone — that attribute commits a render behind this state, so a
+  // click fired before it lands would otherwise still reach `mutate`.
+  const autoRenewalChangeHandler = (nextChecked: boolean) => {
+    if (isPending) {
+      return
+    }
+
+    mutate(nextChecked)
+  }
 
   return (
     <div className={styles.root}>
-      <Checkbox checked={checked} onCheckedChange={autoRenewalChangeHandler}>
+      {/* Disabled while a request is in flight — a second click before the response lands
+          would read `previousStatus` from an already-optimistic cache and could race. */}
+      <Checkbox checked={checked} disabled={isPending} onCheckedChange={autoRenewalChangeHandler}>
         Auto-Renewal
       </Checkbox>
 

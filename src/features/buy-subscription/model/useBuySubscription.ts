@@ -18,6 +18,11 @@ type Params = {
 export type BuySubscriptionState = {
   /** Non-null while the consent modal is open — it also carries the provider being paid with. */
   consentProvider: PaymentProvider | null
+  /**
+   * True from the confirm click until either the checkout session request settles into an
+   * error, or (on success) the browser actually navigates away — not just while the request
+   * itself is in flight. Drives both the `OK` button and the modal's dismiss lock.
+   */
   isCheckoutPending: boolean
   paymentResult: CheckoutOutcome | null
   cancelPayment: () => void
@@ -57,6 +62,13 @@ export const useBuySubscription = ({ planId }: Params): BuySubscriptionState => 
    */
   const [dismissedResult, setDismissedResult] = useState<CheckoutOutcome | null>(null)
   const [hasCheckoutFailed, setHasCheckoutFailed] = useState(false)
+  /**
+   * `mutate` settles as soon as the response lands, but `window.location.assign` below is a
+   * real navigation and can take a moment — on a slow connection the modal would briefly be
+   * interactive again before the browser actually leaves. Stays true past the mutation itself
+   * so the modal locks for the whole click-to-navigate window, not just the request.
+   */
+  const [isConfirmed, setIsConfirmed] = useState(false)
   const { isPending, mutate } = useCreateCheckoutSessionMutation()
 
   const outcomeFromUrl = parseCheckoutOutcome(searchParams?.get(PAYMENT_RESULT_PARAM))
@@ -74,26 +86,37 @@ export const useBuySubscription = ({ planId }: Params): BuySubscriptionState => 
 
   const startPayment = (provider: PaymentProvider) => {
     setHasCheckoutFailed(false)
+    setIsConfirmed(false)
     setConsentProvider(provider)
   }
 
   /** Closing the modal by the cross or the backdrop is a cancel: no payment is created. */
-  const cancelPayment = () => setConsentProvider(null)
+  const cancelPayment = () => {
+    setConsentProvider(null)
+    setIsConfirmed(false)
+  }
 
   const confirmPayment = () => {
-    if (!consentProvider) {
+    // The `OK` button's `disabled` attribute lags one render behind this state, so a click
+    // fired before that commit would otherwise still reach here — guard the logic itself
+    // rather than trust the UI to have already locked.
+    if (!consentProvider || isConfirmed) {
       return
     }
+
+    setIsConfirmed(true)
 
     mutate(
       { planId, provider: consentProvider, returnUrl: buildReturnUrl() },
       {
         // A real provider hosts its page on its own domain, so this is a full navigation
-        // and not a router push — the app is genuinely left behind.
+        // and not a router push — the app is genuinely left behind. `isConfirmed` is left
+        // `true` on purpose: the modal must stay locked until that navigation actually happens.
         onSuccess: ({ checkoutUrl }) => window.location.assign(checkoutUrl),
         onError: () => {
           setConsentProvider(null)
           setHasCheckoutFailed(true)
+          setIsConfirmed(false)
         },
       }
     )
@@ -116,7 +139,7 @@ export const useBuySubscription = ({ planId }: Params): BuySubscriptionState => 
 
   return {
     consentProvider,
-    isCheckoutPending: isPending,
+    isCheckoutPending: isPending || isConfirmed,
     // A session that could not even be created is the same failure to the user as a
     // declined payment, so it renders through the very same modal.
     paymentResult: hasCheckoutFailed ? 'failed' : resultFromUrl,

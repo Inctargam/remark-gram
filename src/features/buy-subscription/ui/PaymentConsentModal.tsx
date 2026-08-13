@@ -15,7 +15,11 @@ export const PAYMENT_CONSENT_MESSAGE =
 
 type Props = {
   open: boolean
-  /** While the session is being created the modal stays put and `OK` is locked. */
+  /**
+   * Locked from the confirm click through to the actual redirect (see `isCheckoutPending`) —
+   * not only while the session-creation request is in flight. `OK` stays disabled and the
+   * modal stays put for the whole window.
+   */
   isPending: boolean
   onConfirm: () => void
   /** Closing by the cross or the backdrop cancels the payment (UC-1 step 10). */
@@ -39,7 +43,9 @@ export const PaymentConsentModal = ({ open, isPending, onConfirm, onOpenChange }
       className={styles.modal}
       open={open}
       onOpenChange={openChangeHandler}
-      title={PAYMENT_CONSENT_TITLE}>
+      title={PAYMENT_CONSENT_TITLE}
+      // Blocks backdrop, cross and Escape for the whole confirm-to-redirect window (see `isPending`).
+      dismissDisabled={isPending}>
       <p className={styles.message}>{PAYMENT_CONSENT_MESSAGE}</p>
 
       <div className={styles.consentActions}>
