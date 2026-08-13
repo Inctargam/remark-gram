@@ -18,6 +18,14 @@ describe('postComments', () => {
         author: 'URLProfiles',
         text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
         createdAtLabel: '2 Hours ago',
+        replies: [
+          {
+            id: 'post-1-comment-1-reply-1',
+            author: 'URLProfiles',
+            text: 'Reply mock text for a threaded comment.',
+            createdAtLabel: '2 Hours ago',
+          },
+        ],
       },
       {
         id: 'post-1-comment-2',

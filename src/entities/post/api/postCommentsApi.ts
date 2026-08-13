@@ -49,7 +49,7 @@ export const publishPostComment = async ({
   })
 
   state.nextCommentIndex += 1
-  getPostCommentsState(postId).push(comment)
+  getPostCommentsState(postId).unshift(comment)
 
   return comment
 }

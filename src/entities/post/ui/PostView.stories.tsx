@@ -55,6 +55,7 @@ type Story = StoryObj<typeof meta>
 export const OwnPost: Story = {
   args: {
     actions: <OwnerActions />,
+    canInteract: true,
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -66,22 +67,80 @@ export const OwnPost: Story = {
     ).toBeVisible()
     await expect(canvas.getByText('July 3, 2026')).toBeInTheDocument()
     await expect(canvas.getByRole('button', { name: 'Post actions' })).toBeInTheDocument()
-  },
-}
-
-export const OtherUserPost: Story = {
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-
-    await expect(canvas.queryByRole('button', { name: 'Post actions' })).not.toBeInTheDocument()
-    // Like/share controls are still visual stubs, but comment publishing is mocked.
     await expect(canvas.getByRole('button', { name: 'Like' })).toBeDisabled()
+    await expect(canvas.getByRole('button', { name: 'Share' })).toBeDisabled()
+    await expect(canvas.getByRole('button', { name: 'Save' })).toBeDisabled()
     await expect(canvas.getByLabelText('Add a comment')).toBeEnabled()
     await expect(canvas.getByRole('button', { name: 'Publish' })).toBeDisabled()
   },
 }
 
+export const AuthenticatedPost: Story = {
+  args: {
+    canInteract: true,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    await expect(canvas.queryByRole('button', { name: 'Post actions' })).not.toBeInTheDocument()
+    await expect(canvas.getByRole('button', { name: 'Like' })).toBeDisabled()
+    await expect(canvas.getByRole('button', { name: 'Share' })).toBeDisabled()
+    await expect(canvas.getByRole('button', { name: 'Save' })).toBeDisabled()
+    await expect(canvas.getByLabelText('Add a comment')).toBeEnabled()
+    await expect(canvas.getByRole('button', { name: 'Publish' })).toBeDisabled()
+  },
+}
+
+export const GuestPost: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    await expect(canvas.queryByRole('button', { name: 'Post actions' })).not.toBeInTheDocument()
+    await expect(canvas.queryByRole('button', { name: 'Like' })).not.toBeInTheDocument()
+    await expect(canvas.queryByRole('button', { name: 'Share' })).not.toBeInTheDocument()
+    await expect(canvas.queryByRole('button', { name: 'Save' })).not.toBeInTheDocument()
+    await expect(canvas.queryByLabelText('Add a comment')).not.toBeInTheDocument()
+    await expect(canvas.queryByRole('button', { name: 'Publish' })).not.toBeInTheDocument()
+  },
+}
+
+export const ToggleAnswers: Story = {
+  args: {
+    canInteract: true,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const answersToggle = canvas.getByRole('button', { name: 'View Answers (1)' })
+
+    await expect(answersToggle).toHaveAttribute('aria-expanded', 'false')
+    await expect(
+      canvas.getByText('Lorem ipsum dolor sit amet, consectetur adipiscing elit.')
+    ).toBeVisible()
+    await expect(
+      canvas.queryByText('Reply mock text for a threaded comment.')
+    ).not.toBeInTheDocument()
+
+    await userEvent.click(answersToggle)
+
+    await expect(canvas.getByRole('button', { name: 'Hide Answers' })).toHaveAttribute(
+      'aria-expanded',
+      'true'
+    )
+    await expect(canvas.getByText('Reply mock text for a threaded comment.')).toBeVisible()
+
+    await userEvent.click(canvas.getByRole('button', { name: 'Hide Answers' }))
+
+    await expect(canvas.getByRole('button', { name: 'View Answers (1)' })).toHaveAttribute(
+      'aria-expanded',
+      'false'
+    )
+  },
+}
+
 export const PublishComment: Story = {
+  args: {
+    canInteract: true,
+  },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const commentInput = canvas.getByLabelText('Add a comment')
@@ -99,6 +158,8 @@ export const PublishComment: Story = {
     await expect(await canvas.findByText('Just now')).toBeVisible()
     await expect(commentInput).toHaveValue('')
     await expect(publishButton).toBeDisabled()
+    await expect(canvas.getByRole('button', { name: 'Publish' })).toBeVisible()
+    await expect(canvas.getByLabelText('Add a comment')).toBeVisible()
   },
 }
 

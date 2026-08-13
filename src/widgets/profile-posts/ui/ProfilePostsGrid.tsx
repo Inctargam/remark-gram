@@ -4,6 +4,7 @@ import type { Post } from '@/entities/post'
 import { PostViewModal, useProfilePostsQuery } from '@/entities/post'
 import { DeletePostDialog } from '@/features/delete-post'
 import { EditPostModal } from '@/features/edit-post'
+import { useSessionStatus } from '@/shared/auth'
 
 import { useProfilePostModal } from '../model/useProfilePostModal'
 import { ProfilePostOwnerActions } from './ProfilePostOwnerActions'
@@ -17,6 +18,7 @@ type Props = {
 const LOAD_ERROR_MESSAGE = 'Failed to load publications. Please try again.'
 
 export const ProfilePostsGrid = ({ initialSelectedPost = null, userId }: Props) => {
+  const sessionStatus = useSessionStatus()
   const { posts, error, hasNextPage, isFetchingNextPage, isPending, fetchNextPage } =
     useProfilePostsQuery(userId)
   const {
@@ -31,6 +33,7 @@ export const ProfilePostsGrid = ({ initialSelectedPost = null, userId }: Props) 
     postSelectHandler,
     selectedPost,
   } = useProfilePostModal({ initialSelectedPost, posts, userId })
+  const canInteractWithPost = sessionStatus === 'authenticated'
 
   // Handlers are plain functions: React Compiler is on for this project (`reactCompiler`
   // in `next.config.ts`), so wrapping them in `useCallback` by hand would add nothing.
@@ -55,6 +58,7 @@ export const ProfilePostsGrid = ({ initialSelectedPost = null, userId }: Props) 
         // The view steps aside while the edit form is open: both take the same box on screen.
         open={selectedPost !== null && !isEditing}
         onOpenChange={modalOpenChangeHandler}
+        canInteract={canInteractWithPost}
         // The delete confirmation sits on top of the post, so a stray click must not
         // dismiss the post underneath it.
         disablePointerDismissal={isDeleting}

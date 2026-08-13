@@ -4,6 +4,7 @@ import type { MouseEvent } from 'react'
 
 import type { Post } from '@/entities/post'
 import { PostViewModal } from '@/entities/post'
+import { useSessionStatus } from '@/shared/auth'
 import { ROUTES } from '@/shared/config'
 import { buildProfilePostUrl } from '@/widgets/profile-posts'
 
@@ -16,7 +17,9 @@ type Props = {
 }
 
 export const HomePostsGrid = ({ posts }: Props) => {
+  const sessionStatus = useSessionStatus()
   const { modalOpenChangeHandler, postOpenHandler, selectedPost } = useHomePostModal({ posts })
+  const canInteractWithPost = sessionStatus === 'authenticated'
 
   const postClickHandler = (event: MouseEvent<HTMLAnchorElement>, post: Post) => {
     event.preventDefault()
@@ -44,6 +47,7 @@ export const HomePostsGrid = ({ posts }: Props) => {
         post={selectedPost}
         open={selectedPost !== null}
         onOpenChange={modalOpenChangeHandler}
+        canInteract={canInteractWithPost}
       />
     </>
   )

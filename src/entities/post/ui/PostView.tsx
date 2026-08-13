@@ -7,15 +7,17 @@ import { Scroll } from '@/shared/ui/scroll'
 import { formatPostDate } from '../lib/formatPostDate'
 import { formatPostRelativeTime } from '../lib/formatPostRelativeTime'
 import type { Post } from '../model/types'
+import { usePostAnswers } from '../model/usePostAnswers'
 import { usePostComments } from '../model/usePostComments'
 import { PostAuthor } from './PostAuthor'
 import { PostCommentForm } from './PostCommentForm'
 import { PostComments } from './PostComments'
+import { PostEngagementActions } from './PostEngagementActions'
 import { PostGallery } from './PostGallery'
 import styles from './postView.module.css'
-import { PostEngagementStub } from './stubs/PostEngagementStub'
 
 type Props = {
+  canInteract?: boolean
   post: Post
   /**
    * Owner-only controls (the three-dot menu from `features/post-actions`).
@@ -24,9 +26,10 @@ type Props = {
   actions?: ReactNode
 }
 
-export const PostView = ({ post, actions }: Props) => {
+export const PostView = ({ post, actions, canInteract = false }: Props) => {
   const publishedAt = formatPostDate(post.createdAt)
   const postedAgo = formatPostRelativeTime(post.createdAt)
+  const { expandedCommentIds, answerToggleHandler } = usePostAnswers()
   const {
     comments,
     draftComment,
@@ -58,25 +61,39 @@ export const PostView = ({ post, actions }: Props) => {
             </div>
           ) : null}
 
-          <PostComments comments={comments} />
+          <PostComments
+            comments={comments}
+            expandedCommentIds={expandedCommentIds}
+            onAnswerToggle={answerToggleHandler}
+          />
         </Scroll>
 
         <div className={styles.footer}>
           <div className={styles.engagement}>
-            <PostEngagementStub />
-            {/* Real data next to the stubs: the date must survive deleting `ui/stubs/`. */}
+            {canInteract ? <PostEngagementActions /> : null}
+            <div className={styles.likes}>
+              <span className={styles.likeAvatars} aria-hidden="true">
+                <span className={styles.likeAvatar} />
+                <span className={styles.likeAvatar} />
+                <span className={styles.likeAvatar} />
+              </span>
+              <span>
+                <span className={styles.likeCount}>2 243</span> &quot;Like&quot;
+              </span>
+            </div>
             {publishedAt ? <p className={styles.publishedAt}>{publishedAt}</p> : null}
           </div>
-
-          <div className={styles.commentForm}>
-            <PostCommentForm
-              comment={draftComment}
-              canPublish={canPublishComment}
-              isPublishing={isPublishingComment}
-              onCommentChange={commentChangeHandler}
-              onPublish={commentPublishHandler}
-            />
-          </div>
+          {canInteract ? (
+            <div className={styles.commentForm}>
+              <PostCommentForm
+                comment={draftComment}
+                canPublish={canPublishComment}
+                isPublishing={isPublishingComment}
+                onCommentChange={commentChangeHandler}
+                onPublish={commentPublishHandler}
+              />
+            </div>
+          ) : null}
         </div>
       </div>
     </div>

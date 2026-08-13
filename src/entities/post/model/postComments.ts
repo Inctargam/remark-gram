@@ -4,6 +4,7 @@ export type PostComment = {
   author: string
   createdAtLabel: string
   id: string
+  replies?: PostComment[]
   text: string
 }
 
@@ -24,6 +25,14 @@ export const createMockPostComments = (postId: string): PostComment[] => [
     author: MOCK_COMMENT_AUTHOR,
     text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
     createdAtLabel: '2 Hours ago',
+    replies: [
+      {
+        id: `${postId}-comment-1-reply-1`,
+        author: MOCK_COMMENT_AUTHOR,
+        text: 'Reply mock text for a threaded comment.',
+        createdAtLabel: '2 Hours ago',
+      },
+    ],
   },
   {
     id: `${postId}-comment-2`,

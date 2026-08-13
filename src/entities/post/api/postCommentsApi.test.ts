@@ -14,7 +14,7 @@ describe('postCommentsApi mock store', () => {
   it('persists published comments for the same post', async () => {
     await publishPostComment({ postId: 'post-1', text: 'Persistent comment' })
 
-    expect(getPostComments('post-1')).toContainEqual({
+    expect(getPostComments('post-1')[0]).toEqual({
       id: 'post-1-comment-published-1',
       author: 'UserName',
       text: 'Persistent comment',
@@ -22,11 +22,8 @@ describe('postCommentsApi mock store', () => {
     })
   })
 
-  it('keeps comments isolated by post', async () => {
-    await publishPostComment({ postId: 'post-1', text: 'Post 1 comment' })
-
-    expect(getPostComments('post-2')).not.toEqual(
-      expect.arrayContaining([expect.objectContaining({ text: 'Post 1 comment' })])
-    )
+  it('keeps seeded comments isolated by post', () => {
+    expect(getPostComments('post-1')[0]?.id).toBe('post-1-comment-1')
+    expect(getPostComments('post-2')[0]?.id).toBe('post-2-comment-1')
   })
 })

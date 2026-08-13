@@ -18,9 +18,10 @@
 
 #### Post Modal
 
-- Comment form в post modal заменён с disabled-заглушки на локальный mock: пользователь может ввести комментарий, нажать `Publish`, увидеть комментарий в списке и очищенное поле ввода.
-- Mock-публикация комментария теперь проходит через mutation и persistent mock-store по `postId`, поэтому добавленный комментарий сохраняется после закрытия и повторного открытия post modal.
-- Static comments list вынесен из stub-файлов в обычный UI-компонент, а mock-данные и нормализация комментария оформлены в model-слое `entities/post`.
+- Static comments list вынесен из stub-файлов в обычный UI-компонент, а mock-данные комментариев и reply-ветки оформлены в model-слое `entities/post`.
+- Post modal для неавторизованного пользователя больше не показывает `Add a Comment...`, `Publish`, `Like`, `Share` и `Save`; у авторизованного пользователя эти элементы отображаются в модалке.
+- Ответы на комментарий открываются и скрываются кнопкой `View Answers` / `Hide Answers` у авторизованных и неавторизованных пользователей, но только у комментариев с reply-веткой.
+- Новые mock-комментарии в post modal добавляются в начало списка, чтобы свежая публикация была видна сразу без прокрутки вниз.
 
 #### Verification
 
@@ -28,9 +29,10 @@
 - `pnpm exec vitest run --project unit src/shared/api/homePageData.test.ts src/entities/post/lib/formatPostRelativeTime.test.ts` прошёл успешно.
 - `pnpm exec vitest run --project unit src/entities/post/model/postComments.test.ts` прошёл успешно.
 - `pnpm exec vitest run --project unit src/entities/post/api/postCommentsApi.test.ts src/entities/post/model/postComments.test.ts` прошёл успешно.
+- `pnpm exec tsc --noEmit --pretty false`, `pnpm exec eslint src/entities/post/model/usePostAnswers.ts src/entities/post/ui/PostComments.tsx src/entities/post/ui/PostView.tsx src/entities/post/ui/PostView.stories.tsx` и `pnpm exec vitest run --project storybook src/entities/post/ui/PostView.stories.tsx` прошли успешно после правки guest/auth post modal.
+- Playwright smoke подтвердил, что guest post modal не показывает форму комментария и action icons, authenticated post modal показывает их, а `View Answers (1)` раскрывает reply-ветку комментария и меняется на `Hide Answers`.
 - `pnpm exec vitest run --project unit src/shared/api/mock/postsStore.test.ts src/entities/post/lib/postGallery.test.ts src/shared/api/homePageData.test.ts` прошёл успешно.
 - `pnpm exec vitest run --project storybook src/entities/post/ui/PostView.stories.tsx src/pages/profile/ui/ProfilePage.stories.tsx` прошёл успешно.
-- Browser smoke подтвердил, что mock-комментарий сохраняется после закрытия и повторного открытия post modal.
 - `pnpm exec eslint src/pages/home/ui/HomePage.tsx src/pages/home/ui/HomePostsGrid.tsx src/pages/home/ui/HomePostCard.tsx src/pages/home/ui/HomeRegisteredUsersCounter.tsx src/widgets/header/Header.tsx src/widgets/header/HeaderMobile.tsx src/pages/home/ui/HomePage.stories.tsx src/widgets/header/Header.stories.tsx src/widgets/header/HeaderMobile.stories.tsx src/shared/api/homePageData.test.ts src/entities/post/index.ts` прошёл успешно.
 - `pnpm exec eslint src/shared/api/mock/postsStore.ts src/entities/post/ui/PostView.stories.tsx src/entities/post/index.ts src/pages/home/ui/HomePostCard.tsx src/pages/home/ui/HomePostsGrid.tsx src/pages/home/ui/HomePage.stories.tsx` прошёл успешно.
 - `pnpm exec eslint src/entities/post/ui/PostView.stories.tsx src/entities/post/index.ts src/shared/api/mock/postsStore.ts` прошёл успешно.
