@@ -5,11 +5,18 @@ import styles from './postCommentForm.module.css'
 type Props = {
   canPublish: boolean
   comment: string
+  isPublishing: boolean
   onCommentChange: (comment: string) => void
   onPublish: () => void
 }
 
-export const PostCommentForm = ({ canPublish, comment, onCommentChange, onPublish }: Props) => {
+export const PostCommentForm = ({
+  canPublish,
+  comment,
+  isPublishing,
+  onCommentChange,
+  onPublish,
+}: Props) => {
   const submitHandler = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     onPublish()
@@ -22,6 +29,7 @@ export const PostCommentForm = ({ canPublish, comment, onCommentChange, onPublis
         type="text"
         placeholder="Add a Comment..."
         aria-label="Add a comment"
+        disabled={isPublishing}
         value={comment}
         onChange={(event) => onCommentChange(event.currentTarget.value)}
       />

@@ -19,6 +19,7 @@
 #### Post Modal
 
 - Comment form в post modal заменён с disabled-заглушки на локальный mock: пользователь может ввести комментарий, нажать `Publish`, увидеть комментарий в списке и очищенное поле ввода.
+- Mock-публикация комментария теперь проходит через mutation и persistent mock-store по `postId`, поэтому добавленный комментарий сохраняется после закрытия и повторного открытия post modal.
 - Static comments list вынесен из stub-файлов в обычный UI-компонент, а mock-данные и нормализация комментария оформлены в model-слое `entities/post`.
 
 #### Verification
@@ -26,7 +27,10 @@
 - `pnpm exec tsc --noEmit --pretty false` прошёл успешно.
 - `pnpm exec vitest run --project unit src/shared/api/homePageData.test.ts src/entities/post/lib/formatPostRelativeTime.test.ts` прошёл успешно.
 - `pnpm exec vitest run --project unit src/entities/post/model/postComments.test.ts` прошёл успешно.
+- `pnpm exec vitest run --project unit src/entities/post/api/postCommentsApi.test.ts src/entities/post/model/postComments.test.ts` прошёл успешно.
 - `pnpm exec vitest run --project unit src/shared/api/mock/postsStore.test.ts src/entities/post/lib/postGallery.test.ts src/shared/api/homePageData.test.ts` прошёл успешно.
+- `pnpm exec vitest run --project storybook src/entities/post/ui/PostView.stories.tsx src/pages/profile/ui/ProfilePage.stories.tsx` прошёл успешно.
+- Browser smoke подтвердил, что mock-комментарий сохраняется после закрытия и повторного открытия post modal.
 - `pnpm exec eslint src/pages/home/ui/HomePage.tsx src/pages/home/ui/HomePostsGrid.tsx src/pages/home/ui/HomePostCard.tsx src/pages/home/ui/HomeRegisteredUsersCounter.tsx src/widgets/header/Header.tsx src/widgets/header/HeaderMobile.tsx src/pages/home/ui/HomePage.stories.tsx src/widgets/header/Header.stories.tsx src/widgets/header/HeaderMobile.stories.tsx src/shared/api/homePageData.test.ts src/entities/post/index.ts` прошёл успешно.
 - `pnpm exec eslint src/shared/api/mock/postsStore.ts src/entities/post/ui/PostView.stories.tsx src/entities/post/index.ts src/pages/home/ui/HomePostCard.tsx src/pages/home/ui/HomePostsGrid.tsx src/pages/home/ui/HomePage.stories.tsx` прошёл успешно.
 - `pnpm exec eslint src/entities/post/ui/PostView.stories.tsx src/entities/post/index.ts src/shared/api/mock/postsStore.ts` прошёл успешно.
@@ -36,6 +40,7 @@
 - Storybook MCP `run-story-tests` для `pages-home-homepage--default` и `pages-home-homepage--no-posts` прошёл успешно.
 - Storybook MCP `run-story-tests` для `entities-post-postview--publish-comment`, `entities-post-postview--other-user-post` и `entities-post-postview--several-photos` функционально прошёл; a11y по-прежнему показывает contrast warning у Figma-серого `#8d9094` на `#333333`.
 - Storybook MCP `run-story-tests` для `entities-post-postview--several-photos` и `pages-home-homepage--default` функционально прошёл; a11y по-прежнему показывает contrast warning у Figma-серого `#8d9094` на `#333333`.
+- Storybook MCP `run-story-tests` и `preview-stories` для повторной проверки `entities-post-postview--publish-comment` и `pages-profilepage--open-post-from-home` не завершились за 300 секунд; сценарии проверены локально через Vitest и браузерный smoke.
 - Storybook MCP `run-story-tests` для `widgets-header--logo-link` и `widgets-headermobile--logo-link` прошёл успешно без a11y; a11y для desktop header по-прежнему показывает contrast warning у существующей primary-кнопки `Sign up` на Figma-синем фоне.
 
 #### Profile SSR
@@ -44,6 +49,7 @@
 - На главной просмотр поста открывается поверх текущего списка публикаций без визуального перехода на профильный список автора; прямой вход по URL всё ещё открывает профиль с выбранным постом.
 - Закрытие post modal теперь возвращает на `/` только при безопасном `returnTo=/`; внешние и небезопасные значения игнорируются, а обычное закрытие остаётся на профиле автора без `postId`.
 - Storybook-сценарии главной и профиля проверяют URL открытия поста с главной, прямой вход с `postId` и возврат через `returnTo`.
+- Direct SSR-вход с `initialSelectedPost` используется как fallback для выбранного поста, когда `useSearchParams()` ещё недоступен на клиенте.
 - Owner-only элементы профиля больше не вычисляются на сервере через mock owner id: `Profile Settings` и меню действий поста появляются только после клиентского `/me`, а на время `loading` показываются skeleton-состояния.
 - Skeleton-состояния owner-only элементов получили `role="status"`, чтобы их доступные имена были валидными для Storybook a11y.
 - Route/modal state для просмотра, редактирования и удаления поста вынесен из `ProfilePostsGrid` в отдельный hook, чтобы widget-компонент отвечал только за загрузку списка и композицию UI.

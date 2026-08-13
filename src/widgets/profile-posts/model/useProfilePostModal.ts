@@ -22,7 +22,9 @@ export const useProfilePostModal = ({ initialSelectedPost = null, posts, userId 
   const [editingPostId, setEditingPostId] = useState<string | null>(null)
   const [deletingPostId, setDeletingPostId] = useState<string | null>(null)
 
-  const selectedPostId = searchParams?.get('postId') ?? null
+  const selectedPostId = searchParams
+    ? (searchParams.get('postId') ?? null)
+    : (initialSelectedPost?.id ?? null)
   const isEditing = selectedPostId !== null && editingPostId === selectedPostId
   const isDeleting = selectedPostId !== null && deletingPostId === selectedPostId
   const selectedPost =

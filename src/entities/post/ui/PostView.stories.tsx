@@ -95,8 +95,8 @@ export const PublishComment: Story = {
 
     await userEvent.click(publishButton)
 
-    await expect(canvas.getByText('Nice mock comment')).toBeVisible()
-    await expect(canvas.getByText('Just now')).toBeVisible()
+    await expect(await canvas.findByText('Nice mock comment')).toBeVisible()
+    await expect(await canvas.findByText('Just now')).toBeVisible()
     await expect(commentInput).toHaveValue('')
     await expect(publishButton).toBeDisabled()
   },

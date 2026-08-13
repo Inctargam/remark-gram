@@ -27,8 +27,14 @@ type Props = {
 export const PostView = ({ post, actions }: Props) => {
   const publishedAt = formatPostDate(post.createdAt)
   const postedAgo = formatPostRelativeTime(post.createdAt)
-  const { comments, draftComment, canPublishComment, commentChangeHandler, commentPublishHandler } =
-    usePostComments(post.id)
+  const {
+    comments,
+    draftComment,
+    canPublishComment,
+    isPublishingComment,
+    commentChangeHandler,
+    commentPublishHandler,
+  } = usePostComments(post.id)
 
   return (
     <div className={styles.post}>
@@ -66,6 +72,7 @@ export const PostView = ({ post, actions }: Props) => {
             <PostCommentForm
               comment={draftComment}
               canPublish={canPublishComment}
+              isPublishing={isPublishingComment}
               onCommentChange={commentChangeHandler}
               onPublish={commentPublishHandler}
             />

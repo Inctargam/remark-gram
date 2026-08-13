@@ -1,17 +1,21 @@
 'use client'
 
+import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
 
-import {
-  createMockPostComments,
-  createPublishedPostComment,
-  getPublishablePostComment,
-  normalizePostComment,
-} from './postComments'
+import { getPostComments, publishPostComment } from '../api/postCommentsApi'
+import { getPublishablePostComment, normalizePostComment } from './postComments'
 
 export const usePostComments = (postId: string) => {
-  const [comments, setComments] = useState(() => createMockPostComments(postId))
+  const [comments, setComments] = useState(() => getPostComments(postId))
   const [draftComment, setDraftComment] = useState('')
+  const publishCommentMutation = useMutation({
+    mutationFn: publishPostComment,
+    onSuccess: () => {
+      setComments(getPostComments(postId))
+      setDraftComment('')
+    },
+  })
 
   const commentChangeHandler = (comment: string) => {
     setDraftComment(normalizePostComment(comment))
@@ -20,23 +24,19 @@ export const usePostComments = (postId: string) => {
   const commentPublishHandler = () => {
     const text = getPublishablePostComment(draftComment)
 
-    if (!text) {
+    if (!text || publishCommentMutation.isPending) {
       return
     }
 
-    const publishedComment = createPublishedPostComment({
-      id: `${postId}-comment-${Date.now()}`,
-      text,
-    })
-
-    setComments((currentComments) => [...currentComments, publishedComment])
-    setDraftComment('')
+    publishCommentMutation.mutate({ postId, text })
   }
 
   return {
     comments,
     draftComment,
-    canPublishComment: getPublishablePostComment(draftComment) !== null,
+    canPublishComment:
+      getPublishablePostComment(draftComment) !== null && !publishCommentMutation.isPending,
+    isPublishingComment: publishCommentMutation.isPending,
     commentChangeHandler,
     commentPublishHandler,
   }
