@@ -1,76 +1,44 @@
 'use client'
 
-import { useState } from 'react'
-
 import type { Post } from '@/entities/post'
 import { PostViewModal, useProfilePostsQuery } from '@/entities/post'
 import { DeletePostDialog } from '@/features/delete-post'
 import { EditPostModal } from '@/features/edit-post'
-import { PostActionsMenu } from '@/features/post-actions'
-import { isProfileOwner } from '@/shared/auth'
+import { useSessionStatus } from '@/shared/auth'
 
+import { useProfilePostModal } from '../model/useProfilePostModal'
+import { ProfilePostOwnerActions } from './ProfilePostOwnerActions'
 import { ProfilePostsGridView } from './ProfilePostsGridView'
 
 type Props = {
+  initialSelectedPost?: Post | null
   userId: string
 }
 
 const LOAD_ERROR_MESSAGE = 'Failed to load publications. Please try again.'
 
-export const ProfilePostsGrid = ({ userId }: Props) => {
+export const ProfilePostsGrid = ({ initialSelectedPost = null, userId }: Props) => {
+  const sessionStatus = useSessionStatus()
   const { posts, error, hasNextPage, isFetchingNextPage, isPending, fetchNextPage } =
     useProfilePostsQuery(userId)
-  const [selectedPostId, setSelectedPostId] = useState<string | null>(null)
-  const [isEditing, setIsEditing] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
-
-  // The open post is looked up in the feed by id instead of being copied into state:
-  // an edited post re-renders with fresh data, and a deleted one closes the modal by itself.
-  const selectedPost = posts.find(({ id }) => id === selectedPostId) ?? null
-  // Editing and deleting belong to the post owner — the check follows the post, not the route.
-  const canManageSelectedPost = selectedPost !== null && isProfileOwner(selectedPost.ownerId)
+  const {
+    deleteOpenChangeHandler,
+    deleteStartHandler,
+    editOpenChangeHandler,
+    editStartHandler,
+    isDeleting,
+    isEditing,
+    modalOpenChangeHandler,
+    postDeletedHandler,
+    postSelectHandler,
+    selectedPost,
+  } = useProfilePostModal({ initialSelectedPost, posts, userId })
+  const canInteractWithPost = sessionStatus === 'authenticated'
 
   // Handlers are plain functions: React Compiler is on for this project (`reactCompiler`
   // in `next.config.ts`), so wrapping them in `useCallback` by hand would add nothing.
   const loadMoreHandler = () => {
     fetchNextPage()
-  }
-
-  const postSelectHandler = (post: Post) => {
-    setSelectedPostId(post.id)
-  }
-
-  const modalOpenChangeHandler = (open: boolean) => {
-    if (!open) {
-      setSelectedPostId(null)
-    }
-  }
-
-  const editStartHandler = () => {
-    setIsEditing(true)
-  }
-
-  // Saving and discarding both land back on the post, so only the edit form closes here.
-  const editOpenChangeHandler = (open: boolean) => {
-    if (!open) {
-      setIsEditing(false)
-    }
-  }
-
-  const deleteStartHandler = () => {
-    setIsDeleting(true)
-  }
-
-  const deleteOpenChangeHandler = (open: boolean) => {
-    if (!open) {
-      setIsDeleting(false)
-    }
-  }
-
-  // After a deletion the user stays on the profile — the page behind the modal is already
-  // their home page, so UC-3 needs the view closed, not a navigation.
-  const postDeletedHandler = () => {
-    setSelectedPostId(null)
   }
 
   return (
@@ -90,12 +58,17 @@ export const ProfilePostsGrid = ({ userId }: Props) => {
         // The view steps aside while the edit form is open: both take the same box on screen.
         open={selectedPost !== null && !isEditing}
         onOpenChange={modalOpenChangeHandler}
+        canInteract={canInteractWithPost}
         // The delete confirmation sits on top of the post, so a stray click must not
         // dismiss the post underneath it.
         disablePointerDismissal={isDeleting}
         actions={
-          canManageSelectedPost ? (
-            <PostActionsMenu onEdit={editStartHandler} onDelete={deleteStartHandler} />
+          selectedPost ? (
+            <ProfilePostOwnerActions
+              post={selectedPost}
+              onEdit={editStartHandler}
+              onDelete={deleteStartHandler}
+            />
           ) : undefined
         }
       />

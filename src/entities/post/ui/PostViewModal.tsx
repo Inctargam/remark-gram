@@ -15,6 +15,7 @@ type Props = {
   open: boolean
   onOpenChange: (open: boolean) => void
   actions?: ReactNode
+  canInteract?: boolean
   /** Set while a dialog opened from the post is on screen, so a click outside keeps the post. */
   disablePointerDismissal?: boolean
 }
@@ -34,6 +35,7 @@ export const PostViewModal = ({
   open,
   onOpenChange,
   actions,
+  canInteract = false,
   disablePointerDismissal = false,
 }: Props) => {
   if (!post) {
@@ -51,7 +53,7 @@ export const PostViewModal = ({
           <Dialog.Close className={styles.close} aria-label="Close">
             <Icon iconId="icon-close-outline" width={24} height={24} />
           </Dialog.Close>
-          <PostView post={post} actions={actions} />
+          <PostView post={post} actions={actions} canInteract={canInteract} key={post.id} />
         </Dialog.Popup>
       </Dialog.Portal>
     </Dialog.Root>

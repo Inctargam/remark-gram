@@ -25,6 +25,15 @@
   animation: skeleton-pulse 1.4s ease-in-out infinite;
 }
 
+.actionsSkeleton {
+  display: block;
+  width: 24px;
+  height: 24px;
+  border-radius: 2px;
+  background-color: var(--color-dark-100);
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+}
+
 .message {
   margin: 0;
   color: var(--color-text-secondary);

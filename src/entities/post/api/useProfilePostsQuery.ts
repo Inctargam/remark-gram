@@ -4,6 +4,11 @@ import { useInfiniteQuery } from '@tanstack/react-query'
 
 import { flattenPostsPages } from '../lib/flattenPostsPages'
 import { getProfilePosts, PROFILE_POSTS_PAGE_SIZE } from './postsApi'
+import {
+  getProfilePostsNextPageParam,
+  PROFILE_POSTS_INITIAL_PAGE_PARAM,
+  PROFILE_POSTS_STALE_TIME_MS,
+} from './profilePostsQueryData'
 import { postsQueryKeys } from './queryKeys'
 
 /**
@@ -15,8 +20,9 @@ export const useProfilePostsQuery = (userId: string) => {
     queryKey: postsQueryKeys.list(userId),
     queryFn: ({ pageParam }) =>
       getProfilePosts({ userId, cursor: pageParam, pageSize: PROFILE_POSTS_PAGE_SIZE }),
-    initialPageParam: null as string | null,
-    getNextPageParam: ({ nextCursor }) => nextCursor,
+    initialPageParam: PROFILE_POSTS_INITIAL_PAGE_PARAM,
+    getNextPageParam: getProfilePostsNextPageParam,
+    staleTime: PROFILE_POSTS_STALE_TIME_MS,
   })
 
   return { ...query, posts: flattenPostsPages(data?.pages) }

@@ -1,12 +1,23 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
+import { getRouter } from '@storybook/nextjs-vite/navigation.mock'
+import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
 import { expect, screen, userEvent, waitFor, within } from 'storybook/test'
 
-import type { Post, PostsPage } from '@/entities/post'
-import { MOCK_CURRENT_USER_ID } from '@/shared/auth'
-
-import { ProfilePage } from './ProfilePage'
+import type { Post, PostsPage } from '../../../entities/post'
+import { postsQueryKeys, PROFILE_POSTS_INITIAL_PAGE_PARAM } from '../../../entities/post'
+import type { CurrentUser } from '../../../shared/auth'
+import { MOCK_CURRENT_USER_ID, sessionStore } from '../../../shared/auth'
+import type { ProfilePageViewProps } from './ProfilePageView'
+import { ProfilePageView } from './ProfilePageView'
 
 const OTHER_USER_ID = 'mock-user-2'
+
+const CURRENT_USER: CurrentUser = {
+  id: MOCK_CURRENT_USER_ID,
+  username: 'UserName',
+  email: 'user@example.com',
+  avatarUrl: null,
+}
 
 const createImageUrl = (label: string, hue: number) =>
   `data:image/svg+xml;utf8,${encodeURIComponent(
@@ -30,6 +41,19 @@ const createPage = (ownerId: string): PostsPage => ({
     })
   ),
   nextCursor: null,
+})
+
+const createProfile = (userId: string) => ({
+  id: userId,
+  username: userId === OTHER_USER_ID ? 'OtherUser' : 'UserName',
+  description:
+    userId === OTHER_USER_ID
+      ? 'Mock profile for a second author. Used to verify public profile SSR states.'
+      : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+  followingCount: userId === OTHER_USER_ID ? 128 : 2218,
+  followersCount: userId === OTHER_USER_ID ? 642 : 2358,
+  publicationsCount: userId === OTHER_USER_ID ? 4 : 20,
+  avatarUrl: null,
 })
 
 /**
@@ -65,11 +89,45 @@ const stubPostsFetch = () => {
   }
 }
 
+const setOwnerSession = () => {
+  sessionStore.getState().setAuthenticated('mock-token', CURRENT_USER)
+}
+
+const setGuestSession = () => {
+  sessionStore.getState().setGuest()
+}
+
+const setLoadingSession = () => {
+  sessionStore.setState({ accessToken: null, currentUser: null, status: 'loading' })
+}
+
+type StoryProps = ProfilePageViewProps & {
+  initialPostsPage: PostsPage
+}
+
+const ProfilePageStory = ({ initialPostsPage, ...args }: StoryProps) => {
+  const queryClient = new QueryClient()
+
+  queryClient.setQueryData(postsQueryKeys.list(args.userId), {
+    pages: [initialPostsPage],
+    pageParams: [PROFILE_POSTS_INITIAL_PAGE_PARAM],
+  })
+
+  return (
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <ProfilePageView {...args} />
+    </HydrationBoundary>
+  )
+}
+
 const meta = {
   title: 'pages/ProfilePage',
-  component: ProfilePage,
+  component: ProfilePageStory,
   tags: ['autodocs'],
   args: {
+    initialPostsPage: createPage(MOCK_CURRENT_USER_ID),
+    initialSelectedPost: null,
+    profile: createProfile(MOCK_CURRENT_USER_ID),
     userId: MOCK_CURRENT_USER_ID,
   },
   beforeEach: stubPostsFetch,
@@ -81,30 +139,59 @@ const meta = {
       },
     },
   },
-} satisfies Meta<typeof ProfilePage>
+} satisfies Meta<typeof ProfilePageStory>
 
 export default meta
 
 type Story = StoryObj<typeof meta>
 
 export const OwnProfile: Story = {
+  beforeEach: () => {
+    const router = getRouter()
+
+    setOwnerSession()
+    router.push.mockClear()
+  },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
 
     await expect(await canvas.findByAltText('Mock publication 1')).toBeInTheDocument()
     await expect(canvas.getAllByRole('img')).toHaveLength(8)
     await expect(canvas.getByRole('button', { name: 'Profile Settings' })).toBeInTheDocument()
+
+    await userEvent.click(canvas.getByAltText('Mock publication 2'))
+    await expect(getRouter().push).toHaveBeenLastCalledWith(
+      `/profile/${MOCK_CURRENT_USER_ID}?postId=${MOCK_CURRENT_USER_ID}-post-2`,
+      { scroll: false }
+    )
   },
 }
 
-/** Opening a post keeps the URL: the view is a modal over the profile, not a route. */
+/** Direct post URL opens the view as a modal over the profile page. */
 export const OpenPost: Story = {
+  beforeEach: () => {
+    const router = getRouter()
+
+    setGuestSession()
+    router.replace.mockClear()
+  },
+  args: {
+    initialSelectedPost: createPage(MOCK_CURRENT_USER_ID).items[1],
+  },
+  parameters: {
+    nextjs: {
+      navigation: {
+        pathname: `/profile/${MOCK_CURRENT_USER_ID}`,
+        query: {
+          postId: `${MOCK_CURRENT_USER_ID}-post-2`,
+        },
+      },
+    },
+  },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
 
-    await userEvent.click(await canvas.findByAltText('Mock publication 2'))
-
-    // The modal renders in a portal, so it is looked up in the whole document.
+    await expect(await canvas.findByAltText('Mock publication 2')).toBeInTheDocument()
     const dialog = await screen.findByRole('dialog')
 
     await expect(within(dialog).getByText('Mock publication 2')).toBeVisible()
@@ -112,16 +199,66 @@ export const OpenPost: Story = {
 
     await userEvent.keyboard('{Escape}')
 
-    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    await expect(getRouter().replace).toHaveBeenLastCalledWith(`/profile/${MOCK_CURRENT_USER_ID}`, {
+      scroll: false,
+    })
+  },
+}
+
+/** A post opened from home keeps an explicit safe return target for closing the modal. */
+export const OpenPostFromHome: Story = {
+  beforeEach: () => {
+    const router = getRouter()
+
+    setGuestSession()
+    router.replace.mockClear()
+  },
+  args: {
+    initialSelectedPost: createPage(MOCK_CURRENT_USER_ID).items[1],
+  },
+  parameters: {
+    nextjs: {
+      navigation: {
+        pathname: `/profile/${MOCK_CURRENT_USER_ID}`,
+        query: {
+          postId: `${MOCK_CURRENT_USER_ID}-post-2`,
+          returnTo: '/',
+        },
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    await expect(await canvas.findByAltText('Mock publication 2')).toBeInTheDocument()
+    await expect(await screen.findByRole('dialog')).toBeVisible()
+
+    await userEvent.keyboard('{Escape}')
+
+    await expect(getRouter().replace).toHaveBeenLastCalledWith('/', { scroll: false })
   },
 }
 
 /** UC-2 entry point: the owner reaches the edit form through the three-dot menu on the post. */
 export const EditOwnPost: Story = {
+  beforeEach: setOwnerSession,
+  args: {
+    initialSelectedPost: createPage(MOCK_CURRENT_USER_ID).items[0],
+  },
+  parameters: {
+    nextjs: {
+      navigation: {
+        pathname: `/profile/${MOCK_CURRENT_USER_ID}`,
+        query: {
+          postId: `${MOCK_CURRENT_USER_ID}-post-1`,
+        },
+      },
+    },
+  },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
 
-    await userEvent.click(await canvas.findByAltText('Mock publication 1'))
+    await expect(await canvas.findByAltText('Mock publication 1')).toBeInTheDocument()
     await userEvent.click(await screen.findByRole('button', { name: 'Post actions' }))
     await userEvent.click(await screen.findByRole('menuitem', { name: 'Edit Post' }))
 
@@ -136,10 +273,29 @@ export const EditOwnPost: Story = {
 
 /** UC-3 end to end: menu → confirmation → post gone from the feed, user stays on the profile. */
 export const DeleteOwnPost: Story = {
+  beforeEach: () => {
+    const router = getRouter()
+
+    setOwnerSession()
+    router.replace.mockClear()
+  },
+  args: {
+    initialSelectedPost: createPage(MOCK_CURRENT_USER_ID).items[2],
+  },
+  parameters: {
+    nextjs: {
+      navigation: {
+        pathname: `/profile/${MOCK_CURRENT_USER_ID}`,
+        query: {
+          postId: `${MOCK_CURRENT_USER_ID}-post-3`,
+        },
+      },
+    },
+  },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
 
-    await userEvent.click(await canvas.findByAltText('Mock publication 3'))
+    await expect(await canvas.findByAltText('Mock publication 3')).toBeInTheDocument()
     await userEvent.click(await screen.findByRole('button', { name: 'Post actions' }))
     await userEvent.click(await screen.findByRole('menuitem', { name: 'Delete Post' }))
 
@@ -149,15 +305,19 @@ export const DeleteOwnPost: Story = {
 
     await userEvent.click(screen.getByRole('button', { name: 'Yes' }))
 
-    // Both the confirmation and the post view close; the profile grid is what stays.
-    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    await expect(getRouter().replace).toHaveBeenLastCalledWith(`/profile/${MOCK_CURRENT_USER_ID}`, {
+      scroll: false,
+    })
     await waitFor(() => expect(canvas.queryByAltText('Mock publication 3')).not.toBeInTheDocument())
     await expect(canvas.getByAltText('Mock publication 1')).toBeInTheDocument()
   },
 }
 
 export const OtherUserProfile: Story = {
+  beforeEach: setOwnerSession,
   args: {
+    initialPostsPage: createPage(OTHER_USER_ID),
+    profile: createProfile(OTHER_USER_ID),
     userId: OTHER_USER_ID,
   },
   play: async ({ canvasElement }) => {
@@ -165,5 +325,57 @@ export const OtherUserProfile: Story = {
 
     await expect(await canvas.findByAltText('Mock publication 1')).toBeInTheDocument()
     await expect(canvas.queryByRole('button', { name: 'Profile Settings' })).not.toBeInTheDocument()
+  },
+}
+
+export const OpenOtherUserPost: Story = {
+  beforeEach: setOwnerSession,
+  args: {
+    initialPostsPage: createPage(OTHER_USER_ID),
+    initialSelectedPost: createPage(OTHER_USER_ID).items[0],
+    profile: createProfile(OTHER_USER_ID),
+    userId: OTHER_USER_ID,
+  },
+  parameters: {
+    nextjs: {
+      navigation: {
+        pathname: `/profile/${OTHER_USER_ID}`,
+        query: {
+          postId: `${OTHER_USER_ID}-post-1`,
+        },
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    await expect(await canvas.findByAltText('Mock publication 1')).toBeInTheDocument()
+    await expect(await screen.findByRole('dialog')).toBeVisible()
+    await expect(screen.queryByRole('button', { name: 'Post actions' })).not.toBeInTheDocument()
+  },
+}
+
+export const OwnerControlsLoading: Story = {
+  beforeEach: setLoadingSession,
+  args: {
+    initialSelectedPost: createPage(MOCK_CURRENT_USER_ID).items[0],
+  },
+  parameters: {
+    nextjs: {
+      navigation: {
+        pathname: `/profile/${MOCK_CURRENT_USER_ID}`,
+        query: {
+          postId: `${MOCK_CURRENT_USER_ID}-post-1`,
+        },
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    await expect(await canvas.findByLabelText('Loading profile settings')).toBeInTheDocument()
+    await expect(await screen.findByLabelText('Loading post actions')).toBeInTheDocument()
+    await expect(screen.queryByRole('button', { name: 'Profile Settings' })).not.toBeInTheDocument()
+    await expect(screen.queryByRole('button', { name: 'Post actions' })).not.toBeInTheDocument()
   },
 }

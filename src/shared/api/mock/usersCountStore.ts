@@ -8,7 +8,7 @@ type GlobalWithUsersCountStore = typeof globalThis & {
   [STORE_KEY]?: UsersCountState
 }
 
-const SEED_COUNT = 2_150
+const SEED_COUNT = 9_213
 
 const getState = (): UsersCountState => {
   const globalWithStore = globalThis as GlobalWithUsersCountStore
