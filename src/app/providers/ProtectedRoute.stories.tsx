@@ -20,7 +20,7 @@ const meta = {
     const router = getRouter()
 
     router.replace.mockClear()
-    sessionStore.setState({ accessToken: null, status: 'loading' })
+    sessionStore.setState({ accessToken: null, currentUser: null, status: 'loading' })
 
     return () => sessionStore.setState(previousState)
   },

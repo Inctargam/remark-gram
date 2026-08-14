@@ -1,10 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
-import { expect, within } from 'storybook/test'
+import { expect, screen, userEvent, within } from 'storybook/test'
 
 import type { Post } from '@/entities/post'
 import { AppShellView } from '@/widgets/app-shell'
 
 import { HomePage } from './HomePage'
+
+const createImageUrl = (label: string, hue: number) =>
+  `data:image/svg+xml;utf8,${encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080"><rect width="1080" height="1080" fill="hsl(${hue}, 42%, 32%)"/><text x="50%" y="52%" fill="hsl(${hue}, 60%, 88%)" font-family="sans-serif" font-size="220" text-anchor="middle" dominant-baseline="middle">${label}</text></svg>`
+  )}`
 
 const createMockPosts = (): Post[] =>
   Array.from({ length: 4 }, (_, index) => ({
@@ -12,10 +17,24 @@ const createMockPosts = (): Post[] =>
     ownerId: 'mock-user-1',
     ownerUsername: 'UserName',
     ownerAvatarUrl: null,
-    images: [],
-    description: `Mock publication ${index + 1}. Seeded post used until the posts backend is ready.`,
-    createdAt: new Date(Date.UTC(2026, 6, 1, 12) - index * 3600_000).toISOString(),
-    updatedAt: new Date(Date.UTC(2026, 6, 1, 12) - index * 3600_000).toISOString(),
+    images:
+      index === 0
+        ? Array.from({ length: 3 }, (_, imageIndex) => ({
+            url: createImageUrl(`${index + 1}.${imageIndex + 1}`, (imageIndex * 60) % 360),
+            width: 1080,
+            height: 1080,
+          }))
+        : [
+            {
+              url: createImageUrl(`${index + 1}`, (index * 37) % 360),
+              width: 1080,
+              height: 1080,
+            },
+          ],
+    description:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+    createdAt: new Date(Date.now() - (22 + index * 60) * 60_000).toISOString(),
+    updatedAt: new Date(Date.now() - (22 + index * 60) * 60_000).toISOString(),
   }))
 
 const meta = {
@@ -27,7 +46,7 @@ const meta = {
   },
   args: {
     posts: createMockPosts(),
-    registeredUsersCount: 2150,
+    registeredUsersCount: 9213,
   },
 } satisfies Meta<typeof HomePage>
 
@@ -40,8 +59,41 @@ export const Default: Story = {
     const canvas = within(canvasElement)
 
     await expect(canvas.getByRole('heading', { name: 'Registered users:' })).toBeInTheDocument()
-    await expect(canvas.getByText('2,150 registered users')).toBeInTheDocument()
-    await expect(canvasElement.querySelectorAll('article')).toHaveLength(4)
+    await expect(canvas.getByLabelText('9,213 registered users')).toBeInTheDocument()
+    await expect(canvas.getAllByText('UserName')).toHaveLength(4)
+    await expect(canvas.getAllByText('Show more')).toHaveLength(4)
+    await expect(canvas.getAllByAltText(/Lorem ipsum dolor sit amet/)).toHaveLength(4)
+    await expect(
+      canvas.queryByRole('button', { name: 'Show previous photo' })
+    ).not.toBeInTheDocument()
+    await expect(canvas.queryByRole('button', { name: 'Show next photo' })).not.toBeInTheDocument()
+    await expect(canvas.queryByRole('button', { name: 'Show photo 1' })).not.toBeInTheDocument()
+
+    const firstPostLink = canvas.getAllByRole('link', { name: /Lorem ipsum dolor sit amet/ })[0]
+
+    await expect(firstPostLink).toHaveAttribute(
+      'href',
+      '/profile/mock-user-1?postId=mock-user-1-post-01&returnTo=%2F'
+    )
+
+    await userEvent.click(firstPostLink)
+
+    await expect(window.location.pathname).toBe('/profile/mock-user-1')
+    await expect(window.location.search).toBe('?postId=mock-user-1-post-01&returnTo=%2F')
+    const dialog = await screen.findByRole('dialog')
+
+    await expect(dialog).toBeVisible()
+    await expect(within(dialog).getByRole('button', { name: 'Show next photo' })).toBeVisible()
+    await expect(within(dialog).getByRole('button', { name: 'Show photo 1' })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    )
+
+    await userEvent.keyboard('{Escape}')
+
+    await expect(window.location.pathname).toBe('/')
+    await expect(window.location.search).toBe('')
+    await expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   },
 }
 
@@ -53,7 +105,7 @@ export const NoPosts: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
 
-    await expect(canvas.getByText('1,000 registered users')).toBeInTheDocument()
+    await expect(canvas.getByLabelText('1,000 registered users')).toBeInTheDocument()
     await expect(canvasElement.querySelectorAll('article')).toHaveLength(0)
   },
 }
@@ -71,12 +123,11 @@ export const AuthenticatedDesktop: Story = {
     </AppShellView>
   ),
   play: async ({ canvas, canvasElement }) => {
-    const placeholders = canvasElement.querySelectorAll('article')
+    const cards = canvasElement.querySelectorAll('article')
 
     await expect(canvas.getByRole('navigation', { name: 'Primary navigation' })).toBeVisible()
-    await expect(placeholders).toHaveLength(4)
-    await expect(Math.round(placeholders[0].getBoundingClientRect().width)).toBe(234)
-    await expect(Math.round(placeholders[0].getBoundingClientRect().height)).toBe(391)
+    await expect(cards).toHaveLength(4)
+    await expect(Math.round(cards[0].getBoundingClientRect().width)).toBe(234)
   },
 }
 
@@ -93,16 +144,13 @@ export const AuthenticatedMobile: Story = {
     </AppShellView>
   ),
   play: async ({ canvas, canvasElement }) => {
-    const placeholders = canvasElement.querySelectorAll('article')
-    const firstPlaceholderBounds = placeholders[0].getBoundingClientRect()
-    const secondPlaceholderBounds = placeholders[1].getBoundingClientRect()
+    const cards = canvasElement.querySelectorAll('article')
+    const firstCardBounds = cards[0].getBoundingClientRect()
+    const secondCardBounds = cards[1].getBoundingClientRect()
 
     await expect(canvas.getByRole('navigation', { name: 'Mobile navigation' })).toBeVisible()
-    await expect(placeholders).toHaveLength(4)
-    await expect(Math.round(firstPlaceholderBounds.width)).toBe(382)
-    await expect(Math.round(secondPlaceholderBounds.left)).toBe(
-      Math.round(firstPlaceholderBounds.left)
-    )
-    await expect(secondPlaceholderBounds.top).toBeGreaterThan(firstPlaceholderBounds.bottom)
+    await expect(cards).toHaveLength(4)
+    await expect(Math.round(secondCardBounds.left)).toBe(Math.round(firstCardBounds.left))
+    await expect(secondCardBounds.top).toBeGreaterThan(firstCardBounds.bottom)
   },
 }

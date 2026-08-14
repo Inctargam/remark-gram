@@ -4,6 +4,22 @@
 
 ## Unreleased
 
+### 2026-08-15
+
+#### Header
+
+- Desktop-header сохраняет функциональный API уведомлений для авторизованного состояния: необязательные `notificationCount` и `onBellClick`, badge с ограничением `99+`, доступную кнопку и focus-visible состояние.
+- Адаптивная геометрия App Shell и управление гостевыми auth-действиями сохранены; пользовательский бренд в desktop/mobile header, metadata, stories и документации унифицирован как `Remarkgram`.
+- Storybook-документация Header объединяет гостевые состояния текущей оболочки и сценарии количества уведомлений, переполнения badge и клика по колокольчику.
+
+#### Verification
+
+- Локальный `tsc --noEmit --pretty false` прошёл успешно.
+- Локальные ESLint и stylelint для изменённых Header/Profile story и CSS-файлов прошли успешно.
+- Prettier для затронутых Header, Profile story и документационных файлов прошёл успешно.
+- Локальный Storybook Vitest runner прошёл: 3 файла, 26 тестов; после завершения runner сообщил предупреждения о preload assets и задержке закрытия процесса.
+- Storybook MCP недоступен в текущей сессии, поэтому проверка выполнена локальным Storybook Vitest runner.
+
 ### 2026-08-13
 
 #### Settings
@@ -56,6 +72,132 @@
 
 ### 2026-08-12
 
+#### Home
+
+- Главная страница приведена ближе к Figma frame `26786:11274`: добавлен счетчик registered users с шестью цифровыми ячейками, сетка из четырех карточек шириной по макету и карточка публикации с изображением, аватаром, username, временем, описанием и ссылочным `Show more`.
+- Карточка публикации на главной показывает только preview первого фото; стрелки и точки для нескольких фото остаются только внутри post modal.
+- Первые seeded mock-посты теперь содержат по 5 фото, чтобы открытая post modal показывала реальные стрелки и точки галереи как в Figma-макете.
+- Цвета и рамка post modal выровнены с Figma: popup получил border `Dark/100`, radius `2px`, а gallery controls используют `Dark/300` поверх изображения.
+- Mock-счетчик зарегистрированных пользователей обновлен до `9 213`, чтобы стартовое состояние соответствовало макету.
+- Логотип desktop/mobile header унифицирован под пользовательский бренд `Remarkgram` из metadata приложения.
+- `formatPostRelativeTime()` и `getPostImageAlt()` открыты через публичный API `entities/post`, чтобы home-компоненты не импортировали приватные internals.
+
+#### Post Modal
+
+- Static comments list вынесен из stub-файлов в обычный UI-компонент, а mock-данные комментариев и reply-ветки оформлены в model-слое `entities/post`.
+- Post modal для неавторизованного пользователя больше не показывает `Add a Comment...`, `Publish`, `Like`, `Share` и `Save`; у авторизованного пользователя эти элементы отображаются в модалке.
+- Ответы на комментарий открываются и скрываются кнопкой `View Answers` / `Hide Answers` у авторизованных и неавторизованных пользователей, но только у комментариев с reply-веткой.
+- Новые mock-комментарии в post modal добавляются в начало списка, чтобы свежая публикация была видна сразу без прокрутки вниз.
+
+#### Verification
+
+- `pnpm exec tsc --noEmit --pretty false` прошёл успешно.
+- `pnpm exec vitest run --project unit src/shared/api/homePageData.test.ts src/entities/post/lib/formatPostRelativeTime.test.ts` прошёл успешно.
+- `pnpm exec vitest run --project unit src/entities/post/model/postComments.test.ts` прошёл успешно.
+- `pnpm exec vitest run --project unit src/entities/post/api/postCommentsApi.test.ts src/entities/post/model/postComments.test.ts` прошёл успешно.
+- `pnpm exec tsc --noEmit --pretty false`, `pnpm exec eslint src/entities/post/model/usePostAnswers.ts src/entities/post/ui/PostComments.tsx src/entities/post/ui/PostView.tsx src/entities/post/ui/PostView.stories.tsx` и `pnpm exec vitest run --project storybook src/entities/post/ui/PostView.stories.tsx` прошли успешно после правки guest/auth post modal.
+- Playwright smoke подтвердил, что guest post modal не показывает форму комментария и action icons, authenticated post modal показывает их, а `View Answers (1)` раскрывает reply-ветку комментария и меняется на `Hide Answers`.
+- `pnpm exec vitest run --project unit src/shared/api/mock/postsStore.test.ts src/entities/post/lib/postGallery.test.ts src/shared/api/homePageData.test.ts` прошёл успешно.
+- `pnpm exec vitest run --project storybook src/entities/post/ui/PostView.stories.tsx src/pages/profile/ui/ProfilePage.stories.tsx` прошёл успешно.
+- `pnpm exec eslint src/pages/home/ui/HomePage.tsx src/pages/home/ui/HomePostsGrid.tsx src/pages/home/ui/HomePostCard.tsx src/pages/home/ui/HomeRegisteredUsersCounter.tsx src/widgets/header/Header.tsx src/widgets/header/HeaderMobile.tsx src/pages/home/ui/HomePage.stories.tsx src/widgets/header/Header.stories.tsx src/widgets/header/HeaderMobile.stories.tsx src/shared/api/homePageData.test.ts src/entities/post/index.ts` прошёл успешно.
+- `pnpm exec eslint src/shared/api/mock/postsStore.ts src/entities/post/ui/PostView.stories.tsx src/entities/post/index.ts src/pages/home/ui/HomePostCard.tsx src/pages/home/ui/HomePostsGrid.tsx src/pages/home/ui/HomePage.stories.tsx` прошёл успешно.
+- `pnpm exec eslint src/entities/post/ui/PostView.stories.tsx src/entities/post/index.ts src/shared/api/mock/postsStore.ts` прошёл успешно.
+- `pnpm exec prettier --check CHANGELOG.md src/entities/post/ui/postGallery.module.css src/entities/post/ui/postViewModal.module.css src/entities/post/ui/PostView.stories.tsx` прошёл успешно.
+- `pnpm lint` прошёл без ошибок; остались существующие warnings в generated OpenAPI schema и `useSignUpForm`.
+- `pnpm exec prettier --check CHANGELOG.md src/entities/post/index.ts src/pages/home/ui/HomePage.tsx src/pages/home/ui/HomePostsGrid.tsx src/pages/home/ui/HomePostCard.tsx src/pages/home/ui/HomeRegisteredUsersCounter.tsx src/pages/home/ui/homePage.module.css src/pages/home/ui/HomePage.stories.tsx src/shared/api/homePageData.test.ts src/shared/api/mock/usersCountStore.ts src/widgets/header/Header.tsx src/widgets/header/HeaderMobile.tsx src/widgets/header/Header.stories.tsx src/widgets/header/HeaderMobile.stories.tsx` прошёл успешно.
+- Storybook MCP `run-story-tests` для `pages-home-homepage--default` и `pages-home-homepage--no-posts` прошёл успешно.
+- Storybook MCP `run-story-tests` для `entities-post-postview--publish-comment`, `entities-post-postview--other-user-post` и `entities-post-postview--several-photos` функционально прошёл; a11y по-прежнему показывает contrast warning у Figma-серого `#8d9094` на `#333333`.
+- Storybook MCP `run-story-tests` для `entities-post-postview--several-photos` и `pages-home-homepage--default` функционально прошёл; a11y по-прежнему показывает contrast warning у Figma-серого `#8d9094` на `#333333`.
+- Storybook MCP `run-story-tests` и `preview-stories` для повторной проверки `entities-post-postview--publish-comment` и `pages-profilepage--open-post-from-home` не завершились за 300 секунд; сценарии проверены локально через Vitest и браузерный smoke.
+- Storybook MCP `run-story-tests` для `widgets-header--logo-link` и `widgets-headermobile--logo-link` прошёл успешно без a11y; a11y для desktop header по-прежнему показывает contrast warning у существующей primary-кнопки `Sign up` на Figma-синем фоне.
+
+#### Profile SSR
+
+- Переходы к просмотру публикации унифицированы: посты на главной ведут на `/profile/{ownerId}?postId={postId}&returnTo=/`, а профильная модалка использует общий helper для закрытия.
+- На главной просмотр поста открывается поверх текущего списка публикаций без визуального перехода на профильный список автора; прямой вход по URL всё ещё открывает профиль с выбранным постом.
+- Закрытие post modal теперь возвращает на `/` только при безопасном `returnTo=/`; внешние и небезопасные значения игнорируются, а обычное закрытие остаётся на профиле автора без `postId`.
+- Storybook-сценарии главной и профиля проверяют URL открытия поста с главной, прямой вход с `postId` и возврат через `returnTo`.
+- Direct SSR-вход с `initialSelectedPost` используется как fallback для выбранного поста, когда `useSearchParams()` ещё недоступен на клиенте.
+- Owner-only элементы профиля больше не вычисляются на сервере через mock owner id: `Profile Settings` и меню действий поста появляются только после клиентского `/me`, а на время `loading` показываются skeleton-состояния.
+- Skeleton-состояния owner-only элементов получили `role="status"`, чтобы их доступные имена были валидными для Storybook a11y.
+- Route/modal state для просмотра, редактирования и удаления поста вынесен из `ProfilePostsGrid` в отдельный hook, чтобы widget-компонент отвечал только за загрузку списка и композицию UI.
+- SSR selected post reader перенесён в `entities/post` server API boundary: `getProfilePostServer()` сразу проверяет принадлежность `postId` к `userId`, поэтому профильная page больше не держит отдельную domain-проверку.
+- Home SSR reader покрыт unit-тестом на контракт latest posts и registered users count перед будущим переключением mock layer на backend.
+- Baseline Storybook-сценарии на mock boundary теперь проверяют полный open/close цикл post modal с главной и открытый пост чужого пользователя без owner actions.
+- SSR-гидратация постов профиля переведена с quick-start `initialData` на рекомендуемый TanStack Query pattern: server-side `prefetchInfiniteQuery`, `dehydrate` и `HydrationBoundary` вокруг клиентской сетки.
+- `QueryProvider` обновлён на SSR-safe создание `QueryClient`, чтобы клиентский cache не пересоздавался при initial render suspend.
+- Storybook-сценарии профиля теперь поднимают тот же hydrated cache, что и production-путь, без отдельного `initialData` prop в `ProfilePageView`.
+
+#### Auth
+
+- Session store теперь хранит текущего пользователя из mock `/me`, чтобы UI мог проверять ownership по `/me.id`, а не по синхронному mock helper.
+- Mock auth bootstrap сохраняет user payload из `/api/mock/auth/me`; logout и guest state очищают `currentUser`.
+
+#### Verification
+
+- `pnpm exec vitest run --project unit src/widgets/profile-posts/lib/profilePostUrl.test.ts` прошёл успешно.
+- `pnpm exec vitest run --project unit src/shared/auth/sessionStore.test.ts src/shared/auth/checkMockAuth.test.ts src/shared/auth/refreshSession.test.ts src/features/logout/api/useLogoutMutation.test.ts` прошёл успешно.
+- `pnpm exec vitest run --project unit src/entities/post/api/postsApi.server.test.ts src/pages/profile/api/profile.server.test.ts src/shared/api/homePageData.test.ts` прошёл успешно.
+- `pnpm exec vitest run --project unit src/entities/post/api/profilePostsHydration.server.test.ts src/entities/post/api/profilePostsQueryData.test.ts` прошёл успешно.
+- `pnpm exec vitest run --project unit src/widgets/profile-posts/lib/profilePostUrl.test.ts src/entities/post/api/postsApi.server.test.ts src/pages/profile/api/profile.server.test.ts src/shared/api/homePageData.test.ts src/shared/auth/sessionStore.test.ts src/shared/auth/checkMockAuth.test.ts` прошёл успешно.
+- `pnpm test:unit` прошёл: 46 файлов, 266 тестов.
+- `pnpm exec tsc --noEmit --pretty false`, `pnpm test:unit` и `pnpm exec eslint --quiet` прошли успешно при финальной проверке ветки.
+- Playwright smoke проверил открытие post modal с Home с возвратом на `/` и direct/profile URL с возвратом на профиль автора.
+- `pnpm exec vitest run --project storybook src/pages/home/ui/HomePage.stories.tsx src/pages/profile/ui/ProfilePage.stories.tsx` прошёл успешно.
+- `pnpm exec vitest run --project storybook src/pages/profile/ui/ProfilePage.stories.tsx src/app/providers/ProtectedRoute.stories.tsx` прошёл успешно.
+- `pnpm exec vitest run --project storybook src/pages/profile/ui/ProfilePage.stories.tsx` прошёл успешно после выноса modal state в hook.
+- `pnpm exec tsc --noEmit --pretty false` прошёл успешно.
+- `pnpm exec eslint src/app/providers/QueryProvider.tsx src/entities/post/api/profilePostsHydration.server.ts src/entities/post/api/profilePostsQueryData.ts src/entities/post/api/useProfilePostsQuery.ts src/entities/post/index.ts src/entities/post/index.server.ts src/widgets/profile-posts/ui/ProfilePostsGrid.tsx src/pages/profile/ui/ProfilePage.tsx src/pages/profile/ui/ProfilePageView.tsx src/pages/profile/ui/ProfilePage.stories.tsx` прошёл успешно.
+- `pnpm exec eslint src/pages/home/model/useHomePostModal.ts src/pages/home/ui/HomePostsGrid.tsx src/pages/home/ui/HomePage.tsx src/pages/home/ui/HomePage.stories.tsx src/widgets/profile-posts/lib/profilePostUrl.ts src/widgets/profile-posts/lib/profilePostUrl.test.ts src/widgets/profile-posts/ui/ProfilePostsGrid.tsx src/widgets/profile-posts/index.ts src/pages/profile/ui/ProfilePage.stories.tsx` прошёл успешно.
+- `pnpm exec eslint src/shared/auth/sessionStore.ts src/shared/auth/useCurrentUser.ts src/shared/auth/checkMockAuth.ts src/shared/auth/index.ts src/shared/auth/sessionStore.test.ts src/shared/auth/refreshSession.test.ts src/shared/auth/checkMockAuth.test.ts src/features/logout/api/useLogoutMutation.test.ts src/app/providers/ProtectedRoute.stories.tsx src/pages/profile/ui/ProfilePageView.tsx src/pages/profile/ui/ProfileSettingsControl.tsx src/pages/profile/ui/ProfilePage.stories.tsx src/widgets/profile-posts/ui/ProfilePostsGrid.tsx src/widgets/profile-posts/ui/ProfilePostOwnerActions.tsx` прошёл успешно.
+- `pnpm exec eslint src/widgets/profile-posts/model/useProfilePostModal.ts src/widgets/profile-posts/ui/ProfilePostsGrid.tsx src/widgets/profile-posts/ui/ProfilePostOwnerActions.tsx src/pages/profile/ui/ProfilePage.stories.tsx src/shared/auth/sessionStore.ts src/shared/auth/useCurrentUser.ts src/shared/auth/checkMockAuth.ts` прошёл успешно.
+- `pnpm exec eslint src/entities/post/api/postsApi.server.ts src/entities/post/api/postsApi.server.test.ts src/entities/post/index.server.ts src/pages/profile/ui/ProfilePage.tsx src/shared/api/homePageData.ts src/shared/api/homePageData.test.ts` прошёл успешно.
+- `pnpm exec eslint src/pages/home/ui/HomePage.stories.tsx src/pages/profile/ui/ProfilePage.stories.tsx` прошёл успешно.
+- `pnpm build` был остановлен вручную после повторного длительного зависания на этапе `Creating an optimized production build ...` без вывода ошибок.
+- Storybook MCP `get-storybook-story-instructions`, `run-story-tests` и `preview-stories` не завершились за 300 секунд; focused story-тесты запущены локально через Vitest.
+
+### 2026-08-10 — 2026-08-12 (ветка `payments-UC1-4-stripe`, UC-1 – UC-4)
+
+Оплата и подписки целиком на моках (без Stripe SDK и ключей) — до появления бэкенда за платежи отвечает `subscriptionsStore.ts` на `globalThis`, по образцу `postsStore.ts`.
+
+#### Payments
+
+- Домен: сущности `entities/subscription` (тип аккаунта, подписка, каталог планов `day`/`week`/`month`) и `entities/payment` (постраничная история платежей). Весь обмен идёт через `entities/*/api/*Api.ts` — единственные файлы, которые переедут на реальный бэкенд (переключатель `NEXT_PUBLIC_PAYMENTS_API_MOCK`). Пять мок-роутов: `subscriptions/current`, `subscriptions/checkout`, `subscriptions/checkout/{id}/complete`, `subscriptions/auto-renewal`, `payments`.
+- Правила домена — в сторе, не в UI: новая подписка встаёт в конец очереди, автопродление остаётся включённым только у последней подписки, `nextPaymentAt` считается от хвоста очереди. Повторное завершение сессии отбивается `409`.
+- `widgets/account-management` — вкладка «Account Management»: тип аккаунта, планы, блок текущей подписки (очередь — `Table`, строка на подписку, `Next payment` только у хвоста, UC-3), кнопки `Stripe`/`PayPal`. Провайдер — параметр одного сценария (`PaymentProvider`), а не два флоу.
+- `features/buy-subscription` — согласие (`Modal`, не `ConfirmDialog`: по макету одна кнопка), создание сессии, уход на `payments/mock-checkout` (заглушка внешнего сервиса, `pages/mock-checkout`, снимается вместе с мок-API), разбор результата по `?payment=success|failed` после возврата. Переход — полная навигация (`window.location.assign`), не роутер. `returnUrl` принимается только same-origin — иначе открытый редирект.
+- `features/cancel-auto-renewal` — чекбокс `Auto-Renewal` (UC-2), оптимистичное обновление с откатом на ошибке.
+- `widgets/my-payments` — вкладка «My payments» (UC-4): таблица с пагинацией, номер страницы в query (`page`, без `page=1`), размер страницы — локальное состояние.
+- **Интеграция (этап 7):** виджеты подключены в реальный каркас настроек (`/settings`, вкладки `subscriptions`/`payments` из `develop`), временный роут `/profile/settings` и `ROUTES.profileSettings` удалены. Найден и исправлен баг: закрытие модалки результата оплаты стирало из query каркаса весь набор параметров, а не только результат, — из-за этого пользователя сбрасывало на вкладку `General information` вместо `Account Management`.
+
+#### Shared UI
+
+- Новый компонент `shared/ui/table` — компаунд `Table.Root/Head/Body/Row/HeadCell/Cell` со встроенными `Table.Empty` и `Table.Skeleton`, горизонтальный скролл на узких экранах.
+- Заполнен пустой `shared/ui/pagination/index.ts` (импорт через публичный API не компилировался).
+- `shared/lib/date/formatShortDate.ts` — общий формат дат для вкладок подписок и платежей.
+
+#### Tooling
+
+- `withMockDelay` переехал в общий `app/api/mock/_mock/`, переменная переименована в `MOCK_API_DELAY_MS`.
+
+#### Tests
+
+- Стор, мок-хендлеры, слой запросов, парсинг query-параметров, сторис на все состояния виджетов и фич покрыты юнит- и Storybook-тестами на каждом этапе.
+
+#### Shared UI (попутный фикс)
+
+- `shared/ui/modal/Modal.tsx`: у `Dialog.Close` восстановлен `disabled={dismissDisabled}` — атрибут потерялся при мердже каркаса настроек (`fb2610a`), из-за чего кнопка закрытия модалки оставалась активной во время pending-состояния. Ломало три сторис-теста (`Modal`, `ConfirmDialog`, `ProfileAvatar`), не связанных с этой веткой напрямую, но обнаруженных при её `pnpm test:storybook`.
+
+#### Verification
+
+- Финальное состояние перед PR: `pnpm exec tsc --noEmit`, `pnpm lint` (0 ошибок), `pnpm build` — все чисто. `pnpm test:unit` — 318 тестов пройдено.
+- `pnpm test:storybook` — 274 теста, все пройдены после фикса `Modal.tsx` (до фикса было 3 упавших из-за чужого бага в мердже).
+
+#### Notes
+
+- PayPal (Р4, Б2): слот `onProviderSelect`/`PaymentProvider` на месте, но согласование точки подключения с разработчиком B не проведено — открытый вопрос вне кода.
+- Смена типа аккаунта на `Personal` после окончания подписки — зона бэкенда, на фронте не реализована умышленно.
+
 #### App Shell
 
 - На desktop общий header теперь прокручивается вместе с документом, а sidebar после прокрутки header закрепляется у верхнего края viewport и занимает всю доступную высоту.
@@ -73,6 +215,32 @@
 - Storybook MCP недоступен в текущей сессии; документация и сценарии проверены по исходникам, браузерная проверка выполнена локальным Storybook/Vitest runner.
 
 ### 2026-08-11
+
+#### Profile SSR
+
+- Первая SSR-страница постов профиля теперь передается в `useProfilePostsQuery()` как `initialData` React Query infinite query.
+- Для SSR-seed данных задан короткий `staleTime`, чтобы после гидрации клиент не отправлял дублирующий запрос за той же первой страницей.
+- Добавлена unit-проверка формы `pages/pageParams`, которую ожидает TanStack Query для infinite query.
+- Выбранный пост на странице профиля теперь синхронизирован с URL `?postId=...`: открытие публикации делает client navigation, закрытие удаляет параметр, а прямой SSR-вход использует `initialSelectedPost`.
+- Добавлен внутренний helper сборки URL профиля с unit-проверками сохранения сторонних query params и удаления `postId`.
+
+#### Shared UI
+
+- Кнопка закрытия `Modal` теперь получает `disabled` при `dismissDisabled`, чтобы pending-состояния блокировали все способы закрытия и Storybook-сценарий соответствовал поведению компонента.
+
+#### Verification
+
+- `pnpm exec vitest run --project unit src/entities/post/api/profilePostsQueryData.test.ts` прошёл успешно.
+- `pnpm exec vitest run --project unit src/widgets/profile-posts/lib/profilePostUrl.test.ts src/entities/post/api/profilePostsQueryData.test.ts` прошёл успешно.
+- `pnpm test:unit` прошёл: 44 файла, 253 теста.
+- `pnpm exec vitest run --project storybook src/pages/profile/ui/ProfilePage.stories.tsx` прошёл успешно.
+- `pnpm exec vitest run --project storybook src/pages/profile/ui/ProfilePage.stories.tsx src/shared/ui/modal/Modal.stories.tsx` прошёл успешно.
+- `pnpm exec vitest run --project storybook src/shared/ui/modal/Modal.stories.tsx` прошёл успешно.
+- `pnpm exec eslint src/entities/post/api/useProfilePostsQuery.ts src/entities/post/api/profilePostsQueryData.ts src/entities/post/api/profilePostsQueryData.test.ts src/widgets/profile-posts/ui/ProfilePostsGrid.tsx` прошёл успешно.
+- `pnpm exec eslint src/widgets/profile-posts/ui/ProfilePostsGrid.tsx src/widgets/profile-posts/lib/profilePostUrl.ts src/widgets/profile-posts/lib/profilePostUrl.test.ts src/pages/profile/ui/ProfilePage.stories.tsx src/shared/ui/modal/Modal.tsx` прошёл успешно.
+- `pnpm exec tsc --noEmit` прошёл успешно.
+- `pnpm exec tsc --noEmit --pretty false` прошёл успешно.
+- `pnpm exec prettier --check CHANGELOG.md src/entities/post/api/useProfilePostsQuery.ts src/entities/post/api/profilePostsQueryData.ts src/entities/post/api/profilePostsQueryData.test.ts src/widgets/profile-posts/ui/ProfilePostsGrid.tsx` прошёл успешно.
 
 #### Profile
 
@@ -171,7 +339,35 @@
 - После устранения дублирования повторно прошли Storybook-тесты `AppShellView`: 1 файл, 5 тестов; TypeScript и ESLint изменённого компонента прошли без ошибок.
 - TypeScript, ESLint затронутых компонентов и stylelint мобильных стилей прошли.
 - В браузере подтверждены мобильные варианты `EN` / `RU` и ширина popup 88 px.
+
 ### 2026-08-10
+
+#### Profile SSR
+
+- Добавлены публичные mock-данные профиля и server-safe reader `getPublicProfile()` для будущего SSR `/profile/{id}`.
+- Добавлены server-safe readers постов `getProfilePostsServer()` и `getPostServer()`, которые читают mock store напрямую без HTTP-запроса к route handler.
+- Mock store постов получил `countUserPosts()`; счетчик публикаций профиля теперь можно получать из фактического состояния постов.
+- Route `/profile/[id]` принимает async `searchParams`, нормализует `postId` из query string и передает его в page-level `ProfilePage`.
+- Добавлен route-local unit-тест нормализации `postId`, включая повторяющийся query param.
+- `ProfilePage` переведена в server container: на сервере загружает публичный профиль, первую страницу постов и выбранный пост из `postId`, а некорректные profile/post сочетания отправляет в `notFound()`.
+- Синхронный `ProfilePageView` получает server data пропсами и рендерит публичный профиль без placeholder-статистики.
+- Добавлена unit-проверка, что выбранный пост принадлежит открытому профилю.
+
+#### Verification
+
+- `pnpm exec vitest run --project unit src/pages/profile/api/profile.server.test.ts src/entities/post/api/postsApi.server.test.ts src/shared/api/mock/postsStore.test.ts` прошёл успешно.
+- `pnpm exec vitest run --project unit app/'(main)'/profile/'[id]'/normalizePostId.test.ts` прошёл успешно.
+- `pnpm exec vitest run --project unit src/pages/profile/model/selectedProfilePost.test.ts src/pages/profile/api/profile.server.test.ts src/entities/post/api/postsApi.server.test.ts src/shared/api/mock/postsStore.test.ts` прошёл успешно.
+- `pnpm exec vitest run --project storybook src/pages/profile/ui/ProfilePage.stories.tsx` прошёл успешно.
+- `pnpm exec eslint app/'(main)'/profile/'[id]'/page.tsx app/'(main)'/profile/'[id]'/normalizePostId.ts app/'(main)'/profile/'[id]'/normalizePostId.test.ts src/pages/profile/ui/ProfilePage.tsx src/pages/profile/ui/ProfilePage.stories.tsx` прошёл успешно.
+- `pnpm exec eslint src/pages/profile/ui/ProfilePage.tsx src/pages/profile/ui/ProfilePageView.tsx src/pages/profile/ui/ProfilePage.stories.tsx src/pages/profile/model/selectedProfilePost.ts src/pages/profile/model/selectedProfilePost.test.ts src/widgets/profile-posts/ui/ProfilePostsGrid.tsx` прошёл успешно.
+- `pnpm exec prettier --check CHANGELOG.md app/'(main)'/profile/'[id]'/page.tsx app/'(main)'/profile/'[id]'/normalizePostId.ts app/'(main)'/profile/'[id]'/normalizePostId.test.ts src/pages/profile/ui/ProfilePage.tsx src/pages/profile/ui/ProfilePage.stories.tsx` прошёл успешно.
+- `pnpm exec prettier --check src/pages/profile/ui/ProfilePage.tsx src/pages/profile/ui/ProfilePageView.tsx src/pages/profile/ui/ProfilePage.stories.tsx src/pages/profile/model/selectedProfilePost.ts src/pages/profile/model/selectedProfilePost.test.ts src/widgets/profile-posts/ui/ProfilePostsGrid.tsx` прошёл успешно.
+- `pnpm exec tsc --noEmit` прошёл успешно.
+- `pnpm build` был остановлен вручную после длительного зависания на этапе `Creating an optimized production build ...` без вывода ошибок.
+- Storybook MCP `run-story-tests` для `ProfilePage` не завершился за 300 секунд; focused story-тест запущен локально через Vitest.
+- Storybook MCP `get-storybook-story-instructions` и `preview-stories` для `ProfilePage` не завершились за 300 секунд.
+- `pnpm lint` запускался, но не прошёл из-за прежних предупреждений Prettier в сгенерированном `src/shared/api/openapi/schema.d.ts` и существующего предупреждения React Compiler вне этой правки.
 
 #### Home
 
@@ -476,7 +672,7 @@
 - Созданы мок-эндпоинты: `GET /api/mock/posts?limit=4` (глобальный список постов без `userId`), `GET /api/mock/registered-users-count` (возвращает `{ totalCount: 2150 }`), `GET /api/mock/auth/me` (проверяет `Authorization: Bearer mock-token`).
 - Мок-хранилища `postsStore` и `usersCountStore` вынесены из `app/api/mock/` в `src/shared/api/mock/` для доступа через `@/shared/api/mock/` из серверных компонентов.
 - `SessionBootstrap` в mock-режиме (`NEXT_PUBLIC_AUTH_MOCK=true`) вызывает `checkMockAuth()` вместо `refreshSession()`.
-- Компонент `HomePage` принимает `posts` и `registeredUsersCount`, рендерит заголовок «Inctagram», счётчик пользователей и сетку из 4 `PostThumbnail`.
+- Компонент `HomePage` принимает `posts` и `registeredUsersCount`, рендерит заголовок «Remarkgram», счётчик пользователей и сетку из 4 `PostThumbnail`.
 - Добавлены Storybook-истории (`Default`, `NoPosts`).
 - В `.env.local` добавлены `NEXT_PUBLIC_POSTS_API_MOCK=true` и `NEXT_PUBLIC_AUTH_MOCK=true`.
 
@@ -513,6 +709,7 @@
 - `pnpm exec eslint src/widgets` — чисто.
 - `pnpm exec vitest run --project=storybook` — 37 файлов, 158 тестов, прошло. Скрипта `pnpm test:storybook` в проекте нет.
 - Новая стори проверена на ловлю регрессии: при временном снятии `sticky` с шапки и со слота сайдбара она падает.
+
 ### 2026-08-02 — Причёсывание кода постов перед PR
 
 #### Posts
@@ -819,6 +1016,7 @@
 
 - Для прогона story-тестов локально понадобилось доустановить браузер: `pnpm exec playwright install chromium`.
 - Пропсы существующих компонентов сверялись по исходникам (`Modal.tsx`, `Button.tsx`) и типам `@base-ui/react`, а не через MCP `inctagram-storybook`: этот сервер настроен для Codex и в текущем окружении недоступен.
+
 ### 2026-08-01
 
 #### Tooling
@@ -832,6 +1030,7 @@
 - `pnpm exec vitest run --project unit` прошёл успешно: 19 файлов, 84 теста.
 - `pnpm exec vitest run --project storybook` прошёл успешно: 37 файлов, 157 тестов.
 - `pnpm build` прошёл успешно.
+
 ### 2026-07-31
 
 #### Auth
@@ -946,6 +1145,7 @@
 - `pnpm exec tsc --noEmit` прошёл успешно.
 - `pnpm build` был остановлен вручную после длительного зависания на этапе `Creating an optimized production build ...` без вывода ошибок.
 - Storybook tests не запускались, потому что stories не изменялись и Storybook MCP tools недоступны в текущей сессии.
+
 ### 2026-07-14
 
 #### Auth
@@ -1229,6 +1429,7 @@
 #### Verification
 
 - Не запускались; изменение только документационное.
+
 ### 2026-06-14
 
 #### Shared UI

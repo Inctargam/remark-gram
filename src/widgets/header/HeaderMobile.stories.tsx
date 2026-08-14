@@ -57,6 +57,8 @@ export const WithLanguageSelector: Story = {
 
 export const LogoLink: Story = {
   play: async ({ canvas }) => {
-    await expect(canvas.getByRole('link', { name: 'Remarkgram' })).toHaveAttribute('href', '/')
+    const logo = canvas.getByRole('link', { name: 'Remarkgram' })
+
+    await expect(logo).toHaveAttribute('href', '/')
   },
 }

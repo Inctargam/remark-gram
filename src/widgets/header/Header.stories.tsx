@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
-import { expect } from 'storybook/test'
+import { expect, fn, userEvent } from 'storybook/test'
 
 import { Header } from './Header'
 
@@ -9,14 +9,23 @@ const meta = {
   tags: ['autodocs'],
   parameters: {
     layout: 'fullscreen',
+    docs: {
+      description: {
+        component:
+          'Десктопный хедер. Discriminated union по `variant` — ' +
+          'TypeScript не допустит `notificationCount` при `variant="guest"`.',
+      },
+    },
   },
   argTypes: {
     variant: {
       control: 'radio',
       options: ['auth', 'guest'],
+      description: 'Переключает набор допустимых пропсов',
     },
     languageSelector: {
       control: false,
+      description: 'Слот для переключателя языка',
     },
   },
   args: {
@@ -49,7 +58,21 @@ export const GuestWithoutAuthActions: Story = {
 }
 
 export const Auth: Story = {
-  args: { variant: 'auth' },
+  args: { variant: 'auth', notificationCount: 0 },
+}
+
+export const AuthWithNotifications: Story = {
+  args: { variant: 'auth', notificationCount: 5 },
+  play: async ({ canvas }) => {
+    await expect(canvas.getByText('5')).toBeInTheDocument()
+  },
+}
+
+export const AuthWithManyNotifications: Story = {
+  args: { variant: 'auth', notificationCount: 247 },
+  play: async ({ canvas }) => {
+    await expect(canvas.getByText('99+')).toBeInTheDocument()
+  },
 }
 
 export const AuthWithLanguageSelector: Story = {
@@ -63,6 +86,16 @@ export const AuthWithLanguageSelector: Story = {
 
 export const LogoLink: Story = {
   play: async ({ canvas }) => {
-    await expect(canvas.getByRole('link', { name: 'Remarkgram' })).toHaveAttribute('href', '/')
+    const logo = canvas.getByRole('link', { name: 'Remarkgram' })
+
+    await expect(logo).toHaveAttribute('href', '/')
+  },
+}
+
+export const BellClick: Story = {
+  args: { variant: 'auth', notificationCount: 3, onBellClick: fn() },
+  play: async ({ args, canvas }) => {
+    await userEvent.click(canvas.getByRole('button', { name: 'Notifications' }))
+    await expect((args as { onBellClick?: () => void }).onBellClick).toHaveBeenCalledOnce()
   },
 }

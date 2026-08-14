@@ -42,6 +42,14 @@
   color: var(--color-text-primary);
 }
 
+.settingsSkeleton {
+  display: block;
+  width: 167px;
+  height: 36px;
+  border-radius: 2px;
+  background-color: var(--color-dark-100);
+}
+
 .stats {
   display: flex;
   gap: 64px;
