@@ -1,11 +1,14 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { Suspense } from 'react'
 
 import { EditProfileForm } from '@/features/edit-profile'
 import { ProfileAvatar } from '@/features/manage-profile-avatar'
 import { ROUTES } from '@/shared/config'
 import { Tabs } from '@/shared/ui/tabs'
+import { AccountManagement } from '@/widgets/account-management'
+import { MyPayments } from '@/widgets/my-payments'
 
 import { SETTINGS_PARTS, type SettingsPart } from '../model/settingsPart'
 import styles from './settingsPage.module.css'
@@ -37,8 +40,20 @@ export const SettingsPage = ({ activePart }: Props) => {
           <EditProfileForm avatar={<ProfileAvatar />} />
         </Tabs.Panel>
         <Tabs.Panel className={styles.panel} value={SETTINGS_PARTS.devices} />
-        <Tabs.Panel className={styles.panel} value={SETTINGS_PARTS.subscriptions} />
-        <Tabs.Panel className={styles.panel} value={SETTINGS_PARTS.payments} />
+
+        <Tabs.Panel className={styles.panel} value={SETTINGS_PARTS.subscriptions}>
+          {/* The widget reads the payment result from the query string, hence the boundary. */}
+          <Suspense fallback={<p>Loading subscription…</p>}>
+            <AccountManagement />
+          </Suspense>
+        </Tabs.Panel>
+
+        <Tabs.Panel className={styles.panel} value={SETTINGS_PARTS.payments}>
+          {/* The widget keeps the page number in the query string, hence the same boundary. */}
+          <Suspense fallback={<p>Loading payments…</p>}>
+            <MyPayments />
+          </Suspense>
+        </Tabs.Panel>
       </Tabs.Root>
     </section>
   )
