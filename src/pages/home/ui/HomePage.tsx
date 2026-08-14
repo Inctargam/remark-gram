@@ -10,10 +10,10 @@ type Props = {
 }
 
 export const HomePage = ({ posts, registeredUsersCount }: Props) => (
-  <div className={styles.page}>
+  <main className={styles.page}>
     <HomeRegisteredUsersCounter value={registeredUsersCount} />
     <section className={styles.posts} aria-label="Latest publications">
       <HomePostsGrid posts={posts} />
     </section>
-  </div>
+  </main>
 )

@@ -172,8 +172,42 @@ export const ExistingPhoto: Story = {
     hasAvatar = true
   },
   play: async ({ canvas }) => {
-    await expect(await canvas.findByRole('button', { name: 'Delete profile photo' })).toBeVisible()
+    const deleteButton = await canvas.findByRole('button', { name: 'Delete profile photo' })
+    const avatar = deleteButton.parentElement
+    const avatarImage = avatar?.querySelector('img')
+    const avatarRect = avatar?.getBoundingClientRect()
+    const deleteButtonRect = deleteButton.getBoundingClientRect()
+
+    await expect(deleteButton).toBeVisible()
+    await expect(deleteButtonRect.width).toBe(24)
+    await expect(deleteButtonRect.top - (avatarRect?.top ?? 0)).toBe(12)
+    await expect((avatarRect?.right ?? 0) - deleteButtonRect.right).toBe(12)
+    await expect(getComputedStyle(deleteButton).borderTopWidth).toBe('0px')
+    await expect(getComputedStyle(avatarImage as Element).maskImage).not.toBe('none')
     await expect(canvas.getByRole('button', { name: 'Select Profile Photo' })).toBeVisible()
+  },
+}
+
+export const MobileExistingPhoto: Story = {
+  globals: {
+    viewport: {
+      value: 'mobile1',
+      isRotated: false,
+    },
+  },
+  beforeEach: () => {
+    hasAvatar = true
+  },
+  play: async ({ canvas }) => {
+    const deleteButton = await canvas.findByRole('button', { name: 'Delete profile photo' })
+    const avatar = deleteButton.parentElement
+    const avatarRect = avatar?.getBoundingClientRect()
+    const deleteButtonRect = deleteButton.getBoundingClientRect()
+
+    await expect(deleteButtonRect.width).toBe(36)
+    await expect(deleteButtonRect.height).toBe(36)
+    await expect(deleteButtonRect.top - (avatarRect?.top ?? 0)).toBe(6)
+    await expect((avatarRect?.right ?? 0) - deleteButtonRect.right).toBe(6)
   },
 }
 

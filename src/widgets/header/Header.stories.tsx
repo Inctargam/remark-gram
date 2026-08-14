@@ -13,7 +13,7 @@ const meta = {
       description: {
         component:
           'Десктопный хедер. Discriminated union по `variant` — ' +
-          'TS не допустит `notificationCount` при `variant="guest"` и наоборот.',
+          'TypeScript не допустит `notificationCount` при `variant="guest"`.',
       },
     },
   },
@@ -21,11 +21,11 @@ const meta = {
     variant: {
       control: 'radio',
       options: ['auth', 'guest'],
-      description: 'Переключает набор допустимых пропов',
+      description: 'Переключает набор допустимых пропсов',
     },
     languageSelector: {
       control: false,
-      description: 'Слот для селектора языка (ReactNode) — заготовка под i18n',
+      description: 'Слот для переключателя языка',
     },
   },
   args: {
@@ -34,18 +34,26 @@ const meta = {
 } satisfies Meta<typeof Header>
 
 export default meta
-
 type Story = StoryObj<typeof meta>
 
-export const Guest: Story = {
-  args: { variant: 'guest' },
-}
+export const Guest: Story = {}
 
 export const GuestWithLabels: Story = {
   args: {
     variant: 'guest',
     loginLabel: 'Войти',
     signupLabel: 'Зарегистрироваться',
+  },
+}
+
+export const GuestWithoutAuthActions: Story = {
+  args: {
+    variant: 'guest',
+    showAuthActions: false,
+  },
+  play: async ({ canvas }) => {
+    await expect(canvas.queryByText('Log in')).not.toBeInTheDocument()
+    await expect(canvas.queryByText('Sign up')).not.toBeInTheDocument()
   },
 }
 
@@ -56,13 +64,10 @@ export const Auth: Story = {
 export const AuthWithNotifications: Story = {
   args: { variant: 'auth', notificationCount: 5 },
   play: async ({ canvas }) => {
-    const badge = canvas.getByText('5')
-
-    await expect(badge).toBeInTheDocument()
+    await expect(canvas.getByText('5')).toBeInTheDocument()
   },
 }
 
-/** Переполнение: 100+ уведомлений → показывает '99+'. */
 export const AuthWithManyNotifications: Story = {
   args: { variant: 'auth', notificationCount: 247 },
   play: async ({ canvas }) => {
@@ -74,30 +79,23 @@ export const AuthWithLanguageSelector: Story = {
   args: {
     variant: 'auth',
     languageSelector: (
-      <span style={{ color: 'var(--color-light-100)', fontSize: '14px' }}>🌐 EN</span>
+      <span style={{ color: 'var(--color-light-100)', fontSize: '14px' }}>English</span>
     ),
   },
 }
 
-/** Логотип — ссылка на главную. */
 export const LogoLink: Story = {
-  args: { variant: 'guest' },
   play: async ({ canvas }) => {
-    const logo = canvas.getByRole('link', { name: 'Inctagram' })
+    const logo = canvas.getByRole('link', { name: 'Remarkgram' })
 
     await expect(logo).toHaveAttribute('href', '/')
   },
 }
 
-/** Клик по колокольчику вызывает onBellClick. */
 export const BellClick: Story = {
   args: { variant: 'auth', notificationCount: 3, onBellClick: fn() },
   play: async ({ args, canvas }) => {
-    const bell = canvas.getByRole('button', { name: 'Notifications' })
-
-    await userEvent.click(bell)
-    // StoryObj инферит args как полный union — сужение по variant недоступно в play,
-    // поэтому явный каст к нужному подтипу.
+    await userEvent.click(canvas.getByRole('button', { name: 'Notifications' }))
     await expect((args as { onBellClick?: () => void }).onBellClick).toHaveBeenCalledOnce()
   },
 }

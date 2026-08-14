@@ -7,8 +7,8 @@ import { AppProviders } from '@/app/providers'
 import { AppShell } from '@/widgets/app-shell'
 
 export const metadata: Metadata = {
-  title: 'Inctagram',
-  description: 'Inctagram application',
+  title: 'Remarkgram',
+  description: 'Remarkgram application',
 }
 
 export default function RootLayout({ children }: { children: ReactNode }) {

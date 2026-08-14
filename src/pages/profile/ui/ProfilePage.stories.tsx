@@ -3,10 +3,12 @@ import { getRouter } from '@storybook/nextjs-vite/navigation.mock'
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
 import { expect, screen, userEvent, waitFor, within } from 'storybook/test'
 
-import type { Post, PostsPage } from '../../../entities/post'
-import { postsQueryKeys, PROFILE_POSTS_INITIAL_PAGE_PARAM } from '../../../entities/post'
-import type { CurrentUser } from '../../../shared/auth'
-import { MOCK_CURRENT_USER_ID, sessionStore } from '../../../shared/auth'
+import type { Post, PostsPage } from '@/entities/post'
+import { postsQueryKeys, PROFILE_POSTS_INITIAL_PAGE_PARAM } from '@/entities/post'
+import type { CurrentUser } from '@/shared/auth'
+import { MOCK_CURRENT_USER_ID, sessionStore } from '@/shared/auth'
+import { AppShellView } from '@/widgets/app-shell'
+
 import type { ProfilePageViewProps } from './ProfilePageView'
 import { ProfilePageView } from './ProfilePageView'
 
@@ -164,6 +166,176 @@ export const OwnProfile: Story = {
       `/profile/${MOCK_CURRENT_USER_ID}?postId=${MOCK_CURRENT_USER_ID}-post-2`,
       { scroll: false }
     )
+  },
+}
+
+export const DesktopLayout: Story = {
+  beforeEach: setOwnerSession,
+  globals: {
+    viewport: {
+      value: 'desktop',
+      isRotated: false,
+    },
+  },
+  render: (args) => (
+    <AppShellView status="authenticated" onLogout={() => Promise.resolve()}>
+      <ProfilePageStory {...args} />
+    </AppShellView>
+  ),
+  play: async ({ canvas, canvasElement }) => {
+    await expect(await canvas.findByAltText('Mock publication 1')).toBeInTheDocument()
+
+    const profile = canvas.getByRole('region', { name: 'UserName' })
+    const header = canvas.getByRole('banner')
+    const sidebar = canvas.getByRole('navigation', { name: 'Primary navigation' })
+    const languageSwitcher = canvas.getByRole('combobox')
+    const settingsButton = canvas.getByRole('button', { name: 'Profile Settings' })
+    const fourthPost = canvas.getByAltText('Mock publication 4').closest('button')
+    const view = canvasElement.ownerDocument.defaultView
+    const languageBounds = languageSwitcher.getBoundingClientRect()
+    const settingsBounds = settingsButton.getBoundingClientRect()
+
+    await expect(view?.getComputedStyle(profile).overflowY).toBe('visible')
+    await expect(header.getBoundingClientRect().height).toBe(60)
+    await expect(profile.getBoundingClientRect().top).toBe(60)
+    await expect(sidebar.getBoundingClientRect().top).toBe(60)
+    await expect({
+      x: languageBounds.x,
+      y: languageBounds.y,
+      width: languageBounds.width,
+      height: languageBounds.height,
+    }).toEqual({ x: 1053, y: 12, width: 163, height: 36 })
+    await expect({
+      x: settingsBounds.x,
+      y: settingsBounds.y,
+      width: settingsBounds.width,
+      height: settingsBounds.height,
+    }).toEqual({ x: 1049, y: 96, width: 167, height: 36 })
+    await expect(fourthPost).not.toBeNull()
+
+    for (const responsiveWidth of [1270, 1240, 1100]) {
+      canvasElement.style.width = `${responsiveWidth}px`
+
+      const languageRight = languageSwitcher.getBoundingClientRect().right
+      const settingsRight = settingsButton.getBoundingClientRect().right
+      const postsRight = fourthPost?.getBoundingClientRect().right ?? 0
+
+      await expect(Math.abs(languageRight - settingsRight)).toBeLessThanOrEqual(1)
+      await expect(Math.abs(languageRight - postsRight)).toBeLessThanOrEqual(1)
+    }
+
+    canvasElement.style.removeProperty('width')
+
+    // Storybook's desktop viewport is taller than the Figma frame, so extend only this
+    // interaction check to exercise document scrolling with the desktop app chrome.
+    profile.style.minHeight = `${(view?.innerHeight ?? 720) + 200}px`
+    view?.scrollTo(0, 200)
+    await waitFor(() => expect(view?.scrollY).toBeGreaterThan(0))
+
+    await expect(header.getBoundingClientRect().bottom).toBeLessThanOrEqual(0)
+    await expect(Math.abs(sidebar.getBoundingClientRect().top)).toBeLessThanOrEqual(1)
+
+    view?.scrollTo(0, 0)
+    profile.style.removeProperty('min-height')
+  },
+}
+
+export const WideDesktopLayout: Story = {
+  beforeEach: setOwnerSession,
+  globals: {
+    viewport: {
+      value: 'wideDesktop',
+      isRotated: false,
+    },
+  },
+  parameters: {
+    viewport: {
+      options: {
+        wideDesktop: {
+          name: 'Wide desktop',
+          styles: { width: '1920px', height: '1080px' },
+          type: 'desktop',
+        },
+      },
+    },
+  },
+  render: (args) => (
+    <AppShellView status="authenticated" onLogout={() => Promise.resolve()}>
+      <ProfilePageStory {...args} />
+    </AppShellView>
+  ),
+  play: async ({ canvas }) => {
+    const fourthPost = (await canvas.findByAltText('Mock publication 4')).closest('button')
+    const sidebarLeft = canvas
+      .getByRole('navigation', { name: 'Primary navigation' })
+      .getBoundingClientRect().left
+    const logoLeft = canvas.getByRole('link', { name: 'Remarkgram' }).getBoundingClientRect().left
+    const languageRight = canvas.getByRole('combobox').getBoundingClientRect().right
+    const settingsRight = canvas
+      .getByRole('button', { name: 'Profile Settings' })
+      .getBoundingClientRect().right
+    const postsRight = fourthPost?.getBoundingClientRect().right ?? 0
+
+    await expect(sidebarLeft).toBe(0)
+    await expect(logoLeft).toBe(60)
+    await expect(languageRight).toBe(1556)
+    await expect(settingsRight).toBe(1556)
+    await expect(postsRight).toBe(1556)
+  },
+}
+
+export const TabletLayout: Story = {
+  beforeEach: setOwnerSession,
+  globals: {
+    viewport: {
+      value: 'tablet',
+      isRotated: false,
+    },
+  },
+  render: (args) => (
+    <AppShellView status="authenticated" onLogout={() => Promise.resolve()}>
+      <ProfilePageStory {...args} />
+    </AppShellView>
+  ),
+  play: async ({ canvas }) => {
+    const thirdPost = (await canvas.findByAltText('Mock publication 3')).closest('button')
+    const languageRight = canvas.getByRole('combobox').getBoundingClientRect().right
+    const settingsRight = canvas
+      .getByRole('button', { name: 'Profile Settings' })
+      .getBoundingClientRect().right
+    const postsRight = thirdPost?.getBoundingClientRect().right ?? 0
+
+    await expect(canvas.getByRole('navigation', { name: 'Primary navigation' })).toBeVisible()
+    await expect(Math.abs(languageRight - settingsRight)).toBeLessThanOrEqual(1)
+    await expect(Math.abs(languageRight - postsRight)).toBeLessThanOrEqual(1)
+  },
+}
+
+export const MobileLayout: Story = {
+  beforeEach: setOwnerSession,
+  globals: {
+    viewport: {
+      value: 'mobile1',
+      isRotated: false,
+    },
+  },
+  render: (args) => (
+    <AppShellView status="authenticated" onLogout={() => Promise.resolve()}>
+      <ProfilePageStory {...args} />
+    </AppShellView>
+  ),
+  play: async ({ canvas }) => {
+    const images = await canvas.findAllByRole('img')
+    const tiles = images.map((image) => image.closest('button')?.getBoundingClientRect())
+    const [firstTile, secondTile, thirdTile, fourthTile] = tiles
+
+    await expect(canvas.getByRole('navigation', { name: 'Mobile navigation' })).toBeVisible()
+    await expect(canvas.queryByRole('button', { name: 'Profile Settings' })).not.toBeInTheDocument()
+    await expect(firstTile).toBeDefined()
+    await expect(Math.round(firstTile?.width ?? 0)).toBe(Math.round(firstTile?.height ?? 1))
+    await expect(Math.round(secondTile?.top ?? -1)).toBe(Math.round(firstTile?.top ?? 0))
+    await expect(Math.round(thirdTile?.top ?? -1)).toBe(Math.round(firstTile?.top ?? 0))
+    await expect(fourthTile?.top ?? 0).toBeGreaterThan(firstTile?.bottom ?? 0)
   },
 }
 

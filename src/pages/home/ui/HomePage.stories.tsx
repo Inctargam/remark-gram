@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { expect, screen, userEvent, within } from 'storybook/test'
 
 import type { Post } from '@/entities/post'
+import { AppShellView } from '@/widgets/app-shell'
 
 import { HomePage } from './HomePage'
 
@@ -105,5 +106,51 @@ export const NoPosts: Story = {
     const canvas = within(canvasElement)
 
     await expect(canvas.getByLabelText('1,000 registered users')).toBeInTheDocument()
+    await expect(canvasElement.querySelectorAll('article')).toHaveLength(0)
+  },
+}
+
+export const AuthenticatedDesktop: Story = {
+  globals: {
+    viewport: {
+      value: 'desktop',
+      isRotated: false,
+    },
+  },
+  render: (args) => (
+    <AppShellView status="authenticated" onLogout={() => Promise.resolve()}>
+      <HomePage {...args} />
+    </AppShellView>
+  ),
+  play: async ({ canvas, canvasElement }) => {
+    const cards = canvasElement.querySelectorAll('article')
+
+    await expect(canvas.getByRole('navigation', { name: 'Primary navigation' })).toBeVisible()
+    await expect(cards).toHaveLength(4)
+    await expect(Math.round(cards[0].getBoundingClientRect().width)).toBe(234)
+  },
+}
+
+export const AuthenticatedMobile: Story = {
+  globals: {
+    viewport: {
+      value: 'mobile2',
+      isRotated: false,
+    },
+  },
+  render: (args) => (
+    <AppShellView status="authenticated" onLogout={() => Promise.resolve()}>
+      <HomePage {...args} />
+    </AppShellView>
+  ),
+  play: async ({ canvas, canvasElement }) => {
+    const cards = canvasElement.querySelectorAll('article')
+    const firstCardBounds = cards[0].getBoundingClientRect()
+    const secondCardBounds = cards[1].getBoundingClientRect()
+
+    await expect(canvas.getByRole('navigation', { name: 'Mobile navigation' })).toBeVisible()
+    await expect(cards).toHaveLength(4)
+    await expect(Math.round(secondCardBounds.left)).toBe(Math.round(firstCardBounds.left))
+    await expect(secondCardBounds.top).toBeGreaterThan(firstCardBounds.bottom)
   },
 }

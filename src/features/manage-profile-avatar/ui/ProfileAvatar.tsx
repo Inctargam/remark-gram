@@ -1,5 +1,6 @@
 'use client'
 
+import clsx from 'clsx'
 import Image from 'next/image'
 
 import { Alert } from '@/shared/ui/alert'
@@ -42,7 +43,7 @@ export const ProfileAvatar = () => {
 
   return (
     <div className={styles.avatarColumn}>
-      <div className={styles.avatar}>
+      <div className={clsx(styles.avatar, avatar && styles.avatarWithImage)}>
         {avatar ? (
           <Image
             alt=""
@@ -62,7 +63,7 @@ export const ProfileAvatar = () => {
             className={styles.deleteAvatarButton}
             type="button"
             onClick={deleteAvatarClickHandler}>
-            <Icon iconId="icon-close" width={12} height={12} />
+            <Icon iconId="icon-close" width={16} height={16} />
           </button>
         )}
       </div>

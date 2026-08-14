@@ -1,11 +1,11 @@
 .page {
   display: flex;
   flex-direction: column;
-  padding: 24px 24px 60px;
-  gap: 30px;
+  gap: 36px;
+  width: 100%;
   max-width: 1020px;
   margin: 0 auto;
-  width: 100%;
+  padding: 24px 24px 60px;
 }
 
 .usersCounter {
@@ -14,7 +14,7 @@
   justify-content: space-between;
   width: 100%;
   min-height: 72px;
-  padding: 12px 24px 12px 18px;
+  padding: 11px 23px;
   border: 1px solid var(--color-dark-300);
   border-radius: 2px;
   background-color: var(--color-dark-500);
@@ -26,22 +26,25 @@
   font-size: var(--font-size-h2);
   font-weight: var(--font-weight-h2);
   line-height: var(--line-height-h2);
+  white-space: nowrap;
 }
 
 .usersCounterDigits {
   display: grid;
-  grid-template-columns: repeat(6, 31px);
+  grid-template-columns: repeat(6, 1fr);
+  width: 203px;
   height: 48px;
   overflow: hidden;
   border: 1px solid var(--color-dark-300);
   border-radius: 2px;
-  background-color: var(--color-bg);
+  background-color: var(--color-dark-700);
 }
 
 .usersCounterDigit {
   display: flex;
   align-items: center;
   justify-content: center;
+  min-width: 0;
   border-left: 1px solid var(--color-dark-300);
   color: var(--color-text-primary);
   font-size: var(--font-size-h2);
@@ -53,15 +56,9 @@
   border-left: 0;
 }
 
-.posts {
-  display: flex;
-  flex-direction: column;
-}
-
 .postsGrid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 234px));
-  justify-content: space-between;
+  grid-template-columns: repeat(auto-fit, minmax(min(234px, 100%), 1fr));
   gap: 24px 12px;
 }
 
@@ -166,33 +163,24 @@
   text-underline-offset: 2px;
 }
 
-@media (width <= 1024px) {
-  .postsGrid {
-    grid-template-columns: repeat(2, 1fr);
-    justify-content: stretch;
-  }
-}
-
-@media (width <= 640px) {
+@media (width < 480px) {
   .page {
-    padding: 16px 16px 72px;
-    gap: 20px;
+    gap: 24px;
+    padding: 16px 16px 60px;
   }
 
   .usersCounter {
-    align-items: flex-start;
     flex-direction: column;
+    align-items: stretch;
     gap: 12px;
-    padding: 16px;
+    padding: 15px;
   }
 
   .usersCounterDigits {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
     width: 100%;
   }
 
   .postsGrid {
-    grid-template-columns: repeat(2, 1fr);
     gap: 20px 8px;
   }
 

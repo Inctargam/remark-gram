@@ -1,6 +1,6 @@
 .card {
-  height: 504px;
   width: min(100%, 378px);
+  min-height: 504px;
 }
 
 .form {
@@ -34,8 +34,8 @@
   height: 36px;
   padding: 0;
   border: 0;
-  color: var(--color-light-100);
   background: transparent;
+  color: var(--color-light-100);
   cursor: pointer;
 }
 
@@ -51,8 +51,8 @@
 
 .socialButton:disabled,
 .socialButton[data-disabled] {
-  cursor: not-allowed;
   opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .fields {

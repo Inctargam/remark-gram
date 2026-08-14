@@ -2,6 +2,8 @@ import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { getRouter } from '@storybook/nextjs-vite/navigation.mock'
 import { expect, screen, userEvent, waitFor } from 'storybook/test'
 
+import { AppShellView } from '@/widgets/app-shell'
+
 import { SettingsPage } from './SettingsPage'
 
 const PROFILE = {
@@ -98,6 +100,64 @@ export const GeneralInformation: Story = {
 
     await userEvent.click(canvas.getByRole('tab', { name: 'My payments' }))
     await expect(getRouter().push).toHaveBeenLastCalledWith('/settings?part=payments')
+  },
+}
+
+export const MobilePayments: Story = {
+  args: {
+    activePart: 'payments',
+  },
+  globals: {
+    viewport: {
+      value: 'mobile1',
+      isRotated: false,
+    },
+  },
+  play: async ({ canvas }) => {
+    const paymentsTab = canvas.getByRole('tab', { name: 'My payments' })
+    const tabsViewport = canvas.getByRole('tablist').parentElement
+
+    await expect(canvas.getByRole('link', { name: 'Back to profile' })).toHaveAttribute(
+      'href',
+      '/profile'
+    )
+    await expect(paymentsTab).toHaveAttribute('data-active')
+    await waitFor(() => expect(tabsViewport?.scrollLeft).toBeGreaterThan(0))
+  },
+}
+
+export const MobileGeneralInformation: Story = {
+  globals: {
+    viewport: {
+      value: 'settingsMobile',
+      isRotated: false,
+    },
+  },
+  parameters: {
+    viewport: {
+      options: {
+        settingsMobile: {
+          name: 'Settings mobile',
+          styles: { width: '360px', height: '1068px' },
+          type: 'mobile',
+        },
+      },
+    },
+  },
+  render: (args) => (
+    <AppShellView status="authenticated" onLogout={() => Promise.resolve()}>
+      <SettingsPage {...args} />
+    </AppShellView>
+  ),
+  play: async ({ canvas }) => {
+    const backLink = canvas.getByRole('link', { name: 'Back to profile' })
+    const tabsList = canvas.getByRole('tablist')
+    const photoButton = await canvas.findByRole('button', { name: 'Add Profile Photo' })
+
+    await expect(backLink.getBoundingClientRect().top).toBe(77)
+    await expect(tabsList.getBoundingClientRect().top).toBe(120)
+    await expect(photoButton.getBoundingClientRect().top).toBe(396)
+    await expect(photoButton.getBoundingClientRect().width).toBe(330)
   },
 }
 
