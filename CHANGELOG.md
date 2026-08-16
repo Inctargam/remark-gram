@@ -4,6 +4,31 @@
 
 ## Unreleased
 
+### 2026-08-16
+
+#### Payments
+
+- Оплата через PayPal (ветка `feat/payments_paypal`) добавлена в существующий мок-флоу покупки по аналогии со Stripe: провайдер остаётся параметром одного сценария, отдельная ветка не создавалась.
+- Мок-хендлер `subscriptions/checkout` теперь возвращает провайдер-специфичный `checkoutUrl`: `stripe` → `/payments/mock-checkout`, `paypal` → `/payments/mock-paypal`.
+- Добавлена заглушка hosted approval-страницы PayPal (`/payments/mock-paypal`, FSD-слайс `pages/mock-paypal`): кнопки `Approve`/`Cancel` (вместо `Pay`/`Cancel` у Stripe), capture имитируется существующим `completeCheckoutSession` через `useCompleteCheckoutMutation`, импортированный из публичного API `pages/mock-checkout` без переноса файлов.
+- Consent-модалка создания платежа показывает бренд-логотип выбранного провайдера (`icon-paypal`/`icon-stripe`); текст согласия остался общим для обоих провайдеров.
+- Добавлены env-константы PayPal: `NEXT_PUBLIC_PAYPAL_CLIENT_ID` (пустой до появления бэкенда) и `NEXT_PUBLIC_PAYPAL_SANDBOX`, а также модуль `shared/config/paypal.ts` с `PAYPAL_CLIENT_ID`, `PAYPAL_SANDBOX` и `PAYPAL_APPROVAL_BASE_URL`.
+- В `entities/subscription/api/subscriptionsApi.ts` зафиксирован TODO-шов `TODO(paypal-capture)`: реальный возвратный флоу PayPal (`token`/`PayerID` → capture) появится после бэкенда, мок-флоу ничего дополнительно не требует.
+- В `.env.local` добавлен отсутствовавший флаг `NEXT_PUBLIC_PAYMENTS_API_MOCK=true` — без него вкладка Account Management ходила на реальный бэкенд `remark-gram.com` и не загружалась (`ERR_TIMED_OUT`).
+
+#### Verification
+
+- `pnpm test:unit` прошёл: 360 тестов.
+- `pnpm vitest run --project storybook` прошёл: 305 тестов (для запуска установлен Playwright-браузер Chromium).
+- `pnpm lint` прошёл: 0 ошибок (1158 предупреждений prettier в сгенерированном `schema.d.ts`, существовавших до изменений).
+- `pnpm build` прошёл успешно, роут `/payments/mock-paypal` присутствует в сборке.
+- `tsc --noEmit` не завершается из-за существующих ссылок `.next/types/validator.ts` на отсутствующие mock payment routes; изменённые файлы новых TypeScript-ошибок не добавили.
+
+#### Notes
+
+- Реальный возвратный флоу PayPal (approve-редирект с `token`/`PayerID` и server-to-server capture) — зона бэкенда; на моках не имитируется, задокументирован как `TODO(paypal-capture)`.
+- Коммиты: `858ccd5`, `7ff3f8f`, `3a62536`, `7f020d7`, `3425c56`.
+
 ### 2026-08-15
 
 #### Header
