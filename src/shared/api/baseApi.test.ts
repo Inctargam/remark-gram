@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('@/shared/config', () => ({ API_BASE_URL: 'https://backend.example.com/api' }))
 
-const { api } = await import('./baseApi')
+const { api, ApiError } = await import('./baseApi')
 
 const fetchMock = vi.fn()
 
@@ -67,5 +67,27 @@ describe('api', () => {
     await api.delete('/api/mock/posts/post-1', { baseUrl: '' })
 
     expect(getRequestInit().headers).toEqual({})
+  })
+})
+
+describe('ApiError', () => {
+  it('keeps a string message as is', () => {
+    const error = new ApiError(401, { message: 'Unauthorized' })
+
+    expect(error.message).toBe('Unauthorized')
+    expect(error.name).toBe('ApiError')
+    expect(error.status).toBe(401)
+  })
+
+  it('joins a string[] message into a single string', () => {
+    const error = new ApiError(400, { message: ['email must be an email', 'password is required'] })
+
+    expect(error.message).toBe('email must be an email, password is required')
+  })
+
+  it('falls back to a status-based message when there is no body', () => {
+    const error = new ApiError(500, null)
+
+    expect(error.message).toBe('API error 500')
   })
 })

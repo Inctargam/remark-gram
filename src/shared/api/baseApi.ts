@@ -1,7 +1,7 @@
 import { API_BASE_URL } from '@/shared/config'
 
 export type ApiErrorData = {
-  message: string
+  message: string | string[]
 }
 
 export class ApiError extends Error {
@@ -9,7 +9,11 @@ export class ApiError extends Error {
     public readonly status: number,
     public readonly data: ApiErrorData | null
   ) {
-    super(data?.message ?? `API error ${status}`)
+    const message = Array.isArray(data?.message)
+      ? data.message.join(', ')
+      : (data?.message ?? `API error ${status}`)
+
+    super(message)
     this.name = 'ApiError'
   }
 }
