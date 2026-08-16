@@ -11,5 +11,6 @@ import { createCheckoutSession } from '@/entities/subscription'
  */
 export const useCreateCheckoutSessionMutation = () =>
   useMutation({
+    meta: { globalErrorHandler: 'off' },
     mutationFn: (payload: CreateCheckoutSessionPayload) => createCheckoutSession(payload),
   })

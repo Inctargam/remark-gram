@@ -6,6 +6,7 @@ import type { SchemaAccessTokenResponseDto, SchemaLoginDto } from '@/shared/api/
 
 export const useLoginMutation = () =>
   useMutation({
+    meta: { globalErrorHandler: 'off' },
     mutationFn: async (payload: SchemaLoginDto): Promise<SchemaAccessTokenResponseDto> => {
       const { data, error, response } = await apiClient.POST('/api/v1/auth/login', {
         body: payload,

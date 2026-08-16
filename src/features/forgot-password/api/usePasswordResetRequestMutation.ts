@@ -5,6 +5,7 @@ import type { SchemaPasswordResetDto } from '@/shared/api/openapi/schema'
 
 export const usePasswordResetRequestMutation = () =>
   useMutation({
+    meta: { globalErrorHandler: 'off' },
     mutationFn: async (payload: SchemaPasswordResetDto) => {
       const { error, response } = await apiClient.POST('/api/v1/auth/password-reset/request', {
         body: payload,

@@ -7,6 +7,7 @@ export const useDeleteProfileAvatarMutation = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
+    meta: { globalErrorHandler: 'off' },
     mutationFn: deleteProfileAvatar,
     onSuccess: (response) => updateProfileAvatarCache(queryClient, response),
   })

@@ -5,6 +5,7 @@ import type { SchemaRegistrationDto } from '@/shared/api/openapi/schema'
 
 export const useRegisterMutation = () =>
   useMutation({
+    meta: { globalErrorHandler: 'off' },
     mutationFn: async (payload: SchemaRegistrationDto) => {
       const { error, response } = await apiClient.POST('/api/v1/auth/registration', {
         body: payload,

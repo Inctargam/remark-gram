@@ -5,6 +5,7 @@ import type { SchemaResendRegistrationConfirmationDto } from '@/shared/api/opena
 
 export const useResendRegistrationConfirmationMutation = () =>
   useMutation({
+    meta: { globalErrorHandler: 'off' },
     mutationFn: async (payload: SchemaResendRegistrationConfirmationDto) => {
       const { error, response } = await apiClient.POST(
         '/api/v1/auth/registration/resend-confirmation',

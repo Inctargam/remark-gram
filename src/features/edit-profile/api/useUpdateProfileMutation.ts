@@ -8,6 +8,7 @@ export const useUpdateProfileMutation = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
+    meta: { globalErrorHandler: 'off' },
     mutationFn: updateProfile,
     onSuccess: (profile) => {
       queryClient.setQueryData(profileQueryKeys.current(), profile)
