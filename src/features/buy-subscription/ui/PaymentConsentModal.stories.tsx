@@ -18,6 +18,7 @@ const meta = {
   },
   args: {
     open: true,
+    provider: 'stripe',
     isPending: false,
     onConfirm: fn(),
     onOpenChange: fn(),
@@ -75,5 +76,19 @@ export const Pending: Story = {
     await screen.findByRole('dialog')
 
     await expect(screen.getByRole('button', { name: 'OK' })).toBeDisabled()
+  },
+}
+
+/** Оплата через PayPal: в модалке показывается логотип PayPal. */
+export const PaypalProvider: Story = {
+  args: {
+    provider: 'paypal',
+  },
+  play: async () => {
+    await screen.findByRole('dialog')
+
+    const paypalIcon = document.querySelector('use[href$="#icon-paypal"]')
+
+    await expect(paypalIcon).toBeInTheDocument()
   },
 }
