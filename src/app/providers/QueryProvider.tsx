@@ -1,13 +1,25 @@
 'use client'
 
-import { environmentManager, QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import {
+  environmentManager,
+  MutationCache,
+  QueryClient,
+  QueryClientProvider,
+} from '@tanstack/react-query'
 import type { ReactNode } from 'react'
+
+import { mutationGlobalErrorHandler } from '@/shared/lib/mutationGlobalErrorHandler'
 
 type Props = {
   children: ReactNode
 }
 
-const makeQueryClient = () => new QueryClient()
+const makeQueryClient = () =>
+  new QueryClient({
+    mutationCache: new MutationCache({
+      onError: mutationGlobalErrorHandler,
+    }),
+  })
 
 let browserQueryClient: QueryClient | undefined
 
