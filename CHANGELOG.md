@@ -16,6 +16,8 @@
 - Удалены неиспользуемые mock-publish adapter и data URL conversion helper после переключения create-post flow на real API adapter.
 - Ошибки публикации поста теперь маппятся в пользовательские сообщения для истёкшей сессии, описания длиннее 500 символов, превышения лимита фото, неподдерживаемого формата/размера файла и временной недоступности backend-сервисов.
 - Backend error code сохраняется в `ApiErrorData`, чтобы feature-level UI мог отличать validation и service failures без разбора raw response.
+- OpenAPI-клиент теперь добавляет `Authorization: Bearer <accessToken>` из session store к запросам, когда пользователь авторизован; это исправляет `401 Authorization header missing` при публикации поста.
+- Перед запуском real publish flow создание поста проверяет access token в памяти и при необходимости пытается восстановить его через refresh-session, чтобы защищённые upload/create запросы не стартовали без авторизации.
 
 #### Verification
 
@@ -23,10 +25,14 @@
 - `pnpm exec vitest run --project unit src/features/create-post/api/usePublishPostMutation.test.ts src/features/create-post/api/publishPostApi.test.ts` прошёл.
 - `pnpm exec vitest run --project unit src/features/create-post/api/publishPostApi.test.ts src/features/create-post/api/usePublishPostMutation.test.ts src/features/create-post/model/createPostFile.test.ts` прошёл.
 - `pnpm exec vitest run --project unit src/features/create-post/model/createPostPublishError.test.ts src/features/create-post/api/publishPostApi.test.ts src/features/create-post/api/usePublishPostMutation.test.ts src/shared/api/baseApi.test.ts` прошёл.
+- `pnpm exec vitest run --project unit src/shared/api/openapi/client.test.ts src/shared/auth/refreshSession.test.ts src/features/create-post/api/publishPostApi.test.ts` прошёл.
+- `pnpm exec vitest run --project unit src/features/create-post/api/publishPostApi.test.ts src/shared/api/openapi/client.test.ts src/shared/auth/refreshSession.test.ts src/features/create-post/model/createPostPublishError.test.ts` прошёл.
 - `pnpm exec tsc --noEmit --pretty false` прошёл.
 - `pnpm exec eslint src/features/create-post/api/publishPostApi.ts src/features/create-post/api/publishPostApi.test.ts src/features/create-post/api/publishPostMock.ts src/features/create-post/api/usePublishPostMutation.ts src/features/create-post/api/publishPostTypes.ts` прошёл.
 - `pnpm exec eslint src/features/create-post/api/usePublishPostMutation.ts src/features/create-post/api/usePublishPostMutation.test.ts` прошёл.
 - `pnpm exec eslint src/features/create-post/model/createPostPublishError.ts src/features/create-post/model/createPostPublishError.test.ts src/features/create-post/model/useCreatePostFlow.ts src/features/create-post/api/publishPostApi.ts src/shared/api/baseApi.ts` прошёл.
+- `pnpm exec eslint src/shared/api/openapi/client.ts src/shared/api/openapi/client.test.ts src/features/create-post/api/publishPostApi.ts` прошёл.
+- `pnpm exec eslint src/features/create-post/api/publishPostApi.ts src/features/create-post/api/publishPostApi.test.ts src/shared/api/openapi/client.ts src/shared/api/openapi/client.test.ts` прошёл.
 
 ### 2026-08-15
 

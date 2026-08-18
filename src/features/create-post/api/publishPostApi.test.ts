@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { ApiError } from '@/shared/api/baseApi'
 import { apiClient } from '@/shared/api/openapi'
+import { refreshSession, sessionStore } from '@/shared/auth'
 
 import { publishPostApi } from './publishPostApi'
 
@@ -12,9 +13,19 @@ vi.mock('@/shared/api/openapi', () => ({
   },
 }))
 
+vi.mock('@/shared/auth', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/shared/auth')>()
+
+  return {
+    ...actual,
+    refreshSession: vi.fn(),
+  }
+})
+
 const apiPostMock = apiClient.POST as Mock
 const fetchMock = vi.fn()
 const randomUUIDMock = vi.fn()
+const refreshSessionMock = vi.mocked(refreshSession)
 
 const createResponse = (status: number) =>
   ({
@@ -32,12 +43,15 @@ beforeEach(() => {
   apiPostMock.mockReset()
   fetchMock.mockReset()
   randomUUIDMock.mockReset()
+  refreshSessionMock.mockReset()
+  sessionStore.getState().setAuthenticated('access-token')
   vi.stubGlobal('fetch', fetchMock)
   vi.stubGlobal('crypto', { randomUUID: randomUUIDMock })
 })
 
 afterEach(() => {
   vi.unstubAllGlobals()
+  sessionStore.setState({ accessToken: null, currentUser: null, status: 'loading' })
 })
 
 describe('publishPostApi', () => {
@@ -145,5 +159,55 @@ describe('publishPostApi', () => {
     await expect(publishPostApi({ description: 'caption', photos: [photo] })).rejects.toThrow(
       'Image upload failed with 403'
     )
+  })
+
+  it('refreshes the session before publishing when the access token is missing', async () => {
+    sessionStore.getState().setGuest()
+    refreshSessionMock.mockResolvedValue('refreshed-token')
+    randomUUIDMock
+      .mockReturnValueOnce('11111111-1111-4111-8111-111111111111')
+      .mockReturnValueOnce('22222222-2222-4222-8222-222222222222')
+    apiPostMock
+      .mockResolvedValueOnce({
+        data: {
+          sessions: [
+            {
+              id: '33333333-3333-4333-8333-333333333333',
+              clientFileId: '11111111-1111-4111-8111-111111111111',
+              url: 'https://storage.example.com',
+              fields: {},
+            },
+          ],
+        },
+        error: undefined,
+        response: createResponse(201),
+      })
+      .mockResolvedValueOnce({
+        data: undefined,
+        error: undefined,
+        response: createResponse(204),
+      })
+      .mockResolvedValueOnce({
+        data: { id: 42 },
+        error: undefined,
+        response: createResponse(201),
+      })
+    fetchMock.mockResolvedValue(createResponse(204))
+
+    await expect(publishPostApi({ description: 'caption', photos: [photo] })).resolves.toEqual({
+      publicationId: '42',
+    })
+    expect(refreshSessionMock).toHaveBeenCalledOnce()
+  })
+
+  it('throws an authorization error when the missing access token cannot be refreshed', async () => {
+    sessionStore.getState().setGuest()
+    refreshSessionMock.mockResolvedValue(null)
+
+    await expect(publishPostApi({ description: 'caption', photos: [photo] })).rejects.toThrow(
+      ApiError
+    )
+    expect(apiPostMock).not.toHaveBeenCalled()
+    expect(fetchMock).not.toHaveBeenCalled()
   })
 })

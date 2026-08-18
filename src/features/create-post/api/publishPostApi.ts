@@ -5,6 +5,7 @@ import type {
   SchemaImageUploadMetadataDto,
   SchemaImageUploadSessionDto,
 } from '@/shared/api/openapi/schema'
+import { refreshSession, sessionStore } from '@/shared/auth'
 
 import type { PublishPostPayload, PublishPostResult } from './publishPostTypes'
 
@@ -48,6 +49,18 @@ const getApiErrorData = (error: unknown, fallbackMessage: string) => ({
   code: getApiErrorCode(error),
   message: getApiErrorMessage(error) ?? fallbackMessage,
 })
+
+const ensureCreatePostAccessToken = async (): Promise<void> => {
+  if (sessionStore.getState().accessToken) {
+    return
+  }
+
+  const refreshedAccessToken = await refreshSession()
+
+  if (!refreshedAccessToken) {
+    throw new ApiError(401, { message: 'Invalid access token' })
+  }
+}
 
 const createUploadMetadata = ({
   clientFileId,
@@ -148,6 +161,8 @@ export const publishPostApi = async ({
   description,
   photos,
 }: PublishPostPayload): Promise<PublishPostResult> => {
+  await ensureCreatePostAccessToken()
+
   const preparedPhotos = photos.map(({ file }) => ({
     clientFileId: crypto.randomUUID(),
     file,
