@@ -13,11 +13,13 @@
 - Добавлены unit-тесты для успешной публикации, backend validation error и ошибки presigned upload.
 - `usePublishPostMutation` переключён на real API adapter; после успешной публикации по-прежнему инвалидируется cache списков постов профиля. Отдельного TanStack query key для Home posts сейчас нет, так как Home получает posts через SSR props.
 - Добавлен unit-тест mutation hook, который проверяет вызов real adapter и invalidation `postsQueryKeys.lists()`.
+- Удалены неиспользуемые mock-publish adapter и data URL conversion helper после переключения create-post flow на real API adapter.
 
 #### Verification
 
 - `pnpm exec vitest run --project unit src/features/create-post/api/publishPostApi.test.ts src/features/create-post/api/publishPostMock.test.ts` прошёл.
 - `pnpm exec vitest run --project unit src/features/create-post/api/usePublishPostMutation.test.ts src/features/create-post/api/publishPostApi.test.ts` прошёл.
+- `pnpm exec vitest run --project unit src/features/create-post/api/publishPostApi.test.ts src/features/create-post/api/usePublishPostMutation.test.ts src/features/create-post/model/createPostFile.test.ts` прошёл.
 - `pnpm exec tsc --noEmit --pretty false` прошёл.
 - `pnpm exec eslint src/features/create-post/api/publishPostApi.ts src/features/create-post/api/publishPostApi.test.ts src/features/create-post/api/publishPostMock.ts src/features/create-post/api/usePublishPostMutation.ts src/features/create-post/api/publishPostTypes.ts` прошёл.
 - `pnpm exec eslint src/features/create-post/api/usePublishPostMutation.ts src/features/create-post/api/usePublishPostMutation.test.ts` прошёл.
