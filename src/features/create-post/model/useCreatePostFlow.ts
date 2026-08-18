@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
 import { normalizePostDescription } from '@/entities/post'
 
 import { usePublishPostMutation } from '../api/usePublishPostMutation'
-import { exportEditedImage } from '../lib/exportEditedImage'
+import { exportEditedImage, type ExportedPostPhoto } from '../lib/exportEditedImage'
 import { createPostDraftFromState } from './createPostDraft'
 import { validateCreatePostFiles } from './createPostFile'
 import type { CreatePostStep } from './createPostFlow'
@@ -14,8 +14,10 @@ import { useCreatePostPhotos } from './useCreatePostPhotos'
 export const useCreatePostFlow = () => {
   const [step, setStep] = useState<CreatePostStep>('add-photo')
   const [description, setDescription] = useState('')
+  const [isPreparingPublication, setIsPreparingPublication] = useState(false)
   const [publishError, setPublishError] = useState<string | null>(null)
   const [uploadError, setUploadError] = useState<string | null>(null)
+  const isPublishInFlightRef = useRef(false)
   const publishPostMutation = usePublishPostMutation()
   const {
     hasDraft,
@@ -130,26 +132,36 @@ export const useCreatePostFlow = () => {
   }
 
   const publishPostHandler = async (onSuccess: () => void) => {
+    if (isPublishInFlightRef.current) {
+      return
+    }
+
+    isPublishInFlightRef.current = true
     setPublishError(null)
+    setIsPreparingPublication(true)
+
+    let editedPhotos: ExportedPostPhoto[]
 
     try {
-      const editedPhotos = await Promise.all(photos.map(exportEditedImage))
-
-      publishPostMutation.mutate(
-        { description, photos: editedPhotos },
-        {
-          onSuccess: () => {
-            clearDraftHandler()
-            resetFlowHandler()
-            onSuccess()
-          },
-          onError: (error) => {
-            setPublishError(getCreatePostPublishErrorMessage(error))
-          },
-        }
-      )
+      editedPhotos = await Promise.all(photos.map(exportEditedImage))
     } catch {
       setPublishError('Failed to prepare photos for publication.')
+      setIsPreparingPublication(false)
+      isPublishInFlightRef.current = false
+      return
+    }
+
+    try {
+      setIsPreparingPublication(false)
+      await publishPostMutation.mutateAsync({ description, photos: editedPhotos })
+      clearDraftHandler()
+      resetFlowHandler()
+      onSuccess()
+    } catch (error) {
+      setPublishError(getCreatePostPublishErrorMessage(error))
+    } finally {
+      setIsPreparingPublication(false)
+      isPublishInFlightRef.current = false
     }
   }
 
@@ -157,7 +169,7 @@ export const useCreatePostFlow = () => {
     description,
     hasDraft,
     hasUnsavedChanges,
-    isPublishing: publishPostMutation.isPending,
+    isPublishing: isPreparingPublication || publishPostMutation.isPending,
     publishError,
     selectedPhoto,
     selectedPhotoId,
