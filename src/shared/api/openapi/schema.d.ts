@@ -4,6 +4,140 @@
  */
 
 export interface paths {
+    "/api/v1/files/image-uploads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create image upload sessions
+         * @description First step of publication creation. Send metadata of the final files after any client-side editing. The response contains one short-lived presigned POST session per image. Match each session to the local file by clientFileId, copy every returned field into FormData, append the file last and POST the form directly to the returned Object Storage URL. After the selected uploads succeed, call the image-uploads/complete endpoint with their session IDs.
+         */
+        post: operations["initiateImageUploads"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/files/image-uploads/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Confirm direct image uploads
+         * @description Call this endpoint after Object Storage has successfully accepted every selected multipart/form-data request. Files verifies ownership and performs HeadObject for each ID without downloading the object. The stored size and Content-Type must exactly match the metadata supplied when the session was created. The current implementation does not inspect magic bytes or decode the image contents. If one object is missing or mismatched, the whole submitted set becomes REJECTED. Repeating a request for an already COMPLETED set succeeds, making confirmation idempotent.
+         */
+        post: operations["completeImageUploads"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/files/images/{fileId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Redirect to a public image
+         * @description Resolves a completed, non-deleted file by its ID and redirects the client to its public Object Storage URL. The gateway does not proxy the image bytes. Browsers follow the redirect and download the image directly from Object Storage.
+         */
+        get: operations["getPublicFileUrl"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/posts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create a post with completed image uploads
+         * @description Final step of publication creation. Supply the IDs previously confirmed through files/image-uploads/complete in their display order. Posts asks Files over gRPC to reserve images that exist, belong to the authenticated author, are not soft-deleted and have status COMPLETED. The post and its ordered image relations are then created atomically, after which the reservation is marked as attached.
+         */
+        post: operations["createPost"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/posts/{postId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Update a post
+         * @description Updates the description of a post owned by the authenticated user.
+         */
+        put: operations["updatePost"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/{userId}/posts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get an author's posts using cursor pagination */
+        get: operations["getAuthorPosts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/testing/all-data": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete all data from the microservice databases */
+        delete: operations["deleteAllData"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/registration": {
         parameters: {
             query?: never;
@@ -273,23 +407,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/testing/all-data": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** Delete all data from the user-accounts database */
-        delete: operations["deleteAllData"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -313,6 +430,165 @@ export interface components {
             message: string[];
             /** @example Bad Request */
             error: string;
+        };
+        ImageUploadMetadataDto: {
+            /**
+             * Format: uuid
+             * @description Client-generated correlation ID used to match the returned session to this local file.
+             * @example 83d26252-a350-4e39-a78e-0bdf54d2341d
+             */
+            clientFileId: string;
+            /**
+             * @description Original filename kept as file metadata; it is not used as the Object Storage key.
+             * @example photo.jpg
+             */
+            originalFilename: string;
+            /**
+             * @description MIME type of the exact file that will be uploaded. Only JPEG and PNG are supported.
+             * @example image/jpeg
+             * @enum {string}
+             */
+            contentType: "image/jpeg" | "image/png";
+            /**
+             * @description Exact size of the final file in bytes. The presigned POST policy and completion check require this exact value.
+             * @example 1048576
+             */
+            size: number;
+        };
+        InitiateImageUploadsDto: {
+            /** @description Metadata for 1–10 final images after any client-side crop or filter processing. */
+            images: components["schemas"]["ImageUploadMetadataDto"][];
+        };
+        ImageUploadSessionDto: {
+            /**
+             * Format: uuid
+             * @description Server-generated upload ID used for confirmation and later as the post image ID.
+             * @example 83d26252-a350-4e39-a78e-0bdf54d2341d
+             */
+            id: string;
+            /**
+             * Format: uuid
+             * @description The client correlation ID from the matching request item.
+             * @example 2b610f18-cb6c-4c4a-aed1-cf8f0bff3b55
+             */
+            clientFileId: string;
+            /**
+             * @description Yandex Object Storage URL to which the multipart/form-data POST must be sent.
+             * @example https://storage.yandexcloud.net/images-bucket
+             */
+            url: string;
+            /**
+             * @description Opaque signed form fields. Append every entry unchanged to FormData, then append the file field last.
+             * @example {
+             *       "key": "users/42/images/83d26252-a350-4e39-a78e-0bdf54d2341d",
+             *       "Content-Type": "image/jpeg",
+             *       "X-Amz-Algorithm": "AWS4-HMAC-SHA256",
+             *       "X-Amz-Credential": "access-key/20260806/ru-central1/s3/aws4_request",
+             *       "X-Amz-Date": "20260806T120000Z",
+             *       "Policy": "base64-encoded-policy",
+             *       "X-Amz-Signature": "hex-encoded-signature"
+             *     }
+             */
+            fields: {
+                [key: string]: string;
+            };
+        };
+        InitiateImageUploadsResponseDto: {
+            /** @description One presigned POST session for each requested image. */
+            sessions: components["schemas"]["ImageUploadSessionDto"][];
+        };
+        CompleteImageUploadsDto: {
+            /**
+             * @description Session IDs returned by image-uploads for objects that Object Storage has accepted successfully.
+             * @example [
+             *       "83d26252-a350-4e39-a78e-0bdf54d2341d"
+             *     ]
+             */
+            uploadIds: string[];
+        };
+        CreatePostDto: {
+            /**
+             * @description Optional post description. An omitted value is stored as NULL; an empty string remains empty.
+             * @example A new post
+             */
+            description?: string;
+            /**
+             * @description Completed image upload IDs in display order. Every image must belong to the authenticated author.
+             * @example [
+             *       "83d26252-a350-4e39-a78e-0bdf54d2341d"
+             *     ]
+             */
+            imageIds: string[];
+        };
+        CreatePostResponseDto: {
+            /**
+             * @description Identifier of the newly created post.
+             * @example 10
+             */
+            id: number;
+        };
+        UpdatePostDto: {
+            /** @example Some description */
+            description: string;
+        };
+        Object: Record<string, never>;
+        AuthorPostImageDto: {
+            /**
+             * Format: uuid
+             * @description Image file identifier.
+             * @example 550e8400-e29b-41d4-a716-446655440000
+             */
+            fileId: string;
+            /**
+             * @description Zero-based image position inside the post.
+             * @example 0
+             */
+            position: number;
+            /**
+             * Format: uri
+             * @description Absolute API Gateway URL that redirects to the public image.
+             * @example https://api.remark-gram.com/api/v1/files/images/550e8400-e29b-41d4-a716-446655440000
+             */
+            url: string;
+        };
+        AuthorPostDto: {
+            /**
+             * @description Post identifier.
+             * @example 42
+             */
+            id: number;
+            /**
+             * @description Author identifier.
+             * @example 7
+             */
+            authorId: number;
+            /**
+             * @description Post description, or null when the post has no description.
+             * @example My first post
+             */
+            description: Record<string, never> | null;
+            /**
+             * Format: date-time
+             * @description Post creation date in ISO 8601 format.
+             * @example 2026-08-11T11:00:00.000Z
+             */
+            createdAt: string;
+            /** @description Post images ordered by position. */
+            images: components["schemas"]["AuthorPostImageDto"][];
+        };
+        GetAuthorPostsDto: {
+            /** @description Posts from the requested page. */
+            items: components["schemas"]["AuthorPostDto"][];
+            /**
+             * @description Whether another page is available.
+             * @example true
+             */
+            hasMore: boolean;
+            /**
+             * @description Opaque cursor for the next page, or null when this is the last page.
+             * @example eyJpZCI6NDIsImNyZWF0ZWRBdCI6IjIwMjYtMDgtMTFUMTE6MDA6MDAuMDAwWiJ9
+             */
+            nextCursor: Record<string, never> | null;
         };
         RegistrationDto: {
             /** @example user_123 */
@@ -411,6 +687,18 @@ export interface components {
 }
 export type SchemaApiErrorResponseDto = components['schemas']['ApiErrorResponseDto'];
 export type SchemaValidationErrorResponseDto = components['schemas']['ValidationErrorResponseDto'];
+export type SchemaImageUploadMetadataDto = components['schemas']['ImageUploadMetadataDto'];
+export type SchemaInitiateImageUploadsDto = components['schemas']['InitiateImageUploadsDto'];
+export type SchemaImageUploadSessionDto = components['schemas']['ImageUploadSessionDto'];
+export type SchemaInitiateImageUploadsResponseDto = components['schemas']['InitiateImageUploadsResponseDto'];
+export type SchemaCompleteImageUploadsDto = components['schemas']['CompleteImageUploadsDto'];
+export type SchemaCreatePostDto = components['schemas']['CreatePostDto'];
+export type SchemaCreatePostResponseDto = components['schemas']['CreatePostResponseDto'];
+export type SchemaUpdatePostDto = components['schemas']['UpdatePostDto'];
+export type SchemaObject = components['schemas']['Object'];
+export type SchemaAuthorPostImageDto = components['schemas']['AuthorPostImageDto'];
+export type SchemaAuthorPostDto = components['schemas']['AuthorPostDto'];
+export type SchemaGetAuthorPostsDto = components['schemas']['GetAuthorPostsDto'];
 export type SchemaRegistrationDto = components['schemas']['RegistrationDto'];
 export type SchemaConfirmRegistrationDto = components['schemas']['ConfirmRegistrationDto'];
 export type SchemaResendRegistrationConfirmationDto = components['schemas']['ResendRegistrationConfirmationDto'];
@@ -423,6 +711,522 @@ export type SchemaConfirmPasswordResetResponseDto = components['schemas']['Confi
 export type SchemaSessionResponseDto = components['schemas']['SessionResponseDto'];
 export type $defs = Record<string, never>;
 export interface operations {
+    initiateImageUploads: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Metadata must describe the exact Blob or File that will be uploaded to Object Storage. */
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InitiateImageUploadsDto"];
+            };
+        };
+        responses: {
+            /** @description Short-lived presigned POST sessions were created and saved as PENDING. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InitiateImageUploadsResponseDto"];
+                };
+            };
+            /** @description The request shape is invalid or an upload invariant is violated: image count, size, content type or unique clientFileId. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"] | components["schemas"]["ValidationErrorResponseDto"];
+                };
+            };
+            /** @description The access token is missing, invalid or expired. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 401 */
+                        statusCode: number;
+                        /** @example Invalid access token */
+                        message: string;
+                        /** @example Unauthorized */
+                        error: string;
+                    };
+                };
+            };
+            /** @description The files service or Object Storage returned an unexpected error. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description The files service is unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    completeImageUploads: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description IDs of successfully uploaded sessions. A subset of the originally created sessions may be confirmed. */
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CompleteImageUploadsDto"];
+            };
+        };
+        responses: {
+            /** @description Every submitted upload is confirmed as COMPLETED. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The request is malformed, contains duplicate IDs or contains fewer than 1 or more than 10 IDs. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"] | components["schemas"]["ValidationErrorResponseDto"];
+                };
+            };
+            /** @description The access token is missing, invalid or expired. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 401 */
+                        statusCode: number;
+                        /** @example Invalid access token */
+                        message: string;
+                        /** @example Unauthorized */
+                        error: string;
+                    };
+                };
+            };
+            /** @description At least one upload does not exist, belongs to another user or is soft-deleted. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description The upload statuses are incompatible or Object Storage metadata does not match. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description The files service or Object Storage returned an unexpected error. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description The files service is unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    getPublicFileUrl: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifier of the completed, non-deleted image file. */
+                fileId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The client is redirected to the public Object Storage URL of the image. */
+            302: {
+                headers: {
+                    /** @description Public URL of the image in Object Storage. */
+                    Location?: string;
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The fileId path parameter is not a UUID v4. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "statusCode": 400,
+                     *       "message": [
+                     *         "fileId must be a UUID"
+                     *       ],
+                     *       "error": "Bad Request"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["ValidationErrorResponseDto"];
+                };
+            };
+            /** @description The access token is missing, invalid or expired. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 401 */
+                        statusCode: number;
+                        /** @example Invalid access token */
+                        message: string;
+                        /** @example Unauthorized */
+                        error: string;
+                    };
+                };
+            };
+            /** @description Object Storage cannot provide a public URL for the file. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "statusCode": 403,
+                     *       "code": "FILE_PUBLIC_ACCESS_DENIED",
+                     *       "message": "File is not public"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description The file does not exist or is not available for public delivery. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "statusCode": 404,
+                     *       "code": "FILE_NOT_FOUND",
+                     *       "message": "File not found"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description The files service or Object Storage returned an unexpected error. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description The files service is unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    createPost: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Client-generated UUID for one publication attempt. Reuse the same value only when retrying an identical request. The current API version accepts this header but does not yet enforce request-level idempotency. */
+                "Idempotency-Key"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Post description and completed image IDs in the desired display order. */
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePostDto"];
+            };
+        };
+        responses: {
+            /** @description The post and all ordered image relations were created. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreatePostResponseDto"];
+                };
+            };
+            /** @description The request shape is invalid or a post invariant is violated: description length, image count or unique image IDs. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"] | components["schemas"]["ValidationErrorResponseDto"];
+                };
+            };
+            /** @description The access token is missing, invalid or expired. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 401 */
+                        statusCode: number;
+                        /** @example Invalid access token */
+                        message: string;
+                        /** @example Unauthorized */
+                        error: string;
+                    };
+                };
+            };
+            /** @description At least one image does not exist, belongs to another user or is soft-deleted. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description At least one image cannot be reserved in its current state or is already attached to another post. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description The posts service or one of its dependencies returned an unexpected error. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Posts could not verify images because Files is unavailable or exceeded its deadline. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    updatePost: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                postId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePostDto"];
+            };
+        };
+        responses: {
+            /** @description The post has been successfully updated. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The path parameter or request body is invalid, or the posts service rejected an invalid post ID, user ID, or description. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseDto"] | components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description The access token is missing, invalid or expired. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 401 */
+                        statusCode: number;
+                        /** @example Invalid access token */
+                        message: string;
+                        /** @example Unauthorized */
+                        error: string;
+                    };
+                };
+            };
+            /** @description The authenticated user is not allowed to update this post. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description The post was not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description The post was modified concurrently and could not be updated. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description The upstream service returned an unexpected error. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description The posts service is unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    getAuthorPosts: {
+        parameters: {
+            query?: {
+                /** @description Maximum number of posts returned in one page. */
+                limit?: components["schemas"]["Object"];
+                /** @description Opaque Base64 cursor returned as nextCursor by the previous page. */
+                cursor?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Numeric identifier of the author whose posts are requested. */
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The requested page of the author's posts. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GetAuthorPostsDto"];
+                };
+            };
+        };
+    };
+    deleteAllData: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description All microservice database data was deleted. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The testing endpoint key is invalid. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The testing endpoint is disabled. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description An upstream service returned an unexpected error. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description A microservice is unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     register: {
         parameters: {
             query?: never;
@@ -1102,52 +1906,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
-            };
-            /** @description The upstream service returned an unexpected error. */
-            502: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description The user-accounts service is unavailable. */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    deleteAllData: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description All user-accounts data was deleted. */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description The testing endpoint key is invalid. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description The testing endpoint is disabled. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
             /** @description The upstream service returned an unexpected error. */
             502: {
