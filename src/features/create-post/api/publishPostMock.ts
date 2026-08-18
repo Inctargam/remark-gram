@@ -1,17 +1,7 @@
 import { createPost } from '@/entities/post'
 
-import type { ExportedPostPhoto } from '../lib/exportEditedImage'
 import { fileToDataUrl } from '../lib/fileToDataUrl'
-
-export type PublishPostPayload = {
-  description: string
-  /** Exactly what `exportEditedImage` produces — the flow publishes edited photos as they are. */
-  photos: ExportedPostPhoto[]
-}
-
-export type PublishPostResult = {
-  publicationId: string
-}
+import type { PublishPostPayload, PublishPostResult } from './publishPostTypes'
 
 /**
  * Publishes into the shared posts mock (`/api/mock/posts`) — the same store the profile grid

@@ -4,6 +4,20 @@
 
 ## Unreleased
 
+### 2026-08-18
+
+#### Create Post
+
+- Добавлен typed API adapter для публикации поста через реальный backend flow: создание image upload sessions, прямой presigned upload в Object Storage, подтверждение загрузок и создание поста по `imageIds`.
+- Общий payload/result contract публикации вынесен из mock-адаптера, чтобы mock и будущий production hook использовали один feature-level тип.
+- Добавлены unit-тесты для успешной публикации, backend validation error и ошибки presigned upload.
+
+#### Verification
+
+- `pnpm exec vitest run --project unit src/features/create-post/api/publishPostApi.test.ts src/features/create-post/api/publishPostMock.test.ts` прошёл.
+- `pnpm exec tsc --noEmit --pretty false` прошёл.
+- `pnpm exec eslint src/features/create-post/api/publishPostApi.ts src/features/create-post/api/publishPostApi.test.ts src/features/create-post/api/publishPostMock.ts src/features/create-post/api/usePublishPostMutation.ts src/features/create-post/api/publishPostTypes.ts` прошёл.
+
 ### 2026-08-15
 
 #### Header

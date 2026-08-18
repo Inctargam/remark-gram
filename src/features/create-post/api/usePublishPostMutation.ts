@@ -2,7 +2,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { postsQueryKeys } from '@/entities/post'
 
-import { publishPostMock, type PublishPostPayload } from './publishPostMock'
+import { publishPostMock } from './publishPostMock'
+import type { PublishPostPayload } from './publishPostTypes'
 
 export const usePublishPostMutation = () => {
   const queryClient = useQueryClient()
