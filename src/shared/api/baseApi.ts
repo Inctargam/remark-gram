@@ -1,6 +1,7 @@
 import { API_BASE_URL } from '@/shared/config'
 
 export type ApiErrorData = {
+  code?: string
   message: string
 }
 

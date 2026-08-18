@@ -34,6 +34,21 @@ const getApiErrorMessage = (error: unknown): string | null => {
   return typeof message === 'string' ? message : null
 }
 
+const getApiErrorCode = (error: unknown): string | undefined => {
+  if (!error || typeof error !== 'object' || !('code' in error)) {
+    return undefined
+  }
+
+  const code = (error as { code?: unknown }).code
+
+  return typeof code === 'string' ? code : undefined
+}
+
+const getApiErrorData = (error: unknown, fallbackMessage: string) => ({
+  code: getApiErrorCode(error),
+  message: getApiErrorMessage(error) ?? fallbackMessage,
+})
+
 const createUploadMetadata = ({
   clientFileId,
   file,
@@ -83,10 +98,10 @@ const initiateImageUploads = async (photos: PreparedPhotoUpload[]) => {
   })
 
   if (!response.ok) {
-    throw new ApiError(response.status, {
-      message:
-        getApiErrorMessage(error) ?? `Image upload initialization failed with ${response.status}`,
-    })
+    throw new ApiError(
+      response.status,
+      getApiErrorData(error, `Image upload initialization failed with ${response.status}`)
+    )
   }
 
   if (!data?.sessions || data.sessions.length !== photos.length) {
@@ -102,10 +117,10 @@ const completeImageUploads = async (uploadIds: string[]): Promise<void> => {
   })
 
   if (!response.ok) {
-    throw new ApiError(response.status, {
-      message:
-        getApiErrorMessage(error) ?? `Image upload confirmation failed with ${response.status}`,
-    })
+    throw new ApiError(
+      response.status,
+      getApiErrorData(error, `Image upload confirmation failed with ${response.status}`)
+    )
   }
 }
 
@@ -116,9 +131,10 @@ const createPost = async (payload: SchemaCreatePostDto): Promise<PublishPostResu
   })
 
   if (!response.ok) {
-    throw new ApiError(response.status, {
-      message: getApiErrorMessage(error) ?? `Post publication failed with ${response.status}`,
-    })
+    throw new ApiError(
+      response.status,
+      getApiErrorData(error, `Post publication failed with ${response.status}`)
+    )
   }
 
   if (!data) {

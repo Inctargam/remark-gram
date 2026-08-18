@@ -7,6 +7,7 @@ import { exportEditedImage } from '../lib/exportEditedImage'
 import { createPostDraftFromState } from './createPostDraft'
 import { validateCreatePostFiles } from './createPostFile'
 import type { CreatePostStep } from './createPostFlow'
+import { getCreatePostPublishErrorMessage } from './createPostPublishError'
 import { useCreatePostDraft } from './useCreatePostDraft'
 import { useCreatePostPhotos } from './useCreatePostPhotos'
 
@@ -142,8 +143,8 @@ export const useCreatePostFlow = () => {
             resetFlowHandler()
             onSuccess()
           },
-          onError: () => {
-            setPublishError('Failed to publish the post. Please try again.')
+          onError: (error) => {
+            setPublishError(getCreatePostPublishErrorMessage(error))
           },
         }
       )
