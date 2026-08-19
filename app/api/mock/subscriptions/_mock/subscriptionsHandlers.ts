@@ -7,8 +7,11 @@ import {
   setAutoRenewal,
 } from '@/shared/api/mock/subscriptionsStore'
 
-/** Where the payment-service stub lives. Real Stripe would return its own hosted url here. */
-const MOCK_CHECKOUT_PATH = '/payments/mock-checkout'
+/** Where the payment-service stubs live. Real services would return their own hosted url here. */
+const MOCK_CHECKOUT_PATHS: Record<PaymentProvider, string> = {
+  stripe: '/payments/mock-checkout',
+  paypal: '/payments/mock-paypal',
+}
 
 const PAYMENT_PROVIDERS: PaymentProvider[] = ['stripe', 'paypal']
 const CHECKOUT_OUTCOMES: CheckoutOutcome[] = ['success', 'failed']
@@ -61,7 +64,7 @@ export const createCheckoutSessionHandler = async (request: Request) => {
   return Response.json(
     {
       sessionId: session.id,
-      checkoutUrl: `${MOCK_CHECKOUT_PATH}?${searchParams.toString()}`,
+      checkoutUrl: `${MOCK_CHECKOUT_PATHS[body.provider]}?${searchParams.toString()}`,
     },
     { status: 201 }
   )

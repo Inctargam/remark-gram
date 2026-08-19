@@ -54,6 +54,18 @@ export const BusinessWithoutSubscription: Story = {
   },
 }
 
+/** Кнопка PayPal запускает тот же сценарий покупки с провайдером paypal. */
+export const PaypalProviderSelect: Story = {
+  args: {
+    accountType: 'business',
+  },
+  play: async ({ canvas, args }) => {
+    await userEvent.click(canvas.getByRole('button', { name: 'Pay with PayPal' }))
+
+    expect(args.onProviderSelect).toHaveBeenCalledWith('paypal')
+  },
+}
+
 /** Активная подписка: сверху Current Subscription, Personal заблокирован, заголовок планов другой. */
 export const BusinessWithSubscription: Story = {
   args: {

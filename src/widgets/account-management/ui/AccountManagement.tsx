@@ -52,12 +52,15 @@ export const AccountManagement = () => {
         onProviderSelect={startPayment}
       />
 
-      <PaymentConsentModal
-        open={consentProvider !== null}
-        isPending={isCheckoutPending}
-        onConfirm={confirmPayment}
-        onOpenChange={cancelPayment}
-      />
+      {consentProvider ? (
+        <PaymentConsentModal
+          open
+          provider={consentProvider}
+          isPending={isCheckoutPending}
+          onConfirm={confirmPayment}
+          onOpenChange={cancelPayment}
+        />
+      ) : null}
 
       <PaymentResultModal outcome={paymentResult} onClose={closePaymentResult} />
     </>

@@ -61,6 +61,21 @@ describe('createCheckoutSessionHandler', () => {
     expect(searchParams.get('returnUrl')).toBe(RETURN_URL)
   })
 
+  it('returns a paypal checkout url for the paypal provider', async () => {
+    const response = await createSession({
+      planId: 'day',
+      provider: 'paypal',
+      returnUrl: RETURN_URL,
+    })
+    const { sessionId, checkoutUrl } = await response.json()
+    const { pathname, searchParams } = new URL(checkoutUrl, MOCK_API_ORIGIN)
+
+    expect(response.status).toBe(201)
+    expect(pathname).toBe('/payments/mock-paypal')
+    expect(searchParams.get('sessionId')).toBe(sessionId)
+    expect(searchParams.get('returnUrl')).toBe(RETURN_URL)
+  })
+
   it('rejects an unknown plan', async () => {
     const response = await createSession({
       planId: 'century',

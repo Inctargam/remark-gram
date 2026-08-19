@@ -61,6 +61,16 @@ describe('completeCheckoutSession', () => {
     expect(payment.dateOfPayment).toBe(new Date(NOW_MS).toISOString())
   })
 
+  it('logs a paypal purchase with the paypal payment type', () => {
+    buy('day', NOW_MS, 'paypal')
+
+    const [payment] = listPayments({ page: 1, pageSize: 10 }).items
+    const subscription = getAccountStatus().subscriptions.at(-1)
+
+    expect(payment.paymentType).toBe('paypal')
+    expect(subscription?.provider).toBe('paypal')
+  })
+
   it('leaves the account untouched when the payment fails', () => {
     const session = createCheckoutSession({ planId: 'day', provider: 'stripe' })
     const result = completeCheckoutSession({
