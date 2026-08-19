@@ -4,6 +4,19 @@
 
 ## Unreleased
 
+### 2026-08-20
+
+#### Auth
+
+- Моковая авторизация через `/api/mock/auth/me` включается по умолчанию, если `NEXT_PUBLIC_AUTH_MOCK` не задан; явное значение `false` сохраняет переключение на настоящий backend.
+- Production-сборка без локального `.env.local` получает мокового текущего пользователя, поэтому owner-only элементы профиля, включая `Profile Settings`, доступны на временных моках.
+
+#### Verification
+
+- ESLint `SessionBootstrap.tsx` прошёл без ошибок и предупреждений.
+- Focused Storybook-проверка `ProtectedRoute.stories.tsx` прошла: 1 файл, 7 тестов.
+- Production build Next.js прошёл; маршрут `/api/mock/auth/me` зарегистрирован.
+
 ### 2026-08-19
 
 #### Profile API
