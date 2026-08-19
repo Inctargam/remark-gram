@@ -4,6 +4,21 @@
 
 ## Unreleased
 
+### 2026-08-19
+
+#### Profile Posts
+
+- Real API для списка постов профиля переключён на контракт OpenAPI `GET /api/v1/users/{userId}/posts` с query-параметром `limit` вместо несуществующего `GET /api/v1/posts?userId=...&pageSize=...`; backend DTO маппится в стабильную UI-модель поста.
+- Для загрузки постов профиля добавлена TanStack Query retry policy: постоянные client errors (`4xx`, включая отсутствующий `GET /api/v1/posts`) больше не повторяются автоматически, а временные server/network ошибки всё ещё retry-ятся до лимита.
+- Real profile posts query не отправляет запросы с mock/non-numeric `userId` и не пытается продолжать пагинацию mock cursor-ом, пока current user/profile ещё не переведены на backend id.
+- Удалён устаревший public API `entities/post.createPost`, который отправлял пост с `images` как JSON; production create-post flow теперь доступен только через presigned upload adapter и финальный `{ imageIds }` payload.
+
+#### Verification
+
+- `pnpm exec vitest run --project unit src/entities/post/api/profilePostsQueryData.test.ts src/entities/post/api/postsApi.test.ts` прошёл.
+- `pnpm exec tsc --noEmit --pretty false` прошёл.
+- Focused ESLint для profile posts query files прошёл.
+
 ### 2026-08-18
 
 #### Create Post

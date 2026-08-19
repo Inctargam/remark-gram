@@ -3,7 +3,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ApiError } from '@/shared/api/baseApi'
 
 import type { Post } from '../model/types'
-import { createPost, deletePost, getPost, getProfilePosts, updatePost } from './postsApi'
+import {
+  canRequestProfilePosts,
+  deletePost,
+  getPost,
+  getProfilePosts,
+  updatePost,
+} from './postsApi'
 
 const post: Post = {
   id: 'post-1',
@@ -45,6 +51,18 @@ afterEach(() => {
 })
 
 describe('getProfilePosts', () => {
+  it('allows mock profile ids when the mock flag is on', () => {
+    expect(canRequestProfilePosts('mock-user-1')).toBe(true)
+  })
+
+  it('allows only positive integer author ids for the real backend', () => {
+    vi.stubEnv('NEXT_PUBLIC_POSTS_API_MOCK', 'false')
+
+    expect(canRequestProfilePosts('7')).toBe(true)
+    expect(canRequestProfilePosts('mock-user-1')).toBe(false)
+    expect(canRequestProfilePosts('0')).toBe(false)
+  })
+
   it('requests the first page with the default page size', async () => {
     respondWith({ items: [post], nextCursor: null })
 
@@ -74,11 +92,58 @@ describe('getProfilePosts', () => {
 
   it('targets the real backend path when the mock flag is off', async () => {
     vi.stubEnv('NEXT_PUBLIC_POSTS_API_MOCK', 'false')
+    respondWith({
+      items: [
+        {
+          id: 42,
+          authorId: 7,
+          description: 'Real publication',
+          createdAt: '2026-08-19T10:00:00.000Z',
+          images: [{ fileId: 'file-1', position: 0, url: 'https://example.com/file-1.jpg' }],
+        },
+      ],
+      hasMore: true,
+      nextCursor: 'encoded-cursor',
+    })
+
+    await expect(getProfilePosts({ userId: '7' })).resolves.toEqual({
+      items: [
+        {
+          id: '42',
+          ownerId: '7',
+          ownerUsername: 'User 7',
+          ownerAvatarUrl: null,
+          images: [{ url: 'https://example.com/file-1.jpg', width: 0, height: 0 }],
+          description: 'Real publication',
+          createdAt: '2026-08-19T10:00:00.000Z',
+          updatedAt: '2026-08-19T10:00:00.000Z',
+        },
+      ],
+      nextCursor: 'encoded-cursor',
+    })
+
+    expect(getRequestedUrl()).toContain('/api/v1/users/7/posts?limit=8')
+    expect(getRequestedUrl()).not.toContain('/api/v1/posts?')
+    expect(getRequestedUrl()).not.toContain('userId=')
+  })
+
+  it('uses backend cursor pagination params for the real author posts endpoint', async () => {
+    vi.stubEnv('NEXT_PUBLIC_POSTS_API_MOCK', 'false')
     respondWith({ items: [], nextCursor: null })
 
-    await getProfilePosts({ userId: 'user-1' })
+    await getProfilePosts({ userId: '7', cursor: 'encoded-cursor', pageSize: 4 })
 
-    expect(getRequestedUrl()).toContain('/api/v1/posts?')
+    expect(getRequestedUrl()).toContain('/api/v1/users/7/posts?limit=4&cursor=encoded-cursor')
+  })
+
+  it('does not request the real backend with a mock profile id', async () => {
+    vi.stubEnv('NEXT_PUBLIC_POSTS_API_MOCK', 'false')
+
+    await expect(getProfilePosts({ userId: 'mock-user-1' })).resolves.toEqual({
+      items: [],
+      nextCursor: null,
+    })
+    expect(fetchMock).not.toHaveBeenCalled()
   })
 })
 
@@ -95,17 +160,6 @@ describe('getPost', () => {
 
     await expect(getPost('missing')).rejects.toThrow(ApiError)
     await expect(getPost('missing')).rejects.toThrow('Post not found.')
-  })
-})
-
-describe('createPost', () => {
-  it('posts the description with the images to the collection path', async () => {
-    respondWith(post, 201)
-
-    await expect(createPost({ description: 'New', images: post.images })).resolves.toEqual(post)
-    expect(getRequestedUrl()).toContain('/api/mock/posts')
-    expect(getRequestInit().method).toBe('POST')
-    expect(getRequestInit().body).toBe(JSON.stringify({ description: 'New', images: post.images }))
   })
 })
 
