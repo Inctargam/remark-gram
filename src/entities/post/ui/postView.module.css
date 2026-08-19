@@ -9,7 +9,9 @@
 .side {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
+  height: 100%;
   min-width: 0;
+  overflow: hidden;
   border-left: 1px solid var(--color-dark-100);
 }
 
@@ -21,6 +23,8 @@
 }
 
 .content {
+  box-sizing: border-box;
+  height: auto;
   min-height: 0;
   padding: 24px;
 }
@@ -72,10 +76,66 @@
 }
 
 .engagement {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   padding: 12px 24px;
 }
 
-/* Publication date sits under the likes row, above the divider — as in the design. */
+.actions {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  color: var(--color-light-100);
+}
+
+.action {
+  display: flex;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+}
+
+.action:disabled {
+  color: var(--color-light-900);
+  cursor: default;
+}
+
+.bookmark {
+  margin-left: auto;
+}
+
+.likes {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  color: var(--color-light-100);
+  font-size: var(--font-size-regular-14);
+  font-weight: var(--font-weight-regular-14);
+  line-height: var(--line-height-regular-14);
+}
+
+.likeAvatars {
+  display: flex;
+}
+
+.likeAvatar {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--color-dark-300);
+  border-radius: 50%;
+  background-color: var(--color-dark-100);
+}
+
+.likeAvatar + .likeAvatar {
+  margin-left: -8px;
+}
+
+.likeCount {
+  font-weight: var(--font-weight-bold-14);
+}
+
 .publishedAt {
   margin: 8px 0 0;
   color: var(--color-light-900);

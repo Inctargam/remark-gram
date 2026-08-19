@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useState } from 'react'
 
 import {
   clearCreatePostDraft,
@@ -10,17 +10,17 @@ import {
 export const useCreatePostDraft = () => {
   const [hasDraft, setHasDraft] = useState(() => Boolean(getCreatePostDraft()))
 
-  const saveDraftHandler = useCallback((draft: CreatePostDraft) => {
+  const saveDraftHandler = (draft: CreatePostDraft) => {
     saveCreatePostDraft(draft)
     setHasDraft(true)
-  }, [])
+  }
 
-  const getDraftHandler = useCallback(() => getCreatePostDraft(), [])
+  const getDraftHandler = () => getCreatePostDraft()
 
-  const clearDraftHandler = useCallback(() => {
+  const clearDraftHandler = () => {
     clearCreatePostDraft()
     setHasDraft(false)
-  }, [])
+  }
 
   return {
     hasDraft,

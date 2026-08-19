@@ -4,7 +4,446 @@
 
 ## Unreleased
 
+### 2026-08-16
+
+#### Payments
+
+- Оплата через PayPal (ветка `feat/payments_paypal`) добавлена в существующий мок-флоу покупки по аналогии со Stripe: провайдер остаётся параметром одного сценария, отдельная ветка не создавалась.
+- Мок-хендлер `subscriptions/checkout` теперь возвращает провайдер-специфичный `checkoutUrl`: `stripe` → `/payments/mock-checkout`, `paypal` → `/payments/mock-paypal`.
+- Добавлена заглушка hosted approval-страницы PayPal (`/payments/mock-paypal`, FSD-слайс `pages/mock-paypal`): кнопки `Approve`/`Cancel` (вместо `Pay`/`Cancel` у Stripe), capture имитируется существующим `completeCheckoutSession` через `useCompleteCheckoutMutation`, импортированный из публичного API `pages/mock-checkout` без переноса файлов.
+- Consent-модалка создания платежа показывает бренд-логотип выбранного провайдера (`icon-paypal`/`icon-stripe`); текст согласия остался общим для обоих провайдеров.
+- Добавлены env-константы PayPal: `NEXT_PUBLIC_PAYPAL_CLIENT_ID` (пустой до появления бэкенда) и `NEXT_PUBLIC_PAYPAL_SANDBOX`, а также модуль `shared/config/paypal.ts` с `PAYPAL_CLIENT_ID`, `PAYPAL_SANDBOX` и `PAYPAL_APPROVAL_BASE_URL`.
+- В `entities/subscription/api/subscriptionsApi.ts` зафиксирован TODO-шов `TODO(paypal-capture)`: реальный возвратный флоу PayPal (`token`/`PayerID` → capture) появится после бэкенда, мок-флоу ничего дополнительно не требует.
+- В `.env.local` добавлен отсутствовавший флаг `NEXT_PUBLIC_PAYMENTS_API_MOCK=true` — без него вкладка Account Management ходила на реальный бэкенд `remark-gram.com` и не загружалась (`ERR_TIMED_OUT`).
+
+#### Verification
+
+- `pnpm test:unit` прошёл: 360 тестов.
+- `pnpm vitest run --project storybook` прошёл: 305 тестов (для запуска установлен Playwright-браузер Chromium).
+- `pnpm lint` прошёл: 0 ошибок (1158 предупреждений prettier в сгенерированном `schema.d.ts`, существовавших до изменений).
+- `pnpm build` прошёл успешно, роут `/payments/mock-paypal` присутствует в сборке.
+- `tsc --noEmit` не завершается из-за существующих ссылок `.next/types/validator.ts` на отсутствующие mock payment routes; изменённые файлы новых TypeScript-ошибок не добавили.
+
+#### Notes
+
+- Реальный возвратный флоу PayPal (approve-редирект с `token`/`PayerID` и server-to-server capture) — зона бэкенда; на моках не имитируется, задокументирован как `TODO(paypal-capture)`.
+- Коммиты: `858ccd5`, `7ff3f8f`, `3a62536`, `7f020d7`, `3425c56`.
+
+### 2026-08-15
+
+#### Header
+
+- Desktop-header сохраняет функциональный API уведомлений для авторизованного состояния: необязательные `notificationCount` и `onBellClick`, badge с ограничением `99+`, доступную кнопку и focus-visible состояние.
+- Адаптивная геометрия App Shell и управление гостевыми auth-действиями сохранены; пользовательский бренд в desktop/mobile header, metadata, stories и документации унифицирован как `Remarkgram`.
+- Storybook-документация Header объединяет гостевые состояния текущей оболочки и сценарии количества уведомлений, переполнения badge и клика по колокольчику.
+
+#### Verification
+
+- Локальный `tsc --noEmit --pretty false` прошёл успешно.
+- Локальные ESLint и stylelint для изменённых Header/Profile story и CSS-файлов прошли успешно.
+- Prettier для затронутых Header, Profile story и документационных файлов прошёл успешно.
+- Локальный Storybook Vitest runner прошёл: 3 файла, 26 тестов; после завершения runner сообщил предупреждения о preload assets и задержке закрытия процесса.
+- Storybook MCP недоступен в текущей сессии, поэтому проверка выполнена локальным Storybook Vitest runner.
+
+### 2026-08-13
+
+#### Settings
+
+- Страница настроек приведена к мобильной геометрии Figma: добавлены заголовок со ссылкой назад на профиль, точные отступы аватара и формы, а также размеры вкладок для viewport `360×1068`.
+- Мобильная лента вкладок прокручивается горизонтальным свайпом без видимого scrollbar и автоматически показывает активную вкладку при прямом открытии раздела.
+- Кнопка удаления аватара получила отдельные desktop- и mobile-размеры; фотография использует круговой CSS-mask-вырез под кнопку вместо имитации зазора тёмным border. Ширины кнопок выбора фотографии и сохранения уточнены по desktop-макету.
+- Два зависимых поля локации сохранены и на mobile, поэтому форма остаётся функциональной и продолжается ниже высоты референсного фрейма.
+
+#### Verification
+
+- 18 unit-тестов `settingsPart` и `editProfileMappers` прошли локально.
+- 15 Storybook-тестов `SettingsPage` и `ProfileAvatar` прошли в Chromium; отдельные повторные запуски 5 сценариев `SettingsPage` и 11 сценариев `ProfileAvatar` подтвердили координаты mobile-фрейма, автопрокрутку вкладок, положение кнопки удаления аватара и применение маски без border.
+- ESLint изменённых TS/TSX-файлов прошёл через локальный исполняемый файл проекта.
+- Stylelint модулей `SettingsPage` и `EditProfileForm` прошёл; в существующем `manageProfileAvatar.module.css` остаются ранее добавленные нарушения для deprecated `clip`, порядка свойств и CSS Modules `:global`.
+
+#### Notes
+
+- Команды через глобальный `pnpm` не запустились из-за недоступной проверки подписи закреплённой версии `pnpm 10.24.0`; проверки выполнены локальными бинарными файлами без изменения зависимостей.
+- `tsc --noEmit` по-прежнему блокируется существующими ссылками `.next/types/validator.ts` на отсутствующие mock payment routes; изменённые файлы новых TypeScript-ошибок не добавили.
+- Storybook MCP был недоступен в текущей сессии; документация и сценарии компонентов проверены по исходникам, поведение — локальным Storybook/Vitest runner.
+
+#### App Shell
+
+- Desktop-оболочка получила общий центрированный контейнер шириной не более `1280px`, поэтому sidebar и основной контент сохраняют выравнивание с внутренним контейнером header на широких экранах.
+- Высота и поведение sidebar при прокрутке не изменялись.
+- Storybook-сценарий оболочки проверяет ширину `1280px` и симметричные поля контейнера внутри области шириной `1440px`.
+- Desktop-header сохраняет внешнюю высоту `60px`: нижний разделитель отрисовывается внутренней тенью без добавления пикселя к потоку документа.
+- Правый отступ header и высота desktop-переключателя языка приведены к геометрии Figma; общий Select и mobile-переключатель не изменялись.
+- Storybook-сценарий профиля проверяет координаты переключателя языка, кнопки `Profile Settings` и начало контента по desktop-фрейму `304:3572`.
+- Правые края переключателя языка, профильной шапки и сетки публикаций синхронно следуют за шириной desktop-оболочки; четыре desktop-колонки плавно сжимаются между полной и tablet-компоновкой.
+- Из CSS профиля удалены дублирующие глобальные значения основного цвета текста и базового шрифта; локальные reset- и sticky-правила сохранены там, где обеспечивают изоляцию компонентов.
+- Storybook-сценарий профиля дополнен проверкой единого правого края при ширинах `1270px`, `1240px` и `1100px`.
+- Удалено преждевременное вертикальное перестроение строки username и `Profile Settings` на tablet: до mobile breakpoint элементы сохраняют общий правый край, а при переходе на mobile кнопка скрывается по существующему правилу.
+- Добавлен tablet-сценарий профиля, проверяющий выравнивание переключателя языка, кнопки настроек и трёхколоночной сетки при ширине `768px`.
+- Для viewport шире `1440px` оболочка использует отдельную wide-композицию: sidebar и логотип закреплены у левого края, а профиль шириной `972px` центрируется в оставшейся main-области без увеличения карточек и типографики.
+- Header на wide desktop повторяет сетку `220px + main`; переключатель языка, `Profile Settings` и сетка публикаций сохраняют общий правый край.
+- Добавлен wide desktop-сценарий `1920×1080`, проверяющий позиции sidebar, логотипа и правой границы профильного контента.
+
+#### Verification
+
+- Все 5 Storybook-тестов `AppShellView` прошли локально в Chromium через проектный Vitest runner.
+- Все 13 Storybook-тестов `Header` и `ProfilePage`, включая точную desktop-геометрию, прошли локально в Chromium через проектный Vitest runner.
+- После адаптивной правки все 8 Storybook-тестов `ProfilePage`, включая новый tablet-сценарий, повторно прошли локально в Chromium.
+- ESLint story-файла оболочки и stylelint CSS-модуля оболочки прошли через локальные исполняемые файлы проекта.
+- ESLint изменённых TSX-файлов header/profile и stylelint CSS-модулей header прошли через локальные исполняемые файлы проекта.
+- Stylelint CSS-модулей профиля и сетки публикаций прошёл через локальные исполняемые файлы проекта.
+- Все 20 Storybook-тестов `AppShellView`, `Header` и `ProfilePage`, включая wide desktop `1920×1080`, прошли локально в Chromium.
+- Wide-композиция дополнительно проверена локальным скриншотом Storybook при `1920×1080`; временный снимок после проверки удалён.
+
+### 2026-08-12
+
+#### Home
+
+- Главная страница приведена ближе к Figma frame `26786:11274`: добавлен счетчик registered users с шестью цифровыми ячейками, сетка из четырех карточек шириной по макету и карточка публикации с изображением, аватаром, username, временем, описанием и ссылочным `Show more`.
+- Карточка публикации на главной показывает только preview первого фото; стрелки и точки для нескольких фото остаются только внутри post modal.
+- Первые seeded mock-посты теперь содержат по 5 фото, чтобы открытая post modal показывала реальные стрелки и точки галереи как в Figma-макете.
+- Цвета и рамка post modal выровнены с Figma: popup получил border `Dark/100`, radius `2px`, а gallery controls используют `Dark/300` поверх изображения.
+- Mock-счетчик зарегистрированных пользователей обновлен до `9 213`, чтобы стартовое состояние соответствовало макету.
+- Логотип desktop/mobile header унифицирован под пользовательский бренд `Remarkgram` из metadata приложения.
+- `formatPostRelativeTime()` и `getPostImageAlt()` открыты через публичный API `entities/post`, чтобы home-компоненты не импортировали приватные internals.
+
+#### Post Modal
+
+- Static comments list вынесен из stub-файлов в обычный UI-компонент, а mock-данные комментариев и reply-ветки оформлены в model-слое `entities/post`.
+- Post modal для неавторизованного пользователя больше не показывает `Add a Comment...`, `Publish`, `Like`, `Share` и `Save`; у авторизованного пользователя эти элементы отображаются в модалке.
+- Ответы на комментарий открываются и скрываются кнопкой `View Answers` / `Hide Answers` у авторизованных и неавторизованных пользователей, но только у комментариев с reply-веткой.
+- Новые mock-комментарии в post modal добавляются в начало списка, чтобы свежая публикация была видна сразу без прокрутки вниз.
+
+#### Verification
+
+- `pnpm exec tsc --noEmit --pretty false` прошёл успешно.
+- `pnpm exec vitest run --project unit src/shared/api/homePageData.test.ts src/entities/post/lib/formatPostRelativeTime.test.ts` прошёл успешно.
+- `pnpm exec vitest run --project unit src/entities/post/model/postComments.test.ts` прошёл успешно.
+- `pnpm exec vitest run --project unit src/entities/post/api/postCommentsApi.test.ts src/entities/post/model/postComments.test.ts` прошёл успешно.
+- `pnpm exec tsc --noEmit --pretty false`, `pnpm exec eslint src/entities/post/model/usePostAnswers.ts src/entities/post/ui/PostComments.tsx src/entities/post/ui/PostView.tsx src/entities/post/ui/PostView.stories.tsx` и `pnpm exec vitest run --project storybook src/entities/post/ui/PostView.stories.tsx` прошли успешно после правки guest/auth post modal.
+- Playwright smoke подтвердил, что guest post modal не показывает форму комментария и action icons, authenticated post modal показывает их, а `View Answers (1)` раскрывает reply-ветку комментария и меняется на `Hide Answers`.
+- `pnpm exec vitest run --project unit src/shared/api/mock/postsStore.test.ts src/entities/post/lib/postGallery.test.ts src/shared/api/homePageData.test.ts` прошёл успешно.
+- `pnpm exec vitest run --project storybook src/entities/post/ui/PostView.stories.tsx src/pages/profile/ui/ProfilePage.stories.tsx` прошёл успешно.
+- `pnpm exec eslint src/pages/home/ui/HomePage.tsx src/pages/home/ui/HomePostsGrid.tsx src/pages/home/ui/HomePostCard.tsx src/pages/home/ui/HomeRegisteredUsersCounter.tsx src/widgets/header/Header.tsx src/widgets/header/HeaderMobile.tsx src/pages/home/ui/HomePage.stories.tsx src/widgets/header/Header.stories.tsx src/widgets/header/HeaderMobile.stories.tsx src/shared/api/homePageData.test.ts src/entities/post/index.ts` прошёл успешно.
+- `pnpm exec eslint src/shared/api/mock/postsStore.ts src/entities/post/ui/PostView.stories.tsx src/entities/post/index.ts src/pages/home/ui/HomePostCard.tsx src/pages/home/ui/HomePostsGrid.tsx src/pages/home/ui/HomePage.stories.tsx` прошёл успешно.
+- `pnpm exec eslint src/entities/post/ui/PostView.stories.tsx src/entities/post/index.ts src/shared/api/mock/postsStore.ts` прошёл успешно.
+- `pnpm exec prettier --check CHANGELOG.md src/entities/post/ui/postGallery.module.css src/entities/post/ui/postViewModal.module.css src/entities/post/ui/PostView.stories.tsx` прошёл успешно.
+- `pnpm lint` прошёл без ошибок; остались существующие warnings в generated OpenAPI schema и `useSignUpForm`.
+- `pnpm exec prettier --check CHANGELOG.md src/entities/post/index.ts src/pages/home/ui/HomePage.tsx src/pages/home/ui/HomePostsGrid.tsx src/pages/home/ui/HomePostCard.tsx src/pages/home/ui/HomeRegisteredUsersCounter.tsx src/pages/home/ui/homePage.module.css src/pages/home/ui/HomePage.stories.tsx src/shared/api/homePageData.test.ts src/shared/api/mock/usersCountStore.ts src/widgets/header/Header.tsx src/widgets/header/HeaderMobile.tsx src/widgets/header/Header.stories.tsx src/widgets/header/HeaderMobile.stories.tsx` прошёл успешно.
+- Storybook MCP `run-story-tests` для `pages-home-homepage--default` и `pages-home-homepage--no-posts` прошёл успешно.
+- Storybook MCP `run-story-tests` для `entities-post-postview--publish-comment`, `entities-post-postview--other-user-post` и `entities-post-postview--several-photos` функционально прошёл; a11y по-прежнему показывает contrast warning у Figma-серого `#8d9094` на `#333333`.
+- Storybook MCP `run-story-tests` для `entities-post-postview--several-photos` и `pages-home-homepage--default` функционально прошёл; a11y по-прежнему показывает contrast warning у Figma-серого `#8d9094` на `#333333`.
+- Storybook MCP `run-story-tests` и `preview-stories` для повторной проверки `entities-post-postview--publish-comment` и `pages-profilepage--open-post-from-home` не завершились за 300 секунд; сценарии проверены локально через Vitest и браузерный smoke.
+- Storybook MCP `run-story-tests` для `widgets-header--logo-link` и `widgets-headermobile--logo-link` прошёл успешно без a11y; a11y для desktop header по-прежнему показывает contrast warning у существующей primary-кнопки `Sign up` на Figma-синем фоне.
+
+#### Profile SSR
+
+- Переходы к просмотру публикации унифицированы: посты на главной ведут на `/profile/{ownerId}?postId={postId}&returnTo=/`, а профильная модалка использует общий helper для закрытия.
+- На главной просмотр поста открывается поверх текущего списка публикаций без визуального перехода на профильный список автора; прямой вход по URL всё ещё открывает профиль с выбранным постом.
+- Закрытие post modal теперь возвращает на `/` только при безопасном `returnTo=/`; внешние и небезопасные значения игнорируются, а обычное закрытие остаётся на профиле автора без `postId`.
+- Storybook-сценарии главной и профиля проверяют URL открытия поста с главной, прямой вход с `postId` и возврат через `returnTo`.
+- Direct SSR-вход с `initialSelectedPost` используется как fallback для выбранного поста, когда `useSearchParams()` ещё недоступен на клиенте.
+- Owner-only элементы профиля больше не вычисляются на сервере через mock owner id: `Profile Settings` и меню действий поста появляются только после клиентского `/me`, а на время `loading` показываются skeleton-состояния.
+- Skeleton-состояния owner-only элементов получили `role="status"`, чтобы их доступные имена были валидными для Storybook a11y.
+- Route/modal state для просмотра, редактирования и удаления поста вынесен из `ProfilePostsGrid` в отдельный hook, чтобы widget-компонент отвечал только за загрузку списка и композицию UI.
+- SSR selected post reader перенесён в `entities/post` server API boundary: `getProfilePostServer()` сразу проверяет принадлежность `postId` к `userId`, поэтому профильная page больше не держит отдельную domain-проверку.
+- Home SSR reader покрыт unit-тестом на контракт latest posts и registered users count перед будущим переключением mock layer на backend.
+- Baseline Storybook-сценарии на mock boundary теперь проверяют полный open/close цикл post modal с главной и открытый пост чужого пользователя без owner actions.
+- SSR-гидратация постов профиля переведена с quick-start `initialData` на рекомендуемый TanStack Query pattern: server-side `prefetchInfiniteQuery`, `dehydrate` и `HydrationBoundary` вокруг клиентской сетки.
+- `QueryProvider` обновлён на SSR-safe создание `QueryClient`, чтобы клиентский cache не пересоздавался при initial render suspend.
+- Storybook-сценарии профиля теперь поднимают тот же hydrated cache, что и production-путь, без отдельного `initialData` prop в `ProfilePageView`.
+
+#### Auth
+
+- Session store теперь хранит текущего пользователя из mock `/me`, чтобы UI мог проверять ownership по `/me.id`, а не по синхронному mock helper.
+- Mock auth bootstrap сохраняет user payload из `/api/mock/auth/me`; logout и guest state очищают `currentUser`.
+
+#### Verification
+
+- `pnpm exec vitest run --project unit src/widgets/profile-posts/lib/profilePostUrl.test.ts` прошёл успешно.
+- `pnpm exec vitest run --project unit src/shared/auth/sessionStore.test.ts src/shared/auth/checkMockAuth.test.ts src/shared/auth/refreshSession.test.ts src/features/logout/api/useLogoutMutation.test.ts` прошёл успешно.
+- `pnpm exec vitest run --project unit src/entities/post/api/postsApi.server.test.ts src/pages/profile/api/profile.server.test.ts src/shared/api/homePageData.test.ts` прошёл успешно.
+- `pnpm exec vitest run --project unit src/entities/post/api/profilePostsHydration.server.test.ts src/entities/post/api/profilePostsQueryData.test.ts` прошёл успешно.
+- `pnpm exec vitest run --project unit src/widgets/profile-posts/lib/profilePostUrl.test.ts src/entities/post/api/postsApi.server.test.ts src/pages/profile/api/profile.server.test.ts src/shared/api/homePageData.test.ts src/shared/auth/sessionStore.test.ts src/shared/auth/checkMockAuth.test.ts` прошёл успешно.
+- `pnpm test:unit` прошёл: 46 файлов, 266 тестов.
+- `pnpm exec tsc --noEmit --pretty false`, `pnpm test:unit` и `pnpm exec eslint --quiet` прошли успешно при финальной проверке ветки.
+- Playwright smoke проверил открытие post modal с Home с возвратом на `/` и direct/profile URL с возвратом на профиль автора.
+- `pnpm exec vitest run --project storybook src/pages/home/ui/HomePage.stories.tsx src/pages/profile/ui/ProfilePage.stories.tsx` прошёл успешно.
+- `pnpm exec vitest run --project storybook src/pages/profile/ui/ProfilePage.stories.tsx src/app/providers/ProtectedRoute.stories.tsx` прошёл успешно.
+- `pnpm exec vitest run --project storybook src/pages/profile/ui/ProfilePage.stories.tsx` прошёл успешно после выноса modal state в hook.
+- `pnpm exec tsc --noEmit --pretty false` прошёл успешно.
+- `pnpm exec eslint src/app/providers/QueryProvider.tsx src/entities/post/api/profilePostsHydration.server.ts src/entities/post/api/profilePostsQueryData.ts src/entities/post/api/useProfilePostsQuery.ts src/entities/post/index.ts src/entities/post/index.server.ts src/widgets/profile-posts/ui/ProfilePostsGrid.tsx src/pages/profile/ui/ProfilePage.tsx src/pages/profile/ui/ProfilePageView.tsx src/pages/profile/ui/ProfilePage.stories.tsx` прошёл успешно.
+- `pnpm exec eslint src/pages/home/model/useHomePostModal.ts src/pages/home/ui/HomePostsGrid.tsx src/pages/home/ui/HomePage.tsx src/pages/home/ui/HomePage.stories.tsx src/widgets/profile-posts/lib/profilePostUrl.ts src/widgets/profile-posts/lib/profilePostUrl.test.ts src/widgets/profile-posts/ui/ProfilePostsGrid.tsx src/widgets/profile-posts/index.ts src/pages/profile/ui/ProfilePage.stories.tsx` прошёл успешно.
+- `pnpm exec eslint src/shared/auth/sessionStore.ts src/shared/auth/useCurrentUser.ts src/shared/auth/checkMockAuth.ts src/shared/auth/index.ts src/shared/auth/sessionStore.test.ts src/shared/auth/refreshSession.test.ts src/shared/auth/checkMockAuth.test.ts src/features/logout/api/useLogoutMutation.test.ts src/app/providers/ProtectedRoute.stories.tsx src/pages/profile/ui/ProfilePageView.tsx src/pages/profile/ui/ProfileSettingsControl.tsx src/pages/profile/ui/ProfilePage.stories.tsx src/widgets/profile-posts/ui/ProfilePostsGrid.tsx src/widgets/profile-posts/ui/ProfilePostOwnerActions.tsx` прошёл успешно.
+- `pnpm exec eslint src/widgets/profile-posts/model/useProfilePostModal.ts src/widgets/profile-posts/ui/ProfilePostsGrid.tsx src/widgets/profile-posts/ui/ProfilePostOwnerActions.tsx src/pages/profile/ui/ProfilePage.stories.tsx src/shared/auth/sessionStore.ts src/shared/auth/useCurrentUser.ts src/shared/auth/checkMockAuth.ts` прошёл успешно.
+- `pnpm exec eslint src/entities/post/api/postsApi.server.ts src/entities/post/api/postsApi.server.test.ts src/entities/post/index.server.ts src/pages/profile/ui/ProfilePage.tsx src/shared/api/homePageData.ts src/shared/api/homePageData.test.ts` прошёл успешно.
+- `pnpm exec eslint src/pages/home/ui/HomePage.stories.tsx src/pages/profile/ui/ProfilePage.stories.tsx` прошёл успешно.
+- `pnpm build` был остановлен вручную после повторного длительного зависания на этапе `Creating an optimized production build ...` без вывода ошибок.
+- Storybook MCP `get-storybook-story-instructions`, `run-story-tests` и `preview-stories` не завершились за 300 секунд; focused story-тесты запущены локально через Vitest.
+
+### 2026-08-10 — 2026-08-12 (ветка `payments-UC1-4-stripe`, UC-1 – UC-4)
+
+Оплата и подписки целиком на моках (без Stripe SDK и ключей) — до появления бэкенда за платежи отвечает `subscriptionsStore.ts` на `globalThis`, по образцу `postsStore.ts`.
+
+#### Payments
+
+- Домен: сущности `entities/subscription` (тип аккаунта, подписка, каталог планов `day`/`week`/`month`) и `entities/payment` (постраничная история платежей). Весь обмен идёт через `entities/*/api/*Api.ts` — единственные файлы, которые переедут на реальный бэкенд (переключатель `NEXT_PUBLIC_PAYMENTS_API_MOCK`). Пять мок-роутов: `subscriptions/current`, `subscriptions/checkout`, `subscriptions/checkout/{id}/complete`, `subscriptions/auto-renewal`, `payments`.
+- Правила домена — в сторе, не в UI: новая подписка встаёт в конец очереди, автопродление остаётся включённым только у последней подписки, `nextPaymentAt` считается от хвоста очереди. Повторное завершение сессии отбивается `409`.
+- `widgets/account-management` — вкладка «Account Management»: тип аккаунта, планы, блок текущей подписки (очередь — `Table`, строка на подписку, `Next payment` только у хвоста, UC-3), кнопки `Stripe`/`PayPal`. Провайдер — параметр одного сценария (`PaymentProvider`), а не два флоу.
+- `features/buy-subscription` — согласие (`Modal`, не `ConfirmDialog`: по макету одна кнопка), создание сессии, уход на `payments/mock-checkout` (заглушка внешнего сервиса, `pages/mock-checkout`, снимается вместе с мок-API), разбор результата по `?payment=success|failed` после возврата. Переход — полная навигация (`window.location.assign`), не роутер. `returnUrl` принимается только same-origin — иначе открытый редирект.
+- `features/cancel-auto-renewal` — чекбокс `Auto-Renewal` (UC-2), оптимистичное обновление с откатом на ошибке.
+- `widgets/my-payments` — вкладка «My payments» (UC-4): таблица с пагинацией, номер страницы в query (`page`, без `page=1`), размер страницы — локальное состояние.
+- **Интеграция (этап 7):** виджеты подключены в реальный каркас настроек (`/settings`, вкладки `subscriptions`/`payments` из `develop`), временный роут `/profile/settings` и `ROUTES.profileSettings` удалены. Найден и исправлен баг: закрытие модалки результата оплаты стирало из query каркаса весь набор параметров, а не только результат, — из-за этого пользователя сбрасывало на вкладку `General information` вместо `Account Management`.
+
+#### Shared UI
+
+- Новый компонент `shared/ui/table` — компаунд `Table.Root/Head/Body/Row/HeadCell/Cell` со встроенными `Table.Empty` и `Table.Skeleton`, горизонтальный скролл на узких экранах.
+- Заполнен пустой `shared/ui/pagination/index.ts` (импорт через публичный API не компилировался).
+- `shared/lib/date/formatShortDate.ts` — общий формат дат для вкладок подписок и платежей.
+
+#### Tooling
+
+- `withMockDelay` переехал в общий `app/api/mock/_mock/`, переменная переименована в `MOCK_API_DELAY_MS`.
+
+#### Tests
+
+- Стор, мок-хендлеры, слой запросов, парсинг query-параметров, сторис на все состояния виджетов и фич покрыты юнит- и Storybook-тестами на каждом этапе.
+
+#### Shared UI (попутный фикс)
+
+- `shared/ui/modal/Modal.tsx`: у `Dialog.Close` восстановлен `disabled={dismissDisabled}` — атрибут потерялся при мердже каркаса настроек (`fb2610a`), из-за чего кнопка закрытия модалки оставалась активной во время pending-состояния. Ломало три сторис-теста (`Modal`, `ConfirmDialog`, `ProfileAvatar`), не связанных с этой веткой напрямую, но обнаруженных при её `pnpm test:storybook`.
+
+#### Verification
+
+- Финальное состояние перед PR: `pnpm exec tsc --noEmit`, `pnpm lint` (0 ошибок), `pnpm build` — все чисто. `pnpm test:unit` — 318 тестов пройдено.
+- `pnpm test:storybook` — 274 теста, все пройдены после фикса `Modal.tsx` (до фикса было 3 упавших из-за чужого бага в мердже).
+
+#### Notes
+
+- PayPal (Р4, Б2): слот `onProviderSelect`/`PaymentProvider` на месте, но согласование точки подключения с разработчиком B не проведено — открытый вопрос вне кода.
+- Смена типа аккаунта на `Personal` после окончания подписки — зона бэкенда, на фронте не реализована умышленно.
+
+#### App Shell
+
+- На desktop общий header теперь прокручивается вместе с документом, а sidebar после прокрутки header закрепляется у верхнего края viewport и занимает всю доступную высоту.
+- Mobile-поведение не изменено: верхняя и нижняя навигация сохраняют существующее sticky-позиционирование.
+- Storybook-сценарии оболочки и профиля обновлены для проверки нового поведения desktop-прокрутки.
+
+#### Verification
+
+- Все 12 Storybook-тестов `AppShellView` и `ProfilePage` прошли локально в Chromium через проектный Vitest runner.
+- ESLint затронутых TSX-файлов и stylelint CSS-модуля оболочки прошли через локальные исполняемые файлы проекта.
+- `tsc --noEmit` не завершился из-за существующих ссылок в `.next/types/validator.ts` на отсутствующие mock-payment routes; затронутые файлы новых TypeScript-ошибок не добавили.
+
+#### Notes
+
+- Storybook MCP недоступен в текущей сессии; документация и сценарии проверены по исходникам, браузерная проверка выполнена локальным Storybook/Vitest runner.
+
+### 2026-08-11
+
+#### Global Loading
+
+- Добавлена глобальная индикация загрузки: тонкая полоса в верхней части страницы появляется при любом активном query-запросе или мутации TanStack Query.
+- Компонент `ProgressBar` реализован на основе `@base-ui/react/progress` в `src/shared/ui/progress-bar/`: индетерминантная анимация скольжения синего индикатора по тёмной подложке, цвета совпадают с `--color-primary-500` и `--color-primary-900` из токенов.
+- Хук `useGlobalLoading` в `src/shared/lib/tanstack/` агрегирует `useIsFetching` и `useIsMutating` со сглаживанием через `useDeferredValue`, возвращает `boolean`.
+- Индикатор встроен в `AppShellView` и отображается поверх всего лейаута (`z-index: 9999`).
+
+#### Profile SSR
+
+- Первая SSR-страница постов профиля теперь передается в `useProfilePostsQuery()` как `initialData` React Query infinite query.
+- Для SSR-seed данных задан короткий `staleTime`, чтобы после гидрации клиент не отправлял дублирующий запрос за той же первой страницей.
+- Добавлена unit-проверка формы `pages/pageParams`, которую ожидает TanStack Query для infinite query.
+- Выбранный пост на странице профиля теперь синхронизирован с URL `?postId=...`: открытие публикации делает client navigation, закрытие удаляет параметр, а прямой SSR-вход использует `initialSelectedPost`.
+- Добавлен внутренний helper сборки URL профиля с unit-проверками сохранения сторонних query params и удаления `postId`.
+
+#### Shared UI
+
+- Кнопка закрытия `Modal` теперь получает `disabled` при `dismissDisabled`, чтобы pending-состояния блокировали все способы закрытия и Storybook-сценарий соответствовал поведению компонента.
+
+#### Verification
+
+- `pnpm exec vitest run --project unit src/entities/post/api/profilePostsQueryData.test.ts` прошёл успешно.
+- `pnpm exec vitest run --project unit src/widgets/profile-posts/lib/profilePostUrl.test.ts src/entities/post/api/profilePostsQueryData.test.ts` прошёл успешно.
+- `pnpm test:unit` прошёл: 44 файла, 253 теста.
+- `pnpm exec vitest run --project storybook src/pages/profile/ui/ProfilePage.stories.tsx` прошёл успешно.
+- `pnpm exec vitest run --project storybook src/pages/profile/ui/ProfilePage.stories.tsx src/shared/ui/modal/Modal.stories.tsx` прошёл успешно.
+- `pnpm exec vitest run --project storybook src/shared/ui/modal/Modal.stories.tsx` прошёл успешно.
+- `pnpm exec eslint src/entities/post/api/useProfilePostsQuery.ts src/entities/post/api/profilePostsQueryData.ts src/entities/post/api/profilePostsQueryData.test.ts src/widgets/profile-posts/ui/ProfilePostsGrid.tsx` прошёл успешно.
+- `pnpm exec eslint src/widgets/profile-posts/ui/ProfilePostsGrid.tsx src/widgets/profile-posts/lib/profilePostUrl.ts src/widgets/profile-posts/lib/profilePostUrl.test.ts src/pages/profile/ui/ProfilePage.stories.tsx src/shared/ui/modal/Modal.tsx` прошёл успешно.
+- `pnpm exec tsc --noEmit` прошёл успешно.
+- `pnpm exec tsc --noEmit --pretty false` прошёл успешно.
+- `pnpm exec prettier --check CHANGELOG.md src/entities/post/api/useProfilePostsQuery.ts src/entities/post/api/profilePostsQueryData.ts src/entities/post/api/profilePostsQueryData.test.ts src/widgets/profile-posts/ui/ProfilePostsGrid.tsx` прошёл успешно.
+- `pnpm lint` прошёл без ошибок (Global Loading).
+
+#### Profile
+
+- Профиль приведён к desktop- и mobile-макетам Figma без изменения данных и интерактивных сценариев: на мобильных экранах аватар и статистика собраны в одну строку, встроенная кнопка настроек скрыта как дублирующая пункт мобильного меню, а публикации образуют три квадратные колонки с зазором `3px`.
+- На desktop профиль использует единственную прокрутку документа; sidebar остаётся доступным благодаря sticky-позиционированию. На mobile также сохранена обычная прокрутка документа со sticky-навигацией.
+- Storybook дополнен desktop- и mobile-сценариями, проверяющими отсутствие вложенного скролла профиля, закрепление sidebar и геометрию мобильной сетки.
+
+#### Verification
+
+- Все 7 Storybook-тестов `ProfilePage` прошли локально в Chromium через проектный Vitest runner.
+- ESLint затронутых TSX-файлов, stylelint CSS-модулей профиля и TypeScript `tsc --noEmit` прошли через локальные исполняемые файлы проекта.
+
+#### Notes
+
+- Геометрия сверена через `figma-bridge` с desktop-фреймом `304:3572` и mobile-фреймом `3800:16667`.
+- Storybook MCP использован для документации компонентов; его повторные test/preview-вызовы не завершились, поэтому итоговая браузерная проверка выполнена локальным Storybook/Vitest runner.
+
+#### Create Post
+
+- Для editor-шагов создания публикации добавлен точечный адаптив на viewport не шире `560px` и не выше `800px`: модальное окно ограничивается динамической высотой экрана, а его содержимое прокручивается внутри без смещения заголовка.
+- На коротких мобильных экранах рабочая область crop/filter/publication уменьшается до диапазона `200–280px`; desktop и мобильные экраны нормальной высоты сохраняют прежнюю геометрию.
+- Добавлен Storybook-сценарий кроппинга `360×740`, проверяющий границы диалога и доступность кнопки `Next` после внутренней прокрутки. Скрытый input выбора фотографий получил доступную подпись.
+
+#### Verification
+
+- Storybook-тесты `CreatePostFlow` прошли для crop с одной и несколькими фотографиями, короткого mobile viewport, filters и publication.
+- ESLint затронутых TSX-файлов, stylelint `createPost.module.css` и TypeScript `tsc --noEmit` прошли через локальные исполняемые файлы проекта.
+
+#### Notes
+
+- A11y-аудит продолжает фиксировать ранее существующий недостаточный контраст общих primary/outline-кнопок и части текстовых токенов; цвета не менялись в рамках адаптивного исправления.
+
+#### Home
+
+- Главная страница авторизованного пользователя сверена с desktop-макетом Figma: сохранены панель зарегистрированных пользователей и четыре полноразмерные заглушки карточек `234×391px` внутри существующего `AppShell` с сайдбаром.
+- Сетка публикаций теперь выбирает количество колонок по фактически доступной ширине контента, поэтому корректно перестраивается после появления desktop-сайдбара и в мобильной оболочке с нижней навигацией.
+- В Storybook добавлены отдельные авторизованные desktop- и mobile-сценарии с проверками геометрии заглушек и соответствующей навигации.
+
+#### Verification
+
+- Storybook-тесты `HomePage` прошли для default, empty, authenticated desktop и authenticated mobile состояний.
+- ESLint для `HomePage.stories.tsx`, stylelint для `homePage.module.css` и TypeScript `tsc --noEmit` прошли через локальные исполняемые файлы проекта.
+
+#### Notes
+
+- Desktop-геометрия сверена через `figma-bridge` с фреймами `65304:8813` и `65304:8883`; отдельного мобильного макета главной страницы в Figma нет, поэтому mobile-композиция следует существующим правилам гостевой страницы и авторизованного `AppShell`.
+- Команды через `pnpm` не запустились из-за недоступной сетевой проверки подписи закрепленной версии; зависимости не изменялись.
+
+#### Auth
+
+- Карточка `Sign In` сохраняет минимальную высоту из макета и теперь расширяется вместе с сообщениями валидации, поэтому нижний блок регистрации остаётся внутри рамки при ошибках в обоих полях.
+- Storybook-сценарий с ошибками дополнен проверкой, что ссылка `Sign Up` не выходит за нижнюю границу карточки.
+- Аналогичное адаптивное поведение добавлено карточке `Sign Up`: при нескольких ошибках рамка растёт вместе с формой, а нижний блок входа остаётся внутри карточки.
+- Storybook-сценарий регистрации проверяет, что ссылка `Sign In` не выходит за нижнюю границу карточки.
+
+#### Verification
+
+- Storybook-тесты `SignInForm` в состояниях по умолчанию и с двумя ошибками прошли.
+- Storybook-тесты `SignUpForm` в состояниях по умолчанию и с несколькими ошибками прошли.
+- ESLint, stylelint и Prettier для изменённых файлов прошли через локальные исполняемые файлы.
+
+#### Notes
+
+- A11y-аудит повторно зафиксировал существующий недостаточный контраст текста ошибок; цветовые токены не менялись в рамках исправления геометрии карточки.
+- `pnpm` не запустился из-за недоступной сетевой проверки подписи закреплённой версии; локальные проверки выполнены без изменения зависимостей.
+
+#### Legal Documents
+
+- Страницы `Privacy Policy` и `Terms of Service` приведены к desktop- и mobile-макетам Figma: добавлены адаптивная ширина текста, мобильная компоновка заголовка и кнопка возврата на `/sign-up` с доступной подписью для скринридеров.
+- На странице `Privacy Policy` сохранён действующий текст о лицензии источника геоданных; внешние ссылки открываются в новых вкладках. После него добавлен временный текст из макета для проверки длинной страницы и прокрутки.
+- `Terms of Service` временно использует тот же длинный текст из макета. Временное содержимое вынесено в общий локальный компонент страницы, чтобы позднее заменить его без дублирования.
+- Storybook-сценарии проверяют заголовки, переход назад, сохранённый лицензионный текст, временное содержимое и поведение внешних ссылок.
+
+#### Verification
+
+- Storybook-тесты `LegalDocumentPage` прошли: 1 файл, 2 теста.
+- Prettier, ESLint, stylelint и `tsc --noEmit` для затронутой области прошли.
+- Production-сборка Next.js 16.2.6 прошла через локальный `next.cmd build`.
+- Геометрия проверена в браузере на ширинах 1280 и 360 px; горизонтального переполнения нет.
+
+#### Notes
+
+- Состояния сверены через `figma-bridge` с фреймами `16760:8576`, `16760:12586`, `16760:12676` и `16760:12743`.
+- Storybook MCP не был опубликован среди инструментов текущей сессии, поэтому использованы существующие stories и проектный Storybook/Vitest runner.
+- `pnpm` не запустился из-за недоступной сетевой проверки подписи закреплённой версии; проверки выполнены уже установленными локальными исполняемыми файлами без изменения зависимостей.
+
+#### Header
+
+- Эксперимент с отдельным позиционированием мобильного списка языков отменён; восстановлено исходное поведение `Select` без дополнительного API для Positioner.
+- В мобильном списке полные названия языков заменены на `EN` / `RU`, а минимальная ширина popup уменьшена до 88 px; desktop сохраняет `English` / `Russian`.
+- Desktop- и mobile-варианты переключателя языка в `AppShellView` переиспользуются между гостевым и авторизованным состояниями без дублирования JSX; поведение компонента не изменено.
+
+#### Verification
+
+- Storybook-тесты `Select`, `HeaderLanguageSwitcher` и `AppShellView` прошли: 3 файла, 14 тестов.
+- После устранения дублирования повторно прошли Storybook-тесты `AppShellView`: 1 файл, 5 тестов; TypeScript и ESLint изменённого компонента прошли без ошибок.
+- TypeScript, ESLint затронутых компонентов и stylelint мобильных стилей прошли.
+- В браузере подтверждены мобильные варианты `EN` / `RU` и ширина popup 88 px.
+
 ### 2026-08-10
+
+#### Profile SSR
+
+- Добавлены публичные mock-данные профиля и server-safe reader `getPublicProfile()` для будущего SSR `/profile/{id}`.
+- Добавлены server-safe readers постов `getProfilePostsServer()` и `getPostServer()`, которые читают mock store напрямую без HTTP-запроса к route handler.
+- Mock store постов получил `countUserPosts()`; счетчик публикаций профиля теперь можно получать из фактического состояния постов.
+- Route `/profile/[id]` принимает async `searchParams`, нормализует `postId` из query string и передает его в page-level `ProfilePage`.
+- Добавлен route-local unit-тест нормализации `postId`, включая повторяющийся query param.
+- `ProfilePage` переведена в server container: на сервере загружает публичный профиль, первую страницу постов и выбранный пост из `postId`, а некорректные profile/post сочетания отправляет в `notFound()`.
+- Синхронный `ProfilePageView` получает server data пропсами и рендерит публичный профиль без placeholder-статистики.
+- Добавлена unit-проверка, что выбранный пост принадлежит открытому профилю.
+
+#### Verification
+
+- `pnpm exec vitest run --project unit src/pages/profile/api/profile.server.test.ts src/entities/post/api/postsApi.server.test.ts src/shared/api/mock/postsStore.test.ts` прошёл успешно.
+- `pnpm exec vitest run --project unit app/'(main)'/profile/'[id]'/normalizePostId.test.ts` прошёл успешно.
+- `pnpm exec vitest run --project unit src/pages/profile/model/selectedProfilePost.test.ts src/pages/profile/api/profile.server.test.ts src/entities/post/api/postsApi.server.test.ts src/shared/api/mock/postsStore.test.ts` прошёл успешно.
+- `pnpm exec vitest run --project storybook src/pages/profile/ui/ProfilePage.stories.tsx` прошёл успешно.
+- `pnpm exec eslint app/'(main)'/profile/'[id]'/page.tsx app/'(main)'/profile/'[id]'/normalizePostId.ts app/'(main)'/profile/'[id]'/normalizePostId.test.ts src/pages/profile/ui/ProfilePage.tsx src/pages/profile/ui/ProfilePage.stories.tsx` прошёл успешно.
+- `pnpm exec eslint src/pages/profile/ui/ProfilePage.tsx src/pages/profile/ui/ProfilePageView.tsx src/pages/profile/ui/ProfilePage.stories.tsx src/pages/profile/model/selectedProfilePost.ts src/pages/profile/model/selectedProfilePost.test.ts src/widgets/profile-posts/ui/ProfilePostsGrid.tsx` прошёл успешно.
+- `pnpm exec prettier --check CHANGELOG.md app/'(main)'/profile/'[id]'/page.tsx app/'(main)'/profile/'[id]'/normalizePostId.ts app/'(main)'/profile/'[id]'/normalizePostId.test.ts src/pages/profile/ui/ProfilePage.tsx src/pages/profile/ui/ProfilePage.stories.tsx` прошёл успешно.
+- `pnpm exec prettier --check src/pages/profile/ui/ProfilePage.tsx src/pages/profile/ui/ProfilePageView.tsx src/pages/profile/ui/ProfilePage.stories.tsx src/pages/profile/model/selectedProfilePost.ts src/pages/profile/model/selectedProfilePost.test.ts src/widgets/profile-posts/ui/ProfilePostsGrid.tsx` прошёл успешно.
+- `pnpm exec tsc --noEmit` прошёл успешно.
+- `pnpm build` был остановлен вручную после длительного зависания на этапе `Creating an optimized production build ...` без вывода ошибок.
+- Storybook MCP `run-story-tests` для `ProfilePage` не завершился за 300 секунд; focused story-тест запущен локально через Vitest.
+- Storybook MCP `get-storybook-story-instructions` и `preview-stories` для `ProfilePage` не завершились за 300 секунд.
+- `pnpm lint` запускался, но не прошёл из-за прежних предупреждений Prettier в сгенерированном `src/shared/api/openapi/schema.d.ts` и существующего предупреждения React Compiler вне этой правки.
+
+#### Home
+
+- Гостевая главная приведена к desktop-макету Figma: добавлена панель зарегистрированных пользователей с шестизначным счётчиком, а контент ограничен шириной 972 px с четырьмя колонками по 234 px.
+- Четыре последних моковых поста отображаются цельными плейсхолдерами будущих карточек с пропорцией 234/391; адаптивная сетка последовательно перестраивается по схеме 4/3/2/1, а счётчик на мобильных экранах размещается под подписью.
+- Пользовательский бренд в desktop/mobile header и metadata приложения изменён на `Remarkgram`; технические идентификаторы `inctagram` сохранены без изменений.
+
+#### Verification
+
+- Целевые Storybook-тесты `HomePage`, `Header` и `HeaderMobile` прошли: 3 файла, 14 тестов.
+- Локальные ESLint и `tsc --noEmit` прошли без ошибок и предупреждений для изменённых файлов.
+- `pnpm run build` прошёл на Next.js 16.2.6.
+
+#### Notes
+
+- Геометрия сверена через `figma-bridge` с фреймами `26786:11274`, `26786:12971` и `83822:8986`; содержимое карточек и модальное окно сознательно оставлены за рамками текущей реализации.
+- Storybook MCP не был опубликован в текущей сессии, поэтому сценарии проверены проектным Storybook/Vitest runner.
+
+#### Header
+
+- Desktop- и mobile-header приведены к гостевому и авторизованному состояниям Figma с единым breakpoint `768px`; бренд `Remarkgram` и существующие CSS-классы сохранены.
+- Для гостя кнопки `Log in` и `Sign up` отображаются на публичных страницах и скрываются во всём AUTH-сценарии, включая юридические страницы и подтверждение почты; мобильные кнопки адаптированы для одной строки без горизонтального переполнения.
+- Добавлен визуальный интерактивный выбор `English` / `Russian` с флагами из `public/icons`, единым состоянием между desktop и mobile и английским языком по умолчанию; перевод интерфейса и сохранение выбора намеренно не реализованы.
+- Переключатель языка переведён на семантический `Select`; общий компонент получил необязательные render-функции для значения и вариантов, а также классы точечной настройки trigger и popup без изменения существующих вызовов.
+- Портальный popup `Select` поднят над содержимым страницы единым `z-index: 200`, чтобы границы и элементы следующего блока не перекрывали список языков.
+- Переключатель языка использует немодальный режим `Select`, поэтому открытие списка больше не блокирует прокрутку страницы и не скрывает scrollbar.
+- Между мобильными кнопками `Log in` и `Sign up` добавлен адаптивный отступ 6 px, уменьшающийся до 4 px на экранах уже 360 px.
+- У авторизованного пользователя desktop-header показывает пустой неинтерактивный колокольчик, а mobile-header — меню с переходами в настройки профиля, статистику и избранное, а также существующим действием выхода.
+
+#### Verification
+
+- Целевые Storybook-тесты `Header`, `HeaderMobile`, `HeaderLanguageSwitcher`, `HeaderMobileMenu` и `AppShellView` прошли: 5 файлов, 21 тест.
+- После перевода языка на `Select` повторно прошли 4 связанных Storybook-набора: 19 тестов для `Select`, `HeaderLanguageSwitcher`, `HeaderMobile` и `AppShellView`.
+- `tsc --noEmit` и stylelint затронутых CSS-модулей прошли.
+- Полный ESLint прошёл без ошибок; сохранены 1205 существующих предупреждений репозитория.
+- Production-сборка Next.js 16.2.6 прошла через локальный `next.cmd build`.
+- Адаптивность проверена в браузере на ширинах 320, 360, 767, 768 и 1280 px: горизонтального переполнения нет, одновременно отображается один вариант Header.
+
+#### Notes
+
+- Состояния сверены через `figma-bridge` с фреймами `26786:11274`, `65304:8813`, `3800:16667` и `3800:10101`.
+- Storybook MCP не был опубликован среди инструментов текущей сессии; документация сверялась по существующим stories и исходникам, а поведение проверено проектным Storybook/Vitest runner.
+- Команда `pnpm` не использовалась для финальной сборки из-за недоступной сетевой проверки подписи закреплённой версии; применён уже установленный локальный исполняемый файл Next.js без изменения зависимостей.
 
 #### Profile Avatar
 
@@ -170,6 +609,22 @@
 
 ### 2026-08-05
 
+#### Create Post
+
+- Хуки создания поста приведены к более чистой модели для React 19: побочные эффекты `URL.createObjectURL`/`URL.revokeObjectURL` и синхронизация выбранного фото больше не выполняются внутри updater-функций `setState`.
+- Ручные `useCallback` убраны из create-post hooks там, где они не дают полезного стабильного контракта и дублируют работу React Compiler.
+- Скрытый file input на шаге `Cropping` получил доступное имя `Add photos`, поэтому новый критичный Storybook a11y label-issue закрыт.
+- Storybook-проверка удаления фото теперь проверяет количество оставшихся thumbnail-кнопок, а не нестабильную подпись после переиндексации.
+
+#### Verification
+
+- `pnpm lint` прошёл без ошибок; остаются существующие предупреждения проекта в `src/shared/api/openapi/schema.d.ts` и `src/features/sign-up/model/useSignUpForm.ts`.
+- `pnpm exec tsc --noEmit` прошёл без ошибок.
+- `pnpm test:unit` прошёл: 28 файлов, 151 тест.
+- Storybook MCP focused tests для `CreatePostModal` (`crop`, `filters`, `publication`) прошли с `a11y: false`.
+- Storybook a11y для тех же сценариев больше не показывает label-ошибку file input; остаются существующие contrast-нарушения общей цветовой системы `Button`/`TextArea`, визуальные цвета в этой правке не менялись.
+- `pnpm build` был запущен, но остановлен вручную: Next.js/Turbopack завис на этапе `Creating an optimized production build ...` без дальнейшего вывода.
+
 #### Profile Settings
 
 - Статический демонстрационный PNG-аватар удалён; до подключения пользовательских данных отображается нейтральный placeholder без неработающей кнопки удаления фотографии.
@@ -195,6 +650,26 @@
 - `node_modules/.bin/vitest.cmd run --project storybook ...` прошёл: 3 story-файла, 11 тестов, включая authenticated- и guest-состояния настроек.
 - `pnpm run build` прошёл; Next.js собрал 19 маршрутов, включая приватный `/settings`.
 - Верстка вручную сверена в Storybook при размерах 1280×794 и 360×1068.
+
+### 2026-08-04
+
+#### Create Post
+
+- В шагах `Filters` и `Publication` добавлена стрелка назад в заголовке модального wizard-а создания поста; на `Cropping` стрелки назад нет, потому что управление выбранными фото доступно прямо на этом шаге.
+- Нижние текстовые кнопки `Back` в editor-шагах убраны, чтобы не дублировать действие.
+- В `Cropping` рядом с выбранными миниатюрами появилась icon-кнопка добавления фото, а на самих миниатюрах — крестик удаления отдельного фото.
+- Ошибки дозагрузки фото на `Cropping` теперь показываются рядом с миниатюрами, включая лимит 10 фото и неверный формат/размер файла.
+- `shared/ui/Modal` получил необязательный левый слот заголовка `headerStart`; без него существующие модалки сохраняют прежнюю раскладку.
+- Storybook-сценарии `Crop With One Photo` и `Crop With Several Photos` проверяют отсутствие header back-кнопки на crop и удаление выбранного фото из миниатюр.
+
+#### Verification
+
+- `pnpm lint` прошёл без ошибок; остаются существующие предупреждения проекта в `src/shared/api/openapi/schema.d.ts` и `src/features/sign-up/model/useSignUpForm.ts`.
+- `pnpm exec vitest run --project storybook src/features/create-post/ui/stories/CreatePostFlow.stories.tsx` прошёл: 6 story-тестов.
+- Storybook MCP focused tests для `CreatePostModal` (`crop`, `filters`, `publication`) прошли с `a11y: false`.
+- Storybook a11y для `crop` не проходит из-за существующего contrast у primary-кнопки `Next`; цветовую систему кнопок в этом фиксе не меняли.
+- `pnpm exec stylelint src/shared/ui/modal/Modal.module.css src/features/create-post/ui/createPost.module.css` не прошёл из-за существующих нарушений в `createPost.module.css` (`clip`, порядок старых свойств, `:global`).
+- `pnpm exec tsc --noEmit` не прошёл из-за stale `.next/types/validator.ts`, который ссылается на отсутствующие route-файлы.
 
 ### 2026-08-03
 
@@ -230,7 +705,7 @@
 - Созданы мок-эндпоинты: `GET /api/mock/posts?limit=4` (глобальный список постов без `userId`), `GET /api/mock/registered-users-count` (возвращает `{ totalCount: 2150 }`), `GET /api/mock/auth/me` (проверяет `Authorization: Bearer mock-token`).
 - Мок-хранилища `postsStore` и `usersCountStore` вынесены из `app/api/mock/` в `src/shared/api/mock/` для доступа через `@/shared/api/mock/` из серверных компонентов.
 - `SessionBootstrap` в mock-режиме (`NEXT_PUBLIC_AUTH_MOCK=true`) вызывает `checkMockAuth()` вместо `refreshSession()`.
-- Компонент `HomePage` принимает `posts` и `registeredUsersCount`, рендерит заголовок приложения, счётчик пользователей и сетку из 4 `PostThumbnail`.
+- Компонент `HomePage` принимает `posts` и `registeredUsersCount`, рендерит заголовок «Remarkgram», счётчик пользователей и сетку из 4 `PostThumbnail`.
 - Добавлены Storybook-истории (`Default`, `NoPosts`).
 - В `.env.local` добавлены `NEXT_PUBLIC_POSTS_API_MOCK=true` и `NEXT_PUBLIC_AUTH_MOCK=true`.
 

@@ -1,7 +1,8 @@
 import type { Post } from '@/entities/post'
-import { PostThumbnail } from '@/entities/post'
 
 import styles from './homePage.module.css'
+import { HomePostsGrid } from './HomePostsGrid'
+import { HomeRegisteredUsersCounter } from './HomeRegisteredUsersCounter'
 
 type Props = {
   posts: Post[]
@@ -9,21 +10,10 @@ type Props = {
 }
 
 export const HomePage = ({ posts, registeredUsersCount }: Props) => (
-  <div className={styles.page}>
-    <section className={styles.hero}>
-      <h1 className={styles.title}>Inctagram</h1>
-      <p className={styles.subtitle}>
-        <span className={styles.count}>{registeredUsersCount.toLocaleString()}</span> registered
-        users
-      </p>
-      <p className={styles.latestLabel}>Latest publications</p>
+  <main className={styles.page}>
+    <HomeRegisteredUsersCounter value={registeredUsersCount} />
+    <section className={styles.posts} aria-label="Latest publications">
+      <HomePostsGrid posts={posts} />
     </section>
-    <section className={styles.posts}>
-      <div className={styles.postsGrid}>
-        {posts.map((post) => (
-          <PostThumbnail key={post.id} post={post} />
-        ))}
-      </div>
-    </section>
-  </div>
+  </main>
 )

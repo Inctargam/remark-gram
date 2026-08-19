@@ -1,3 +1,4 @@
+import { Icon } from '@/shared/ui/icon'
 import { Modal } from '@/shared/ui/modal'
 
 import type {
@@ -37,6 +38,7 @@ type Props = {
   onImageSizeChange: (imageSize: CreatePostImageSize) => void
   onNextFromCrop: () => void
   onNextFromFilters: () => void
+  onPhotoRemove: (photoId: string) => void
   onPhotoSelect: (photoId: string) => void
   onPhotosSelect: (files: File[]) => void
   onPublish: () => void
@@ -66,6 +68,7 @@ export const CreatePostModal = ({
   onImageSizeChange,
   onNextFromCrop,
   onNextFromFilters,
+  onPhotoRemove,
   onPhotoSelect,
   onPhotosSelect,
   onPublish,
@@ -81,23 +84,39 @@ export const CreatePostModal = ({
         : step === 'crop'
           ? 'Cropping'
           : 'Add Photo'
+  const backHandler =
+    step === 'publication' ? onBackToFilters : step === 'filters' ? onBackToCrop : null
+  const headerStart = backHandler ? (
+    <button
+      className={styles.headerBackButton}
+      type="button"
+      aria-label="Back to previous create post step"
+      onClick={backHandler}>
+      <Icon iconId="icon-arrow-ios-back" width={24} height={24} />
+    </button>
+  ) : null
 
   return (
     <Modal
+      bodyClassName={isEditorStep ? styles.editorModalBody : undefined}
       className={isEditorStep ? styles.editorModal : styles.addPhotoModal}
       open={open}
       onOpenChange={onOpenChange}
+      headerStart={headerStart}
       title={modalTitle}>
       {step === 'crop' && selectedPhoto ? (
         <CropPhotoStep
           photos={photos}
           selectedPhoto={selectedPhoto}
           selectedPhotoId={selectedPhotoId}
+          uploadError={uploadError}
           onAspectChange={onAspectChange}
           onCropChange={onCropChange}
           onCropComplete={onCropComplete}
           onImageSizeChange={onImageSizeChange}
+          onPhotoRemove={onPhotoRemove}
           onPhotoSelect={onPhotoSelect}
+          onPhotosSelect={onPhotosSelect}
           onNext={onNextFromCrop}
           onZoomChange={onZoomChange}
         />
@@ -106,7 +125,6 @@ export const CreatePostModal = ({
           photos={photos}
           selectedPhoto={selectedPhoto}
           selectedPhotoId={selectedPhotoId}
-          onBack={onBackToCrop}
           onFilterChange={onFilterChange}
           onNext={onNextFromFilters}
           onPhotoSelect={onPhotoSelect}
@@ -119,7 +137,6 @@ export const CreatePostModal = ({
           publishError={publishError}
           selectedPhoto={selectedPhoto}
           selectedPhotoId={selectedPhotoId}
-          onBack={onBackToFilters}
           onDescriptionChange={onDescriptionChange}
           onPhotoSelect={onPhotoSelect}
           onPublish={onPublish}

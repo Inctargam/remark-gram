@@ -9,3 +9,9 @@
 .image {
   object-fit: cover;
 }
+
+@media (width <= 767px) {
+  .thumbnail {
+    aspect-ratio: 1;
+  }
+}

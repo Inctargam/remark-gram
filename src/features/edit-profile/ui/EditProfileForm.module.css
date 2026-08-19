@@ -50,7 +50,7 @@
 }
 
 .saveButton {
-  min-width: 160px;
+  min-width: 159px;
 }
 
 .submitAlert {
@@ -65,7 +65,7 @@
 @media (width < 768px) {
   .profileContent {
     grid-template-columns: minmax(0, 1fr);
-    gap: 39px;
+    gap: 36px;
   }
 
   .fields {

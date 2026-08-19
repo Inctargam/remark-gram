@@ -38,19 +38,8 @@
   z-index: var(--z-index-bottom-bar);
 }
 
-.languageSelector {
-  width: 163px;
-}
-
-.mobileLanguage {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  color: var(--color-light-100);
-}
-
 @media (width < 768px) {
-  .authDesktopHeader {
+  .desktopHeader {
     display: none;
   }
 
@@ -60,23 +49,37 @@
 }
 
 @media (width >= 768px) {
+  .desktopHeader {
+    position: static;
+  }
+
   .content {
     flex-direction: row;
     align-items: flex-start;
+    width: 100%;
+    max-width: 1280px;
+    margin-inline: auto;
   }
 
-  /* Pinned under the sticky header; scrolls internally if the menu outgrows the viewport */
+  /* Starts under the header, then stays at the viewport top after the header scrolls away. */
   .sidebarSlot {
     position: sticky;
-    top: var(--layout-header-height);
+    top: 0;
     z-index: var(--z-index-sidebar);
     display: block;
     flex-shrink: 0;
-    height: calc(100vh - var(--layout-header-height));
+    height: 100vh;
     overflow-y: auto;
   }
 
   .bottomBarSlot {
     display: none;
+  }
+}
+
+@media (width > 1440px) {
+  .content {
+    max-width: none;
+    margin-inline: 0;
   }
 }

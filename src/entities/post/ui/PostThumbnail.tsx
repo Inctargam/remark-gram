@@ -22,7 +22,7 @@ export const PostThumbnail = ({ post }: Props) => {
         src={cover.url}
         alt={getPostImageAlt(post)}
         fill
-        sizes="(max-width: 767px) 50vw, (max-width: 1023px) 33vw, 234px"
+        sizes="(max-width: 767px) 33vw, (max-width: 1023px) 33vw, 234px"
         // Mock images are data URLs and future ones come from an external host,
         // so the optimizer is skipped until remotePatterns are configured.
         unoptimized

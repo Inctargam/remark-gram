@@ -1,0 +1,39 @@
+/* The payment dialogs are narrower than the 438px default of the modal. */
+.modal {
+  width: min(378px, calc(100vw - 32px));
+}
+
+.message {
+  margin: 0;
+  color: var(--color-light-100);
+  font-family: var(--font-base);
+  font-size: var(--font-size-regular-14);
+  font-weight: var(--font-weight-regular-14);
+  line-height: var(--line-height-regular-14);
+}
+
+/* Brand logo of the provider the payment is created with, above the consent text. */
+.providerIcon {
+  display: block;
+  margin: 0 0 12px;
+}
+
+/* Consent: the checkbox and `OK` share one row, the button pinned to the right. */
+.consentActions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  margin-top: 30px;
+}
+
+.consentConfirm {
+  min-width: 96px;
+}
+
+/* Result: a single button across the whole modal width. */
+.resultAction {
+  display: flex;
+  width: 100%;
+  margin-top: 30px;
+}

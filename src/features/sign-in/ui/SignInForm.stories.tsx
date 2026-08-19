@@ -28,7 +28,7 @@ export const Default: Story = {}
 
 /** Ошибки валидации — появляются при blur на каждом поле. */
 export const WithValidationErrors: Story = {
-  play: async ({ canvas }) => {
+  play: async ({ canvas, canvasElement }) => {
     await userEvent.type(canvas.getByLabelText('Email'), 'notanemail')
     await userEvent.tab()
 
@@ -39,5 +39,13 @@ export const WithValidationErrors: Story = {
       canvas.getByText('The email must match the format example@example.com')
     ).toBeInTheDocument()
     await expect(canvas.getByText('Minimum number of characters 6')).toBeInTheDocument()
+
+    const card = canvasElement.querySelector('[class*="card"]')
+    const signUpLink = canvas.getByRole('link', { name: 'Sign Up' })
+
+    await expect(card).not.toBeNull()
+    await expect(signUpLink.getBoundingClientRect().bottom).toBeLessThanOrEqual(
+      card?.getBoundingClientRect().bottom ?? 0
+    )
   },
 }

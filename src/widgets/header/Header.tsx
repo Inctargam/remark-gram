@@ -21,6 +21,7 @@ type GuestVariant = {
   loginLabel?: string
   signupLabel?: string
   languageSelector?: ReactNode
+  showAuthActions?: boolean
 }
 
 export type HeaderProps = AuthVariant | GuestVariant
@@ -32,7 +33,7 @@ export const Header = (props: HeaderProps) => {
     <header className={styles.header}>
       <div className={styles.inner}>
         <Link className={styles.logo} href={ROUTES.home}>
-          remarkgram
+          Remarkgram
         </Link>
 
         <div className={styles.controls}>
@@ -53,7 +54,7 @@ export const Header = (props: HeaderProps) => {
 
           {languageSelector}
 
-          {variant === 'guest' && (
+          {variant === 'guest' && (props.showAuthActions ?? true) && (
             <>
               <Button nativeButton={false} render={<Link href={ROUTES.signIn} />} variant="text">
                 {props.loginLabel ?? 'Log in'}
