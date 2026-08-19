@@ -4,6 +4,8 @@ import { useState } from 'react'
 
 import { LogoutButton } from '@/features/logout'
 import type { SessionStatus } from '@/shared/auth'
+import { useGlobalLoading } from '@/shared/lib/tanstack'
+import { ProgressBar } from '@/shared/ui/progress-bar'
 import {
   Header,
   type HeaderLanguage,
@@ -34,6 +36,7 @@ export const AppShellView = ({
   const isAuthenticated = status === 'authenticated'
   const isLoading = status === 'loading'
   const showBottomBar = isAuthenticated && !showBottomBarOnCurrentRoute
+  const globalLoading = useGlobalLoading()
   const desktopLanguageSelector = (
     <HeaderLanguageSwitcher value={language} onValueChange={setLanguage} />
   )
@@ -43,6 +46,7 @@ export const AppShellView = ({
 
   return (
     <div className={styles.shell}>
+      <ProgressBar isLoading={globalLoading} />
       {!isLoading && (
         <>
           <div className={styles.desktopHeader}>

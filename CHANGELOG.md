@@ -241,6 +241,13 @@
 
 ### 2026-08-11
 
+#### Global Loading
+
+- Добавлена глобальная индикация загрузки: тонкая полоса в верхней части страницы появляется при любом активном query-запросе или мутации TanStack Query.
+- Компонент `ProgressBar` реализован на основе `@base-ui/react/progress` в `src/shared/ui/progress-bar/`: индетерминантная анимация скольжения синего индикатора по тёмной подложке, цвета совпадают с `--color-primary-500` и `--color-primary-900` из токенов.
+- Хук `useGlobalLoading` в `src/shared/lib/tanstack/` агрегирует `useIsFetching` и `useIsMutating` со сглаживанием через `useDeferredValue`, возвращает `boolean`.
+- Индикатор встроен в `AppShellView` и отображается поверх всего лейаута (`z-index: 9999`).
+
 #### Profile SSR
 
 - Первая SSR-страница постов профиля теперь передается в `useProfilePostsQuery()` как `initialData` React Query infinite query.
@@ -266,6 +273,7 @@
 - `pnpm exec tsc --noEmit` прошёл успешно.
 - `pnpm exec tsc --noEmit --pretty false` прошёл успешно.
 - `pnpm exec prettier --check CHANGELOG.md src/entities/post/api/useProfilePostsQuery.ts src/entities/post/api/profilePostsQueryData.ts src/entities/post/api/profilePostsQueryData.test.ts src/widgets/profile-posts/ui/ProfilePostsGrid.tsx` прошёл успешно.
+- `pnpm lint` прошёл без ошибок (Global Loading).
 
 #### Profile
 
