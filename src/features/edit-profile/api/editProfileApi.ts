@@ -3,7 +3,7 @@ import { api } from '@/shared/api/baseApi'
 
 import type { UpdateProfilePayload } from '../model/editProfileTypes'
 
-const PROFILE_API_PATH = '/api/v1/profile'
+const PROFILE_API_PATH = '/api/mock/profile'
 
 // TODO(profile-api): Replace the local mock request with the typed OpenAPI client once the
 // backend exposes the profile endpoint in the schema.

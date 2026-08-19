@@ -15,7 +15,7 @@ const VALID_UPDATE = {
 }
 
 const createPutRequest = (body: unknown) =>
-  new Request('http://localhost/api/v1/profile', {
+  new Request('http://localhost/api/mock/profile', {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),

@@ -47,7 +47,7 @@ describe('api', () => {
   })
 
   it('sends a JSON body with PUT requests', async () => {
-    await api.put('/api/v1/profile', { userName: 'user123' }, { baseUrl: '' })
+    await api.put('/api/mock/profile', { userName: 'user123' }, { baseUrl: '' })
 
     expect(getRequestInit().method).toBe('PUT')
     expect(getRequestInit().body).toBe(JSON.stringify({ userName: 'user123' }))
@@ -57,7 +57,7 @@ describe('api', () => {
     const formData = new FormData()
     formData.append('file', new Blob(['photo'], { type: 'image/png' }), 'photo.png')
 
-    await api.postForm('/api/v1/profile/avatar', formData, { baseUrl: '' })
+    await api.postForm('/api/mock/profile/avatar', formData, { baseUrl: '' })
 
     expect(getRequestInit().headers).toEqual({})
     expect(getRequestInit().body).toBe(formData)
