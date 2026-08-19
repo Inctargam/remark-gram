@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
-import { expect, fn, userEvent } from 'storybook/test'
+import { expect } from 'storybook/test'
 
 import { HeaderMobile } from './HeaderMobile'
 
@@ -18,46 +18,47 @@ const meta = {
     ),
   ],
   argTypes: {
-    languageSelector: {
-      control: false,
-      description: 'Слот для селектора языка',
-    },
-    onMenuClick: { description: 'Открывает модалку с дополнительными пунктами навигации' },
+    languageSelector: { control: false },
+    menu: { control: false },
   },
   args: {
-    onMenuClick: fn(),
+    variant: 'guest',
   },
 } satisfies Meta<typeof HeaderMobile>
 
 export default meta
-
 type Story = StoryObj<typeof meta>
 
-export const Default: Story = {}
+export const Guest: Story = {}
+
+export const GuestWithoutAuthActions: Story = {
+  args: {
+    variant: 'guest',
+    showAuthActions: false,
+  },
+  play: async ({ canvas }) => {
+    await expect(canvas.queryByText('Log in')).not.toBeInTheDocument()
+    await expect(canvas.queryByText('Sign up')).not.toBeInTheDocument()
+  },
+}
+
+export const Auth: Story = {
+  args: {
+    variant: 'auth',
+    menu: <button type="button">Menu</button>,
+  },
+}
 
 export const WithLanguageSelector: Story = {
   args: {
-    languageSelector: (
-      <span style={{ color: 'var(--color-light-100)', fontSize: '14px' }}>🌐 EN</span>
-    ),
+    languageSelector: <span style={{ color: 'var(--color-light-100)', fontSize: '14px' }}>EN</span>,
   },
 }
 
-/** Логотип — ссылка на главную. */
 export const LogoLink: Story = {
   play: async ({ canvas }) => {
-    const logo = canvas.getByRole('link', { name: 'remarkgram' })
+    const logo = canvas.getByRole('link', { name: 'Remarkgram' })
 
     await expect(logo).toHaveAttribute('href', '/')
-  },
-}
-
-/** Клик по кнопке меню вызывает onMenuClick. */
-export const MenuClick: Story = {
-  play: async ({ args, canvas }) => {
-    const button = canvas.getByRole('button', { name: 'Open menu' })
-
-    await userEvent.click(button)
-    await expect(args.onMenuClick).toHaveBeenCalledOnce()
   },
 }

@@ -34,6 +34,7 @@ export const AddPhotoStep = ({ hasDraft, uploadError, onDraftOpen, onPhotosSelec
         className={styles.fileInput}
         type="file"
         accept="image/jpeg,image/png"
+        aria-label="Photos to upload"
         multiple
         onChange={fileChangeHandler}
       />

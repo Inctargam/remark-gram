@@ -1,4 +1,4 @@
-# Design System — Inctagram (Copy)
+# Design System — Remarkgram (Copy)
 
 ## Color Palette
 

@@ -1,0 +1,110 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  color: var(--color-light-100);
+  font-family: var(--font-base);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.title {
+  margin: 0;
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-h3);
+  line-height: var(--line-height-h3);
+}
+
+.message {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-regular-14);
+  line-height: var(--line-height-regular-14);
+}
+
+/* Current subscription: labels once at the top, a row per subscription of the queue.
+   The card look of the design is kept — no header fill, no separator under it. */
+.subscriptionTable {
+  width: max-content;
+  max-width: 100%;
+  background-color: var(--color-dark-500);
+}
+
+.subscriptionHead {
+  background-color: transparent;
+}
+
+.subscriptionBody tr:first-child {
+  border-top: none;
+}
+
+.subscriptionLabel {
+  padding-bottom: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-regular-14);
+  font-weight: var(--font-weight-regular-14);
+  line-height: var(--line-height-regular-14);
+}
+
+.subscriptionValue {
+  font-size: var(--font-size-bold-14);
+  font-weight: var(--font-weight-bold-14);
+  line-height: var(--line-height-bold-14);
+}
+
+.optionsCard {
+  padding: 12px 18px;
+}
+
+.options {
+  display: flex;
+  width: 100%;
+}
+
+.providers {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 24px;
+}
+
+.providersSeparator {
+  color: var(--color-light-100);
+  font-size: var(--font-size-regular-14);
+  line-height: var(--line-height-regular-14);
+}
+
+.provider {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 96px;
+  height: 64px;
+  padding: 0;
+  border: 1px solid var(--color-dark-300);
+  border-radius: 2px;
+  background-color: var(--color-dark-500);
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    opacity 0.15s;
+
+  &:focus-visible {
+    outline: 2px solid var(--color-primary-700);
+    outline-offset: 1px;
+  }
+
+  /* The buttons are rendered before the payment flow exists, hence a disabled state. */
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+
+  &:hover:not(:disabled) {
+    border-color: var(--color-light-900);
+  }
+}

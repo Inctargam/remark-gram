@@ -6,6 +6,8 @@
 }
 
 .avatar {
+  --avatar-delete-cutout-radius: 14px;
+
   position: relative;
   display: flex;
   justify-content: center;
@@ -18,23 +20,32 @@
   color: var(--color-light-900);
 }
 
+.avatarWithImage {
+  background-color: transparent;
+}
+
 .avatarImage {
+  mask-image: radial-gradient(
+    circle at calc(100% - 24px) 24px,
+    transparent var(--avatar-delete-cutout-radius),
+    #000 calc(var(--avatar-delete-cutout-radius) + 1px)
+  );
   border-radius: 50%;
   object-fit: cover;
 }
 
 .deleteAvatarButton {
   position: absolute;
-  top: 15px;
+  top: 12px;
   right: 12px;
   z-index: 1;
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 18px;
-  height: 18px;
+  width: 24px;
+  height: 24px;
   padding: 0;
-  border: 2px solid var(--color-dark-700);
+  border: 0;
   border-radius: 50%;
   background-color: var(--color-danger-500);
   color: var(--color-light-100);
@@ -42,7 +53,7 @@
 }
 
 .selectAvatarButton {
-  width: 201px;
+  width: 196px;
   padding-right: 12px;
   padding-left: 12px;
   white-space: nowrap;
@@ -124,6 +135,10 @@
 }
 
 @media (width < 768px) {
+  .avatar {
+    --avatar-delete-cutout-radius: 20px;
+  }
+
   .avatarColumn {
     align-items: center;
     gap: 24px;
@@ -133,6 +148,18 @@
   .selectAvatarButton {
     width: 100%;
     height: 48px;
+  }
+
+  .deleteAvatarButton {
+    top: 6px;
+    right: 6px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .deleteAvatarButton svg {
+    width: 24px;
+    height: 24px;
   }
 
   .addModal,
