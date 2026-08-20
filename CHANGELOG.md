@@ -4,6 +4,37 @@
 
 ## Unreleased
 
+### 2026-08-20
+
+#### Auth
+
+- Моковая авторизация через `/api/mock/auth/me` включается по умолчанию, если `NEXT_PUBLIC_AUTH_MOCK` не задан; явное значение `false` сохраняет переключение на настоящий backend.
+- Production-сборка без локального `.env.local` получает мокового текущего пользователя, поэтому owner-only элементы профиля, включая `Profile Settings`, доступны на временных моках.
+
+#### Verification
+
+- ESLint `SessionBootstrap.tsx` прошёл без ошибок и предупреждений.
+- Focused Storybook-проверка `ProtectedRoute.stories.tsx` прошла: 1 файл, 7 тестов.
+- Production build Next.js прошёл; маршрут `/api/mock/auth/me` зарегистрирован.
+
+### 2026-08-19
+
+#### Profile API
+
+- Временный мок профиля перенесён с `/api/v1/profile` на `/api/mock/profile`, включая загрузку, удаление и выдачу изображения аватара.
+- Клиентские запросы General Information и управления аватаром переведены на новый мок-префикс, чтобы production ingress не отправлял их в настоящий backend по зарезервированному `/api/v1`.
+- Тест мок-обработчика аватара проверяет формирование URL изображения через `/api/mock/profile/avatar/image`.
+
+#### Verification
+
+- Целевые unit-тесты прошли: 3 файла, 15 тестов.
+- ESLint изменённых файлов прошёл без ошибок и предупреждений.
+- Production build Next.js прошёл; зарегистрированы `/api/mock/profile`, `/api/mock/profile/avatar` и `/api/mock/profile/avatar/image`, старые маршруты `/api/v1/profile` отсутствуют.
+
+#### Notes
+
+- `pnpm exec vitest` не запустился из-за недоступной проверки подписи registry; проверки выполнены установленными локальными бинарниками Vitest, ESLint и Next.js без изменения зависимостей.
+
 ### 2026-08-16
 
 #### Payments

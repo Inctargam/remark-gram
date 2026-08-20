@@ -11,7 +11,7 @@ const createUploadRequest = (type = 'image/png', size = 4) => {
   const formData = new FormData()
   formData.append('file', new Blob([new Uint8Array(size)], { type }), 'avatar.png')
 
-  return new Request('http://localhost/api/v1/profile/avatar', {
+  return new Request('http://localhost/api/mock/profile/avatar', {
     method: 'POST',
     body: formData,
   })
@@ -28,8 +28,18 @@ describe('profile avatar mock handlers', () => {
 
     expect(response.status).toBe(200)
     expect(result.avatars).toEqual([
-      expect.objectContaining({ width: 192, height: 192, fileSize: 4 }),
-      expect.objectContaining({ width: 45, height: 45, fileSize: 4 }),
+      expect.objectContaining({
+        url: expect.stringContaining('/api/mock/profile/avatar/image?size=192'),
+        width: 192,
+        height: 192,
+        fileSize: 4,
+      }),
+      expect.objectContaining({
+        url: expect.stringContaining('/api/mock/profile/avatar/image?size=45'),
+        width: 45,
+        height: 45,
+        fileSize: 4,
+      }),
     ])
     expect(getMockProfile().avatars).toEqual(result.avatars)
   })
