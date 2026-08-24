@@ -4,6 +4,27 @@
 
 ## Unreleased
 
+### 2026-08-24
+
+#### Auth
+
+- OpenAPI-схема обновлена по актуальному Swagger: добавлен контракт `GET /api/v1/auth/me` для получения текущего пользователя.
+- После login и refresh-session приложение загружает текущего backend-пользователя через `/auth/me` и сохраняет его в session store.
+- Sign In обрабатывает backend-код `USER_ALREADY_LOGGED_IN`: если refresh-cookie уже активна, фронт восстанавливает сессию через refresh/`me` и ведёт пользователя в профиль вместо зависания на форме.
+- Sign In показывает отдельную ошибку загрузки профиля, если `/auth/me` после успешного refresh падает, вместо сообщения про неверный email или пароль.
+- Ошибка `5xx` от `/auth/me` больше не очищает access token как невалидную сессию: фронт сохраняет authenticated state без профиля, показывает form-level ошибку и не повторяет автоматический refresh после `409`, если `/me` уже недавно падал.
+- Authenticated redirect с `/profile` теперь ведёт на `/profile/{numericUserId}`, поэтому real auth flow больше не привязан к `mock-user-1`.
+- Owner checks используют текущего пользователя из session store, сохраняя mock fallback только до загрузки real user данных.
+
+#### Verification
+
+- `pnpm exec vitest run --project unit src/shared/auth src/app/providers src/features/create-post/api src/features/sign-in src/entities/post/api/postsApi.test.ts` прошёл.
+- `pnpm exec vitest run --project unit src/shared/auth src/features/sign-in src/app/providers` прошёл.
+- `pnpm exec tsc --noEmit --pretty false` прошёл.
+- Focused ESLint для auth, ProtectedRoute, sign-in, create-post и post API файлов прошёл.
+- `pnpm exec vitest run --project storybook src/app/providers/ProtectedRoute.stories.tsx` прошёл.
+- Storybook MCP `run-story-tests` и `preview-stories` для `ProtectedRoute.AuthenticatedProfile` не завершились за 300 секунд; сценарий проверен локальным Storybook/Vitest runner.
+
 ### 2026-08-19
 
 #### Profile Posts

@@ -82,6 +82,18 @@
   color: var(--color-text-primary);
 }
 
+.formError {
+  margin-top: 16px;
+}
+
+.formErrorText {
+  margin: 0;
+  color: var(--color-danger-500);
+  font-size: var(--font-size-regular-14);
+  font-weight: var(--font-weight-regular-14);
+  line-height: var(--line-height-regular-14);
+}
+
 .signupBlock {
   display: flex;
   flex-direction: column;

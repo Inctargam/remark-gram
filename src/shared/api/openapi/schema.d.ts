@@ -52,10 +52,10 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Redirect to a public image
-         * @description Resolves a completed, non-deleted file by its ID and redirects the client to its public Object Storage URL. The gateway does not proxy the image bytes. Browsers follow the redirect and download the image directly from Object Storage.
+         * Redirect to an image using a temporary signed URL
+         * @description Resolves a completed, non-deleted file by its ID and redirects the client to a temporary signed Object Storage URL. The gateway does not proxy the image bytes. Browsers follow the redirect and download the image directly from Object Storage.
          */
-        get: operations["getPublicFileUrl"];
+        get: operations["getFileDownloadUrl"];
         put?: never;
         post?: never;
         delete?: never;
@@ -133,6 +133,23 @@ export interface paths {
         post?: never;
         /** Delete all data from the microservice databases */
         delete: operations["deleteAllData"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get the current authenticated user */
+        get: operations["getCurrentUser"];
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -590,6 +607,33 @@ export interface components {
              */
             nextCursor: Record<string, never> | null;
         };
+        CurrentUserResponseDto: {
+            /** @example 42 */
+            id: number;
+            /** @example client123 */
+            username: string;
+            /**
+             * Format: email
+             * @example user@example.com
+             */
+            email: string;
+            /** @example null */
+            avatarUrl: string | null;
+            /** @example true */
+            emailVerified: boolean;
+            /**
+             * @example [
+             *       "password",
+             *       "github"
+             *     ]
+             */
+            loginMethods: ("password" | "github" | "google")[];
+            /**
+             * Format: date-time
+             * @example 2026-08-21T10:15:00.000Z
+             */
+            createdAt: string;
+        };
         RegistrationDto: {
             /** @example user_123 */
             username: string;
@@ -699,6 +743,7 @@ export type SchemaObject = components['schemas']['Object'];
 export type SchemaAuthorPostImageDto = components['schemas']['AuthorPostImageDto'];
 export type SchemaAuthorPostDto = components['schemas']['AuthorPostDto'];
 export type SchemaGetAuthorPostsDto = components['schemas']['GetAuthorPostsDto'];
+export type SchemaCurrentUserResponseDto = components['schemas']['CurrentUserResponseDto'];
 export type SchemaRegistrationDto = components['schemas']['RegistrationDto'];
 export type SchemaConfirmRegistrationDto = components['schemas']['ConfirmRegistrationDto'];
 export type SchemaResendRegistrationConfirmationDto = components['schemas']['ResendRegistrationConfirmationDto'];
@@ -863,7 +908,7 @@ export interface operations {
             };
         };
     };
-    getPublicFileUrl: {
+    getFileDownloadUrl: {
         parameters: {
             query?: never;
             header?: never;
@@ -875,10 +920,10 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description The client is redirected to the public Object Storage URL of the image. */
+            /** @description The client is redirected to a temporary signed Object Storage URL of the image. */
             302: {
                 headers: {
-                    /** @description Public URL of the image in Object Storage. */
+                    /** @description Temporary signed URL of the image in Object Storage. */
                     Location?: string;
                     [name: string]: unknown;
                 };
@@ -918,22 +963,6 @@ export interface operations {
                     };
                 };
             };
-            /** @description Object Storage cannot provide a public URL for the file. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    /**
-                     * @example {
-                     *       "statusCode": 403,
-                     *       "code": "FILE_PUBLIC_ACCESS_DENIED",
-                     *       "message": "File is not public"
-                     *     }
-                     */
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
             /** @description The file does not exist or is not available for public delivery. */
             404: {
                 headers: {
@@ -945,6 +974,22 @@ export interface operations {
                      *       "statusCode": 404,
                      *       "code": "FILE_NOT_FOUND",
                      *       "message": "File not found"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Object Storage cannot create a signed download URL for the file. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "statusCode": 500,
+                     *       "code": "FILE_DOWNLOAD_URL_GENERATION_FAILED",
+                     *       "message": "Unable to create file download URL"
                      *     }
                      */
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
@@ -1219,6 +1264,56 @@ export interface operations {
                 content?: never;
             };
             /** @description A microservice is unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getCurrentUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The current user profile. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CurrentUserResponseDto"];
+                };
+            };
+            /** @description The access token is invalid or its user no longer exists. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"] | {
+                        /** @example 401 */
+                        statusCode: number;
+                        /** @example Invalid access token */
+                        message: string;
+                        /** @example Unauthorized */
+                        error: string;
+                    };
+                };
+            };
+            /** @description The upstream service returned an unexpected error. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The user-accounts service is unavailable. */
             503: {
                 headers: {
                     [name: string]: unknown;

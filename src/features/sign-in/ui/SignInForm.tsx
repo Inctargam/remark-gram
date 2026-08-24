@@ -14,7 +14,7 @@ import { useSignInForm } from '../model/useSignInForm'
 import styles from './SignInForm.module.css'
 
 export const SignInForm = () => {
-  const { register, errors, isSubmitDisabled, submitHandler } = useSignInForm()
+  const { register, errors, formError, isSubmitDisabled, submitHandler } = useSignInForm()
 
   return (
     <Card className={styles.card} padding="medium">
@@ -60,6 +60,12 @@ export const SignInForm = () => {
         <Link className={styles.forgotPassword} href={ROUTES.forgotPassword}>
           Forgot Password
         </Link>
+
+        {formError && (
+          <div className={styles.formError} role="alert">
+            <p className={styles.formErrorText}>{formError}</p>
+          </div>
+        )}
 
         <Button
           className={styles.submitButton}
