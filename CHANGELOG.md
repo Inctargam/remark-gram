@@ -4,6 +4,27 @@
 
 ## Unreleased
 
+### 2026-08-26
+
+#### Profile
+
+- Real numeric profile routes, например `/profile/3`, больше не получают `404` только из-за отсутствия mock-профиля: SSR отдаёт временный backend-compatible profile placeholder до появления полноценного public profile endpoint.
+- Direct URL real post modal, например `/profile/3?postId=5`, больше не получает SSR `404` из-за mock-only selected post lookup; проверка выбранного поста откладывается до клиентской загрузки real posts.
+- Для real numeric profile ids SSR больше не гидрирует пустую mock-страницу публикаций, чтобы клиентский `ProfilePostsGrid` мог сразу запросить реальные посты через backend API.
+- Собственный профиль показывает username из загруженного `/auth/me`, когда текущий пользователь уже есть в session store.
+
+#### Delete Post
+
+- После удаления публикации пост сразу удаляется из cached owner feed, а затем список дополнительно инвалидируется для синхронизации с backend.
+
+#### Verification
+
+- `pnpm exec tsc --noEmit --pretty false` прошёл.
+- `pnpm exec vitest run --project unit src/features/delete-post/model/forgetDeletedPost.test.ts src/pages/profile/api/profile.server.test.ts src/entities/post/api/profilePostsHydration.server.test.ts src/entities/post/api/postsApi.server.test.ts` прошёл.
+- `pnpm exec vitest run --project unit src/pages/profile/model/profileRoute.test.ts src/pages/profile/api/profile.server.test.ts src/entities/post/api/profilePostsHydration.server.test.ts src/entities/post/api/postsApi.server.test.ts` прошёл.
+- Focused ESLint для profile, profile posts hydration и delete-post cache cleanup прошёл.
+- `pnpm exec vitest run --project storybook src/pages/profile/ui/ProfilePage.stories.tsx` прошёл.
+
 ### 2026-08-24
 
 #### Auth
