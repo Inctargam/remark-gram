@@ -6,6 +6,11 @@ export type PublishPostPayload = {
   photos: ExportedPostPhoto[]
 }
 
+export type PublishPostVariables = {
+  payload: PublishPostPayload
+  signal?: AbortSignal
+}
+
 export type PublishPostResult = {
   publicationId: string
 }

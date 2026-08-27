@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 
 import { normalizePostDescription } from '@/entities/post'
 
+import { isPublishPostAbortError } from '../api/publishPostApi'
 import { usePublishPostMutation } from '../api/usePublishPostMutation'
 import { exportEditedImage, type ExportedPostPhoto } from '../lib/exportEditedImage'
 import { createPostDraftFromState } from './createPostDraft'
@@ -18,6 +19,7 @@ export const useCreatePostFlow = () => {
   const [publishError, setPublishError] = useState<string | null>(null)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const isPublishInFlightRef = useRef(false)
+  const publishAbortControllerRef = useRef<AbortController | null>(null)
   const publishPostMutation = usePublishPostMutation()
   const {
     hasDraft,
@@ -90,6 +92,9 @@ export const useCreatePostFlow = () => {
   }
 
   const resetFlowHandler = () => {
+    publishAbortControllerRef.current?.abort()
+    publishAbortControllerRef.current = null
+    isPublishInFlightRef.current = false
     resetPhotosHandler()
     setDescription('')
     setPublishError(null)
@@ -98,6 +103,8 @@ export const useCreatePostFlow = () => {
   }
 
   const saveCurrentDraftHandler = () => {
+    publishAbortControllerRef.current?.abort()
+
     if (!hasUnsavedChanges) {
       return
     }
@@ -127,8 +134,13 @@ export const useCreatePostFlow = () => {
   }
 
   const discardCreationHandler = () => {
+    publishAbortControllerRef.current?.abort()
     clearDraftHandler()
     resetFlowHandler()
+  }
+
+  const abortPublicationHandler = () => {
+    publishAbortControllerRef.current?.abort()
   }
 
   const publishPostHandler = async (onSuccess: () => void) => {
@@ -137,6 +149,10 @@ export const useCreatePostFlow = () => {
     }
 
     isPublishInFlightRef.current = true
+    publishAbortControllerRef.current?.abort()
+    const abortController = new AbortController()
+
+    publishAbortControllerRef.current = abortController
     setPublishError(null)
     setIsPreparingPublication(true)
 
@@ -144,7 +160,24 @@ export const useCreatePostFlow = () => {
 
     try {
       editedPhotos = await Promise.all(photos.map(exportEditedImage))
+      if (abortController.signal.aborted) {
+        setIsPreparingPublication(false)
+        isPublishInFlightRef.current = false
+        if (publishAbortControllerRef.current === abortController) {
+          publishAbortControllerRef.current = null
+        }
+        return
+      }
     } catch {
+      if (abortController.signal.aborted) {
+        setIsPreparingPublication(false)
+        isPublishInFlightRef.current = false
+        if (publishAbortControllerRef.current === abortController) {
+          publishAbortControllerRef.current = null
+        }
+        return
+      }
+
       setPublishError('Failed to prepare photos for publication.')
       setIsPreparingPublication(false)
       isPublishInFlightRef.current = false
@@ -153,15 +186,25 @@ export const useCreatePostFlow = () => {
 
     try {
       setIsPreparingPublication(false)
-      await publishPostMutation.mutateAsync({ description, photos: editedPhotos })
+      await publishPostMutation.mutateAsync({
+        payload: { description, photos: editedPhotos },
+        signal: abortController.signal,
+      })
       clearDraftHandler()
       resetFlowHandler()
       onSuccess()
     } catch (error) {
+      if (abortController.signal.aborted || isPublishPostAbortError(error)) {
+        return
+      }
+
       setPublishError(getCreatePostPublishErrorMessage(error))
     } finally {
       setIsPreparingPublication(false)
       isPublishInFlightRef.current = false
+      if (publishAbortControllerRef.current === abortController) {
+        publishAbortControllerRef.current = null
+      }
     }
   }
 
@@ -176,6 +219,7 @@ export const useCreatePostFlow = () => {
     step,
     photos,
     uploadError,
+    abortPublicationHandler,
     discardCreationHandler,
     openCropStepHandler,
     openDraftHandler,

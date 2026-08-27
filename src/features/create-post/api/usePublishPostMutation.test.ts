@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { postsQueryKeys } from '@/entities/post'
 
-import type { PublishPostPayload, PublishPostResult } from './publishPostTypes'
+import type { PublishPostResult, PublishPostVariables } from './publishPostTypes'
 import { usePublishPostMutation } from './usePublishPostMutation'
 
 const mocks = vi.hoisted(() => ({
@@ -22,7 +22,7 @@ vi.mock('./publishPostApi', () => ({
 }))
 
 type MutationOptions = {
-  mutationFn: (payload: PublishPostPayload) => Promise<PublishPostResult>
+  mutationFn: (variables: PublishPostVariables) => Promise<PublishPostResult>
   onSuccess: () => unknown
 }
 
@@ -45,13 +45,14 @@ describe('usePublishPostMutation', () => {
   it('publishes through the real API adapter and invalidates post lists', async () => {
     const payload = { description: 'caption', photos: [photo] }
     const publishedPost = { publicationId: '42' }
+    const signal = new AbortController().signal
 
     mocks.publishPostApi.mockResolvedValue(publishedPost)
 
     const mutation = usePublishPostMutation() as unknown as MutationOptions
 
-    await expect(mutation.mutationFn(payload)).resolves.toEqual(publishedPost)
-    expect(mocks.publishPostApi).toHaveBeenCalledWith(payload)
+    await expect(mutation.mutationFn({ payload, signal })).resolves.toEqual(publishedPost)
+    expect(mocks.publishPostApi).toHaveBeenCalledWith(payload, signal)
 
     mutation.onSuccess()
 

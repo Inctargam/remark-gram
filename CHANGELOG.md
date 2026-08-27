@@ -4,6 +4,20 @@
 
 ## Unreleased
 
+### 2026-08-27
+
+#### Create Post
+
+- Закрытие create-post modal во время публикации теперь отменяет текущий publish flow через `AbortController`: новые upload/create запросы не стартуют после abort, а активные presigned uploads получают `AbortSignal`.
+- Отмена публикации через закрытие не показывает пользователю generic publish error, потому что это ожидаемое действие пользователя.
+
+#### Verification
+
+- `pnpm exec tsc --noEmit --pretty false` прошёл.
+- `pnpm exec vitest run --project unit src/features/create-post src/shared/api/openapi/client.test.ts src/shared/auth/refreshSession.test.ts` прошёл.
+- Focused ESLint для create-post прошёл.
+- `pnpm exec vitest run --project storybook src/features/create-post/ui/stories/CreatePostFlow.stories.tsx src/features/create-post/ui/close-creation/CloseCreationConfirm.stories.tsx` прошёл.
+
 ### 2026-08-26
 
 #### Profile

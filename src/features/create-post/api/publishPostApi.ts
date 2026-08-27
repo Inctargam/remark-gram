@@ -16,6 +16,22 @@ type PreparedPhotoUpload = {
 
 const SUPPORTED_CONTENT_TYPES = ['image/jpeg', 'image/png'] as const
 
+const createAbortError = () => new DOMException('Post publication was aborted', 'AbortError')
+
+export const isPublishPostAbortError = (error: unknown) =>
+  error instanceof DOMException && error.name === 'AbortError'
+
+const throwIfAborted = (signal?: AbortSignal) => {
+  if (signal?.aborted) {
+    throw createAbortError()
+  }
+}
+
+const createAbortableFetch =
+  (signal?: AbortSignal): typeof fetch =>
+  (input, init) =>
+    fetch(input, { ...init, signal })
+
 const isSupportedContentType = (
   contentType: string
 ): contentType is SchemaImageUploadMetadataDto['contentType'] =>
@@ -91,11 +107,15 @@ const createPresignedUploadFormData = (session: SchemaImageUploadSessionDto, fil
 
 const uploadPhotoToObjectStorage = async (
   session: SchemaImageUploadSessionDto,
-  file: File
+  file: File,
+  signal?: AbortSignal
 ): Promise<void> => {
+  throwIfAborted(signal)
+
   const response = await fetch(session.url, {
     method: 'POST',
     body: createPresignedUploadFormData(session, file),
+    signal,
   })
 
   if (!response.ok) {
@@ -103,11 +123,14 @@ const uploadPhotoToObjectStorage = async (
   }
 }
 
-const initiateImageUploads = async (photos: PreparedPhotoUpload[]) => {
+const initiateImageUploads = async (photos: PreparedPhotoUpload[], signal?: AbortSignal) => {
+  throwIfAborted(signal)
+
   const { data, error, response } = await apiClient.POST('/api/v1/files/image-uploads', {
     body: {
       images: photos.map(createUploadMetadata),
     },
+    fetch: createAbortableFetch(signal),
   })
 
   if (!response.ok) {
@@ -124,9 +147,12 @@ const initiateImageUploads = async (photos: PreparedPhotoUpload[]) => {
   return data.sessions
 }
 
-const completeImageUploads = async (uploadIds: string[]): Promise<void> => {
+const completeImageUploads = async (uploadIds: string[], signal?: AbortSignal): Promise<void> => {
+  throwIfAborted(signal)
+
   const { error, response } = await apiClient.POST('/api/v1/files/image-uploads/complete', {
     body: { uploadIds },
+    fetch: createAbortableFetch(signal),
   })
 
   if (!response.ok) {
@@ -137,9 +163,15 @@ const completeImageUploads = async (uploadIds: string[]): Promise<void> => {
   }
 }
 
-const createPost = async (payload: SchemaCreatePostDto): Promise<PublishPostResult> => {
+const createPost = async (
+  payload: SchemaCreatePostDto,
+  signal?: AbortSignal
+): Promise<PublishPostResult> => {
+  throwIfAborted(signal)
+
   const { data, error, response } = await apiClient.POST('/api/v1/posts', {
     body: payload,
+    fetch: createAbortableFetch(signal),
     headers: { 'Idempotency-Key': crypto.randomUUID() },
   })
 
@@ -157,17 +189,19 @@ const createPost = async (payload: SchemaCreatePostDto): Promise<PublishPostResu
   return { publicationId: String(data.id) }
 }
 
-export const publishPostApi = async ({
-  description,
-  photos,
-}: PublishPostPayload): Promise<PublishPostResult> => {
+export const publishPostApi = async (
+  { description, photos }: PublishPostPayload,
+  signal?: AbortSignal
+): Promise<PublishPostResult> => {
+  throwIfAborted(signal)
   await ensureCreatePostAccessToken()
+  throwIfAborted(signal)
 
   const preparedPhotos = photos.map(({ file }) => ({
     clientFileId: crypto.randomUUID(),
     file,
   }))
-  const sessions = await initiateImageUploads(preparedPhotos)
+  const sessions = await initiateImageUploads(preparedPhotos, signal)
   const photosByClientFileId = new Map(
     preparedPhotos.map(({ clientFileId, file }) => [clientFileId, file])
   )
@@ -182,16 +216,19 @@ export const publishPostApi = async ({
         )
       }
 
-      return uploadPhotoToObjectStorage(session, file)
+      return uploadPhotoToObjectStorage(session, file, signal)
     })
   )
 
   const imageIds = sessions.map((session) => session.id)
 
-  await completeImageUploads(imageIds)
+  await completeImageUploads(imageIds, signal)
 
-  return createPost({
-    description,
-    imageIds,
-  })
+  return createPost(
+    {
+      description,
+      imageIds,
+    },
+    signal
+  )
 }

@@ -104,20 +104,66 @@ describe('publishPostApi', () => {
           },
         ],
       },
+      fetch: expect.any(Function),
     })
     expect(fetchMock).toHaveBeenCalledWith('https://storage.example.com', {
       method: 'POST',
       body: expect.any(FormData),
+      signal: undefined,
     })
     expect(apiPostMock).toHaveBeenNthCalledWith(2, '/api/v1/files/image-uploads/complete', {
       body: { uploadIds: ['33333333-3333-4333-8333-333333333333'] },
+      fetch: expect.any(Function),
     })
     expect(apiPostMock).toHaveBeenNthCalledWith(3, '/api/v1/posts', {
       body: {
         description: 'caption',
         imageIds: ['33333333-3333-4333-8333-333333333333'],
       },
+      fetch: expect.any(Function),
       headers: { 'Idempotency-Key': '22222222-2222-4222-8222-222222222222' },
+    })
+  })
+
+  it('does not start publication requests when already aborted', async () => {
+    const abortController = new AbortController()
+
+    abortController.abort()
+
+    await expect(
+      publishPostApi({ description: 'caption', photos: [photo] }, abortController.signal)
+    ).rejects.toMatchObject({ name: 'AbortError' })
+    expect(apiPostMock).not.toHaveBeenCalled()
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it('passes the abort signal to presigned uploads', async () => {
+    const abortController = new AbortController()
+
+    randomUUIDMock.mockReturnValue('11111111-1111-4111-8111-111111111111')
+    apiPostMock.mockResolvedValueOnce({
+      data: {
+        sessions: [
+          {
+            id: '33333333-3333-4333-8333-333333333333',
+            clientFileId: '11111111-1111-4111-8111-111111111111',
+            url: 'https://storage.example.com',
+            fields: {},
+          },
+        ],
+      },
+      error: undefined,
+      response: createResponse(201),
+    })
+    fetchMock.mockRejectedValue(new DOMException('Upload aborted', 'AbortError'))
+
+    await expect(
+      publishPostApi({ description: 'caption', photos: [photo] }, abortController.signal)
+    ).rejects.toMatchObject({ name: 'AbortError' })
+    expect(fetchMock).toHaveBeenCalledWith('https://storage.example.com', {
+      method: 'POST',
+      body: expect.any(FormData),
+      signal: abortController.signal,
     })
   })
 
