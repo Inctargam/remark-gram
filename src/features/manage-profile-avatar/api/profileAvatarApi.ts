@@ -1,7 +1,7 @@
 import type { ProfileAvatarsResponse } from '@/entities/profile'
 import { api } from '@/shared/api/baseApi'
 
-const PROFILE_AVATAR_API_PATH = '/api/v1/profile/avatar'
+const PROFILE_AVATAR_API_PATH = '/api/mock/profile/avatar'
 
 // TODO(profile-api): Replace these local mock requests with the typed OpenAPI client once the
 // backend exposes the profile avatar endpoints in the schema.

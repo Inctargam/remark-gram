@@ -10,7 +10,8 @@ type Props = {
   children: ReactNode
 }
 
-const isMockAuth = process.env.NEXT_PUBLIC_AUTH_MOCK === 'true'
+// TODO(auth-me): Remove the mock switch after the backend exposes the current-user endpoint.
+const isMockAuth = process.env.NEXT_PUBLIC_AUTH_MOCK !== 'false'
 
 export const SessionBootstrap = ({ children }: Props) => {
   const queryClient = useQueryClient()
