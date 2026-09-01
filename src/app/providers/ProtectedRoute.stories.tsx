@@ -7,6 +7,12 @@ import { sessionStore } from '@/shared/auth'
 import { ProtectedRoute } from './ProtectedRoute'
 
 const PROTECTED_CONTENT = 'Protected content'
+const CURRENT_USER = {
+  avatarUrl: null,
+  email: 'user@example.com',
+  id: '7',
+  username: 'UserName',
+}
 
 const meta = {
   title: 'app/providers/ProtectedRoute',
@@ -74,12 +80,12 @@ export const GuestProfile: Story = {
 }
 
 export const AuthenticatedProfile: Story = {
-  beforeEach: () => sessionStore.getState().setAuthenticated('mock-token'),
+  beforeEach: () => sessionStore.getState().setAuthenticated('mock-token', CURRENT_USER),
   parameters: {
     nextjs: { navigation: { pathname: '/profile' } },
   },
   play: async ({ canvas }) => {
-    await waitFor(() => expect(getRouter().replace).toHaveBeenCalledWith('/profile/mock-user-1'))
+    await waitFor(() => expect(getRouter().replace).toHaveBeenCalledWith('/profile/7'))
     await expect(canvas.queryByText(PROTECTED_CONTENT)).not.toBeInTheDocument()
   },
 }

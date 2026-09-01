@@ -1,6 +1,5 @@
-export type { CreatePostPayload, UpdatePostPayload } from './api/postsApi'
+export type { UpdatePostPayload } from './api/postsApi'
 export {
-  createPost,
   deletePost,
   getPost,
   getProfilePosts,

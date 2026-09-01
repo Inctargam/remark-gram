@@ -4,7 +4,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import type { ReactNode } from 'react'
 import { useEffect } from 'react'
 
-import { getCurrentUserId, useSessionStatus } from '@/shared/auth'
+import { useCurrentUser, useSessionStatus } from '@/shared/auth'
 import { ROUTES } from '@/shared/config'
 
 type Props = {
@@ -14,6 +14,7 @@ type Props = {
 export const ProtectedRoute = ({ children }: Props) => {
   const pathname = usePathname()
   const router = useRouter()
+  const currentUser = useCurrentUser()
   const sessionStatus = useSessionStatus()
   const isProfileEntry = pathname === ROUTES.profile
 
@@ -22,10 +23,10 @@ export const ProtectedRoute = ({ children }: Props) => {
       router.replace(isProfileEntry ? ROUTES.home : ROUTES.signIn)
     }
 
-    if (sessionStatus === 'authenticated' && isProfileEntry) {
-      router.replace(ROUTES.profileById(getCurrentUserId()))
+    if (sessionStatus === 'authenticated' && isProfileEntry && currentUser) {
+      router.replace(ROUTES.profileById(currentUser.id))
     }
-  }, [isProfileEntry, router, sessionStatus])
+  }, [currentUser, isProfileEntry, router, sessionStatus])
 
   const canRenderProtectedContent = sessionStatus === 'authenticated' && !isProfileEntry
 

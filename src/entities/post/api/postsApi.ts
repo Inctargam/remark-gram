@@ -1,24 +1,27 @@
 import { api } from '@/shared/api/baseApi'
+import type { SchemaGetAuthorPostsDto } from '@/shared/api/openapi/schema'
 
-import type { Post, PostImage, PostsPage } from '../model/types'
+import type { Post, PostsPage } from '../model/types'
 
 /**
  * The only place that talks to the posts API. Hooks and UI never call `fetch` directly,
  * so switching from the in-memory mock to the real backend is a change in this file alone.
  *
- * Paths mirror the future real ones and differ by prefix only:
- * mock `/api/mock/posts`, real `${NEXT_PUBLIC_API_BASE_URL}/api/v1/posts` — the same shape
- * the auth calls use, so the base url carries the host only.
+ * Mock and real list endpoints have different shapes:
+ * mock `/api/mock/posts?userId=...&pageSize=...`, real
+ * `${NEXT_PUBLIC_API_BASE_URL}/api/v1/users/{userId}/posts?limit=...`.
+ * Keep that difference hidden here so hooks and UI stay stable.
  *
  * The mock lives in `app/api/mock/posts` — a route handler of this very app, so it is
  * requested on the current origin and must not inherit the backend base url. Auth already
  * points that base url at the real backend; sharing it would send mock calls to the wrong host.
  *
- * TODO(posts-schema): replace hand-written types and paths with the generated
- * openapi-fetch client once posts endpoints appear in `schema.d.ts`.
+ * TODO(posts-schema): replace hand-written response mapping with the generated
+ * openapi-fetch client once the UI post model matches the backend author post DTO.
  */
 const MOCK_POSTS_PATH = '/api/mock/posts'
 const REAL_POSTS_PATH = '/api/v1/posts'
+const REAL_AUTHOR_POSTS_PATH = '/api/v1/users'
 
 export const PROFILE_POSTS_PAGE_SIZE = 8
 
@@ -30,10 +33,62 @@ const getPostsBasePath = () => (isMockPostsApi() ? MOCK_POSTS_PATH : REAL_POSTS_
 /** Empty base url keeps mock calls on the current origin; real ones fall back to the API base. */
 const getPostsRequestInit = () => (isMockPostsApi() ? { baseUrl: '' } : undefined)
 
+export const canRequestProfilePosts = (userId: string) => {
+  if (isMockPostsApi()) {
+    return true
+  }
+
+  return /^[1-9]\d*$/.test(userId)
+}
+
 type GetProfilePostsParams = {
   userId: string
   cursor?: string | null
   pageSize?: number
+}
+
+const isStringValue = (value: unknown): value is string => typeof value === 'string'
+
+const mapAuthorPostsPage = (page: SchemaGetAuthorPostsDto): PostsPage => ({
+  items: page.items.map((post) => {
+    const description = isStringValue(post.description) ? post.description : ''
+
+    return {
+      id: String(post.id),
+      ownerId: String(post.authorId),
+      ownerUsername: `User ${post.authorId}`,
+      ownerAvatarUrl: null,
+      images: post.images.map(({ url }) => ({ url, width: 0, height: 0 })),
+      description,
+      createdAt: post.createdAt,
+      updatedAt: post.createdAt,
+    }
+  }),
+  nextCursor: isStringValue(page.nextCursor) ? page.nextCursor : null,
+})
+
+const getProfilePostsPath = ({
+  userId,
+  cursor,
+  pageSize = PROFILE_POSTS_PAGE_SIZE,
+}: GetProfilePostsParams) => {
+  if (isMockPostsApi()) {
+    const searchParams = new URLSearchParams({ userId, pageSize: String(pageSize) })
+
+    if (cursor) {
+      searchParams.set('cursor', cursor)
+    }
+
+    return `${MOCK_POSTS_PATH}?${searchParams.toString()}`
+  }
+
+  const searchParams = new URLSearchParams({ limit: String(pageSize) })
+
+  if (cursor) {
+    searchParams.set('cursor', cursor)
+  }
+
+  return `${REAL_AUTHOR_POSTS_PATH}/${encodeURIComponent(userId)}/posts?${searchParams.toString()}`
 }
 
 export const getProfilePosts = async ({
@@ -41,33 +96,22 @@ export const getProfilePosts = async ({
   cursor,
   pageSize = PROFILE_POSTS_PAGE_SIZE,
 }: GetProfilePostsParams): Promise<PostsPage> => {
-  const searchParams = new URLSearchParams({ userId, pageSize: String(pageSize) })
-
-  if (cursor) {
-    searchParams.set('cursor', cursor)
+  if (!canRequestProfilePosts(userId)) {
+    return { items: [], nextCursor: null }
   }
 
   const response = await api.get(
-    `${getPostsBasePath()}?${searchParams.toString()}`,
+    getProfilePostsPath({ userId, cursor, pageSize }),
     getPostsRequestInit()
   )
 
-  return response.json()
+  const postsPage = await response.json()
+
+  return isMockPostsApi() ? postsPage : mapAuthorPostsPage(postsPage)
 }
 
 export const getPost = async (postId: string): Promise<Post> => {
   const response = await api.get(`${getPostsBasePath()}/${postId}`, getPostsRequestInit())
-
-  return response.json()
-}
-
-export type CreatePostPayload = {
-  description: string
-  images: PostImage[]
-}
-
-export const createPost = async (payload: CreatePostPayload): Promise<Post> => {
-  const response = await api.post(getPostsBasePath(), payload, getPostsRequestInit())
 
   return response.json()
 }
