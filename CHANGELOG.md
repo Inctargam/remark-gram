@@ -4,6 +4,32 @@
 
 ## Unreleased
 
+### 2026-09-01
+
+#### Notifications
+
+- Добавлена начальная mock-граница уведомлений: доменная модель `entities/notification`, query keys, API adapter, React Query hook и browser-side mock realtime adapter.
+- Добавлен in-memory mock store уведомлений с историей за последний месяц, cursor pagination, unread count и mark-read поведением.
+- Фильтр истории уведомлений исключает некорректные будущие timestamps, чтобы unread/history state не зависел от clock skew в моках или будущем backend DTO.
+- Добавлены route handlers `GET /api/mock/notifications` и `POST /api/mock/notifications/read`, чтобы UI позже подключался к mock API через тот же adapter-шов, который будет заменён на backend contract.
+
+#### Shared UI
+
+- `ProgressBar` получил стабильный `aria-valuetext="100%"` для завершённого состояния, чтобы Base UI не форматировал процент по-разному на сервере и клиенте и не вызывал hydration mismatch.
+
+#### Verification
+
+- `pnpm exec vitest run --project unit src/entities/notification src/shared/api/mock/notificationsStore.test.ts app/api/mock/notifications` прошёл: 5 файлов, 28 тестов.
+- `pnpm exec vitest run --project storybook src/shared/ui/progress-bar/ProgressBar.stories.tsx` прошёл со второго запуска: 1 файл, 3 теста; первый запуск упал из-за Vite re-optimize reload после добавления dependency cache.
+- `pnpm lint` прошёл без ошибок; остались существующие warnings в generated `schema.d.ts` и `src/features/sign-up/model/useSignUpForm.ts`.
+- `pnpm build` был остановлен вручную после зависания дольше 4 минут на `Creating an optimized production build ...`.
+- `pnpm exec tsc --noEmit` не прошёл из-за существующей ошибки `src/shared/api/mock/subscriptionsStore.test.ts(65,24)`: helper типизирован как `'stripe'`, но тест передаёт `'paypal'`.
+
+#### Notes
+
+- Backend contract уведомлений не найден в локальных материалах и OpenAPI schema; реализация временно использует mock contract до появления настоящих WebSocket/REST endpoints.
+- Storybook MCP tools недоступны в текущем наборе tools, поэтому UI-панель уведомлений пока не реализовывалась.
+
 ### 2026-08-20
 
 #### Auth

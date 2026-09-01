@@ -9,7 +9,10 @@ type Props = {
 }
 
 export const ProgressBar = ({ isLoading, className }: Props) => (
-  <Progress.Root value={isLoading ? null : 100} className={clsx(styles.root, className)}>
+  <Progress.Root
+    value={isLoading ? null : 100}
+    aria-valuetext={isLoading ? undefined : '100%'}
+    className={clsx(styles.root, className)}>
     <Progress.Track className={styles.track}>
       <Progress.Indicator className={styles.indicator} />
     </Progress.Track>
