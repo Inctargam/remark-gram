@@ -9,6 +9,7 @@
 #### Notifications
 
 - Добавлена начальная mock-граница уведомлений: доменная модель `entities/notification`, query keys, API adapter, React Query hook и browser-side mock realtime adapter.
+- App-level `NotificationsController` подключает mock realtime stream только для authenticated session и кладёт новые events в TanStack Query cache без дублирования.
 - Добавлен in-memory mock store уведомлений с историей за последний месяц, cursor pagination, unread count и mark-read поведением.
 - Фильтр истории уведомлений исключает некорректные будущие timestamps, чтобы unread/history state не зависел от clock skew в моках или будущем backend DTO.
 - Добавлены route handlers `GET /api/mock/notifications` и `POST /api/mock/notifications/read`, чтобы UI позже подключался к mock API через тот же adapter-шов, который будет заменён на backend contract.
@@ -20,6 +21,7 @@
 #### Verification
 
 - `pnpm exec vitest run --project unit src/entities/notification src/shared/api/mock/notificationsStore.test.ts app/api/mock/notifications` прошёл: 5 файлов, 28 тестов.
+- `pnpm exec vitest run --project unit src/app/providers/notificationsConnection.test.ts src/entities/notification src/shared/api/mock/notificationsStore.test.ts app/api/mock/notifications` прошёл: 7 файлов, 35 тестов.
 - `pnpm exec vitest run --project storybook src/shared/ui/progress-bar/ProgressBar.stories.tsx` прошёл со второго запуска: 1 файл, 3 теста; первый запуск упал из-за Vite re-optimize reload после добавления dependency cache.
 - `pnpm lint` прошёл без ошибок; остались существующие warnings в generated `schema.d.ts` и `src/features/sign-up/model/useSignUpForm.ts`.
 - `pnpm build` был остановлен вручную после зависания дольше 4 минут на `Creating an optimized production build ...`.

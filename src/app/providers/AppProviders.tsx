@@ -2,6 +2,7 @@
 
 import type { ReactNode } from 'react'
 
+import { NotificationsController } from './NotificationsController'
 import { QueryProvider } from './QueryProvider'
 import { SessionBootstrap } from './SessionBootstrap'
 
@@ -11,6 +12,9 @@ type Props = {
 
 export const AppProviders = ({ children }: Props) => (
   <QueryProvider>
-    <SessionBootstrap>{children}</SessionBootstrap>
+    <SessionBootstrap>
+      <NotificationsController />
+      {children}
+    </SessionBootstrap>
   </QueryProvider>
 )
