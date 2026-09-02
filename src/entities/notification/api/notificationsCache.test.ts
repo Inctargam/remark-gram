@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import type { NotificationsInfiniteData } from './notificationsCache'
-import { prependNotificationEventToCache } from './notificationsCache'
+import { markNotificationsReadInCache, prependNotificationEventToCache } from './notificationsCache'
 
 const liveEvent = {
   id: 'notification-live',
@@ -21,6 +21,14 @@ const cachedData: NotificationsInfiniteData = {
           createdAt: '2026-09-01T12:00:00.000Z',
           readAt: null,
           payload: { daysLeft: 1 },
+        },
+        {
+          id: 'notification-second',
+          kind: 'nextPayment',
+          message: 'Следующий платеж у вас спишется через 1 день',
+          createdAt: '2026-09-01T11:00:00.000Z',
+          readAt: null,
+          payload: {},
         },
       ],
       nextCursor: null,
@@ -42,6 +50,7 @@ describe('prependNotificationEventToCache', () => {
     expect(data.pages[0]?.items.map(({ id }) => id)).toEqual([
       'notification-live',
       'notification-existing',
+      'notification-second',
     ])
   })
 
@@ -52,6 +61,28 @@ describe('prependNotificationEventToCache', () => {
     expect(twice.pages[0]?.items.map(({ id }) => id)).toEqual([
       'notification-live',
       'notification-existing',
+      'notification-second',
     ])
+  })
+})
+
+describe('markNotificationsReadInCache', () => {
+  it('marks cached notifications as read', () => {
+    const data = markNotificationsReadInCache(cachedData, '2026-09-01T12:05:00.000Z')
+
+    expect(data?.pages[0]?.items[0]?.readAt).toBe('2026-09-01T12:05:00.000Z')
+  })
+
+  it('keeps missing cache empty', () => {
+    expect(markNotificationsReadInCache(undefined, '2026-09-01T12:05:00.000Z')).toBeUndefined()
+  })
+
+  it('marks only selected cached notifications as read', () => {
+    const data = markNotificationsReadInCache(cachedData, '2026-09-01T12:05:00.000Z', [
+      'notification-second',
+    ])
+
+    expect(data?.pages[0]?.items[0]?.readAt).toBeNull()
+    expect(data?.pages[0]?.items[1]?.readAt).toBe('2026-09-01T12:05:00.000Z')
   })
 })

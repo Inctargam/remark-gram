@@ -4,6 +4,34 @@
 
 ## Unreleased
 
+### 2026-09-02
+
+#### Notifications
+
+- Добавлен `widgets/notifications`: popover уведомлений у колокольчика, scrollable список истории, состояния loading/empty/error и визуальное разделение read/unread.
+- `Header` и `HeaderMobile` получили `notificationSlot`, а `AppShellView` подключает desktop и mobile `NotificationsMenu` только для authenticated shell.
+- Открытие списка временно помечает уведомления прочитанными через mock mark-read endpoint с optimistic cache update и rollback при ошибке mutation; popup закрывается при смене маршрута, outside click и размонтировании на logout.
+- Browser-side mock realtime больше не генерирует новые уведомления по таймеру по умолчанию; автогенерация включается только через `NEXT_PUBLIC_NOTIFICATIONS_MOCK_REALTIME=true`, чтобы badge не менялся сам при обычной навигации.
+- Query key списка уведомлений теперь разделяет `mock-static`, `mock-realtime` и `real` режимы, чтобы старые timer-generated mock events из TanStack Query cache не мигали в badge перед refetch.
+- Добавлены stories для состояний `NotificationsPanelView` и slot-сценариев desktop/mobile header.
+- Helper cleanup сессии переименован в `sessionQueryCleanup`, чтобы убрать casing-конфликт с компонентом `SessionBootstrap` при TypeScript-проверке на macOS.
+
+#### Verification
+
+- `pnpm exec eslint --fix src/widgets/notifications src/widgets/header src/widgets/app-shell/ui/AppShellView.tsx src/entities/notification` прошёл без ошибок.
+- `pnpm exec eslint --fix src/app/providers/SessionBootstrap.tsx src/app/providers/sessionQueryCleanup.test.ts src/app/providers/sessionQueryCleanup.ts src/widgets/notifications src/widgets/header src/widgets/app-shell/ui/AppShellView.tsx src/entities/notification` прошёл без ошибок.
+- `pnpm lint` прошёл без ошибок; остались существующие warnings в generated `schema.d.ts` и `src/features/sign-up/model/useSignUpForm.ts`.
+- `pnpm exec vitest run --project unit src/widgets/notifications src/entities/notification src/app/providers/notificationsConnection.test.ts src/app/providers/sessionQueryCleanup.test.ts src/shared/api/mock/notificationsStore.test.ts app/api/mock/notifications` прошёл: 10 файлов, 48 тестов.
+- `pnpm exec vitest run --project unit src/entities/notification` прошёл: 5 файлов, 26 тестов.
+- `pnpm exec vitest run --project unit src/entities/notification/api/queryKeys.test.ts` прошёл: 1 файл, 2 теста.
+- `pnpm exec vitest run --project storybook src/widgets/notifications/ui/NotificationsPanelView.stories.tsx src/widgets/header/Header.stories.tsx src/widgets/header/HeaderMobile.stories.tsx` прошёл: 3 файла, 22 теста.
+- `pnpm exec tsc --noEmit --pretty false` не прошёл только из-за существующей ошибки `src/shared/api/mock/subscriptionsStore.test.ts(65,24)`: helper типизирован как `'stripe'`, но тест передаёт `'paypal'`.
+
+#### Notes
+
+- Storybook MCP tools недоступны в текущем наборе tools; shared UI props проверялись по локальным source/stories и Storybook/Vitest.
+- Правило read-state остаётся временным `mark-all-on-open` до подтверждения backend contract.
+
 ### 2026-09-01
 
 #### Notifications

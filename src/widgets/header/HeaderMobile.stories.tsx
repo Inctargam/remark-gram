@@ -49,6 +49,18 @@ export const Auth: Story = {
   },
 }
 
+export const AuthWithNotifications: Story = {
+  args: {
+    variant: 'auth',
+    menu: <button type="button">Menu</button>,
+    notificationSlot: <button type="button">Notifications</button>,
+  },
+  play: async ({ canvas }) => {
+    await expect(canvas.getByRole('button', { name: 'Notifications' })).toBeInTheDocument()
+    await expect(canvas.getByRole('button', { name: 'Menu' })).toBeInTheDocument()
+  },
+}
+
 export const WithLanguageSelector: Story = {
   args: {
     languageSelector: <span style={{ color: 'var(--color-light-100)', fontSize: '14px' }}>EN</span>,

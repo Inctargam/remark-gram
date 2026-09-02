@@ -6,7 +6,7 @@ import { useEffect } from 'react'
 
 import { checkMockAuth, refreshSession, sessionStore } from '@/shared/auth'
 
-import { shouldClearQueryClientOnSessionChange } from './sessionBootstrap'
+import { shouldClearQueryClientOnSessionChange } from './sessionQueryCleanup'
 
 type Props = {
   children: ReactNode

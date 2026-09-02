@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { shouldClearQueryClientOnSessionChange } from './sessionBootstrap'
+import { shouldClearQueryClientOnSessionChange } from './sessionQueryCleanup'
 
 describe('shouldClearQueryClientOnSessionChange', () => {
   it('clears cached data when the session becomes guest', () => {

@@ -11,8 +11,12 @@ export {
   NOTIFICATIONS_PAGE_SIZE,
 } from './api/notificationsApi'
 export type { NotificationsInfiniteData } from './api/notificationsCache'
-export { prependNotificationEventToCache } from './api/notificationsCache'
+export {
+  markNotificationsReadInCache,
+  prependNotificationEventToCache,
+} from './api/notificationsCache'
 export { notificationQueryKeys } from './api/queryKeys'
+export { useMarkNotificationsReadMutation } from './api/useMarkNotificationsReadMutation'
 export {
   NOTIFICATIONS_INITIAL_PAGE_PARAM,
   useNotificationsQuery,

@@ -1,7 +1,7 @@
 import type { InfiniteData } from '@tanstack/react-query'
 
 import type { NotificationEvent, NotificationPage } from '../model/notification'
-import { mapNotificationEvent } from '../model/notification'
+import { mapNotificationEvent, markNotificationsRead } from '../model/notification'
 
 export type NotificationsInfiniteData = InfiniteData<NotificationPage, string | null>
 
@@ -43,5 +43,23 @@ export const prependNotificationEventToCache = (
   return {
     ...data,
     pages: [{ ...firstPage, items: [notification, ...firstPage.items] }, ...restPages],
+  }
+}
+
+export const markNotificationsReadInCache = (
+  data: NotificationsInfiniteData | undefined,
+  readAt: string,
+  ids?: readonly string[]
+): NotificationsInfiniteData | undefined => {
+  if (!data) {
+    return data
+  }
+
+  return {
+    ...data,
+    pages: data.pages.map((page) => ({
+      ...page,
+      items: markNotificationsRead(page.items, readAt, ids),
+    })),
   }
 }

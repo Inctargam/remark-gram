@@ -9,6 +9,10 @@ export type MockNotificationsRealtimeParams = {
 }
 
 const DEFAULT_INTERVAL_MS = 30_000
+const MOCK_REALTIME_ENABLED_VALUE = 'true'
+
+const isMockRealtimeEnabled = () =>
+  process.env.NEXT_PUBLIC_NOTIFICATIONS_MOCK_REALTIME === MOCK_REALTIME_ENABLED_VALUE
 
 const createMockNotificationEvent = (createdAt: Date): NotificationEvent => ({
   id: `mock-notification-live-${createdAt.getTime()}`,
@@ -25,11 +29,15 @@ export const connectMockNotificationsRealtime = ({
   now = () => new Date(),
   onEvent,
 }: MockNotificationsRealtimeParams): (() => void) => {
-  const intervalId = window.setInterval(() => {
+  if (!isMockRealtimeEnabled()) {
+    return () => {}
+  }
+
+  const intervalId = globalThis.setInterval(() => {
     onEvent(createMockNotificationEvent(now()))
   }, intervalMs)
 
   return () => {
-    window.clearInterval(intervalId)
+    globalThis.clearInterval(intervalId)
   }
 }

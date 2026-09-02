@@ -12,6 +12,7 @@ import styles from './header.module.css'
 type AuthVariant = {
   variant: 'auth'
   notificationCount?: number
+  notificationSlot?: ReactNode
   onBellClick?: () => void
   languageSelector?: ReactNode
 }
@@ -37,20 +38,21 @@ export const Header = (props: HeaderProps) => {
         </Link>
 
         <div className={styles.controls}>
-          {variant === 'auth' && (
-            <button
-              aria-label="Notifications"
-              className={styles.bell}
-              type="button"
-              onClick={props.onBellClick}>
-              <Icon iconId="icon-bell-outline" />
-              {!!props.notificationCount && props.notificationCount > 0 && (
-                <span className={styles.badge}>
-                  {props.notificationCount > 99 ? '99+' : props.notificationCount}
-                </span>
-              )}
-            </button>
-          )}
+          {variant === 'auth' &&
+            (props.notificationSlot ?? (
+              <button
+                aria-label="Notifications"
+                className={styles.bell}
+                type="button"
+                onClick={props.onBellClick}>
+                <Icon iconId="icon-bell-outline" />
+                {!!props.notificationCount && props.notificationCount > 0 && (
+                  <span className={styles.badge}>
+                    {props.notificationCount > 99 ? '99+' : props.notificationCount}
+                  </span>
+                )}
+              </button>
+            ))}
 
           {languageSelector}
 
