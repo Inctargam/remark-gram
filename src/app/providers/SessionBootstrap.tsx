@@ -6,6 +6,8 @@ import { useEffect } from 'react'
 
 import { checkMockAuth, refreshSession, sessionStore } from '@/shared/auth'
 
+import { shouldClearQueryClientOnSessionChange } from './sessionBootstrap'
+
 type Props = {
   children: ReactNode
 }
@@ -18,7 +20,7 @@ export const SessionBootstrap = ({ children }: Props) => {
 
   useEffect(() => {
     const unsubscribe = sessionStore.subscribe((state, previousState) => {
-      if (state.status === 'guest' && previousState.status !== 'guest') {
+      if (shouldClearQueryClientOnSessionChange(state.status, previousState.status)) {
         queryClient.clear()
         // TODO(auth-redirect): Redirect only from protected routes when route guards are introduced.
       }
