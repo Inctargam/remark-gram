@@ -4,6 +4,21 @@
 
 ## Unreleased
 
+### 2026-09-04
+
+#### Notifications
+
+- Правило read-state уточнено как `mark-all-on-open`: mark-read mutation запускается один раз на событие открытия списка, а не на каждое появление unread во время уже открытого popup.
+- Добавлены unit-тесты для read-on-open decision helper и `useMarkNotificationsReadMutation`: optimistic update, selective mark-read, rollback при ошибке и invalidation notification lists.
+
+#### Verification
+
+- `pnpm exec eslint --fix src/widgets/notifications/model/useNotificationsMenu.ts src/widgets/notifications/model/notificationsReadState.ts src/widgets/notifications/model/notificationsReadState.test.ts src/entities/notification/api/useMarkNotificationsReadMutation.test.ts src/entities/notification/api/useMarkNotificationsReadMutation.ts` прошёл без ошибок.
+- `pnpm lint` прошёл без ошибок; остались существующие warnings в generated `schema.d.ts` и `src/features/sign-up/model/useSignUpForm.ts`.
+- `pnpm exec vitest run --project unit src/entities/notification src/widgets/notifications` прошёл: 8 файлов, 39 тестов.
+- `pnpm exec vitest run --project storybook src/widgets/notifications/ui/NotificationsPanelView.stories.tsx src/widgets/header/Header.stories.tsx src/widgets/header/HeaderMobile.stories.tsx` прошёл: 3 файла, 22 теста.
+- `pnpm exec tsc --noEmit --pretty false` не прошёл только из-за существующей ошибки `src/shared/api/mock/subscriptionsStore.test.ts(65,24)`: helper типизирован как `'stripe'`, но тест передаёт `'paypal'`.
+
 ### 2026-09-02
 
 #### Notifications

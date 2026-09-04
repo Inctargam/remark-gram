@@ -1,7 +1,7 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import {
   NOTIFICATIONS_PAGE_SIZE,
@@ -10,6 +10,7 @@ import {
 } from '@/entities/notification'
 
 import { flattenNotificationPages, getNotificationsBadgeCount } from '../lib/notificationsView'
+import { shouldMarkNotificationsReadOnOpen } from './notificationsReadState'
 
 export const useNotificationsMenu = () => {
   const pathname = usePathname()
@@ -24,13 +25,18 @@ export const useNotificationsMenu = () => {
   const badgeLabel = unreadCount > 99 ? '99+' : String(unreadCount)
   const isOpen = openPathname === pathname
 
-  useEffect(() => {
-    if (isOpen && hasUnreadNotifications && !isMarkingNotificationsRead) {
+  const openChangeHandler = (nextOpen: boolean) => {
+    if (
+      shouldMarkNotificationsReadOnOpen({
+        hasUnreadNotifications,
+        isMarkingNotificationsRead,
+        isOpen: nextOpen,
+        readWasRequestedForCurrentOpen: false,
+      })
+    ) {
       markNotificationsRead({ all: true })
     }
-  }, [hasUnreadNotifications, isMarkingNotificationsRead, isOpen, markNotificationsRead])
 
-  const openChangeHandler = (nextOpen: boolean) => {
     setOpenPathname(nextOpen ? pathname : null)
   }
 
