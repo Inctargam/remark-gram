@@ -1,12 +1,15 @@
 import type { Notification, NotificationPage } from '@/entities/notification'
 import { countUnreadNotifications } from '@/entities/notification'
 
+const isNotification = (value: Notification | undefined): value is Notification =>
+  value !== undefined
+
 export const flattenNotificationPages = (
-  pages: readonly NotificationPage[] | undefined
-): Notification[] => pages?.flatMap(({ items }) => items) ?? []
+  pages: readonly (NotificationPage | undefined)[] | undefined
+): Notification[] => pages?.flatMap((page) => page?.items?.filter(isNotification) ?? []) ?? []
 
 export const getNotificationsBadgeCount = (
-  pages: readonly NotificationPage[] | undefined
+  pages: readonly (NotificationPage | undefined)[] | undefined
 ): number => countUnreadNotifications(flattenNotificationPages(pages))
 
 export const formatNotificationTime = (isoDate: string): string => {

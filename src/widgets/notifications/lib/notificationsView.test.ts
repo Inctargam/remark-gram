@@ -37,6 +37,23 @@ describe('flattenNotificationPages', () => {
       'notification-2',
     ])
   })
+
+  it('ignores missing pages and malformed empty items', () => {
+    const malformedPage = {
+      ...page,
+      items: [page.items[0], undefined],
+    } as unknown as NotificationPage
+
+    expect(flattenNotificationPages([undefined, malformedPage]).map(({ id }) => id)).toEqual([
+      'notification-1',
+    ])
+  })
+
+  it('treats pages without items as empty pages', () => {
+    const malformedPage = { nextCursor: null } as unknown as NotificationPage
+
+    expect(flattenNotificationPages([malformedPage])).toEqual([])
+  })
 })
 
 describe('getNotificationsBadgeCount', () => {

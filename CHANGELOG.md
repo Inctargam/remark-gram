@@ -10,13 +10,18 @@
 
 - Правило read-state уточнено как `mark-all-on-open`: mark-read mutation запускается один раз на событие открытия списка, а не на каждое появление unread во время уже открытого popup.
 - Добавлены unit-тесты для read-on-open decision helper и `useMarkNotificationsReadMutation`: optimistic update, selective mark-read, rollback при ошибке и invalidation notification lists.
+- Виджет уведомлений теперь устойчив к частично некорректным story/mock cache pages: отсутствующие страницы, отсутствующие `items` и пустые элементы игнорируются при сборке списка и подсчете badge.
 
 #### Verification
 
 - `pnpm exec eslint --fix src/widgets/notifications/model/useNotificationsMenu.ts src/widgets/notifications/model/notificationsReadState.ts src/widgets/notifications/model/notificationsReadState.test.ts src/entities/notification/api/useMarkNotificationsReadMutation.test.ts src/entities/notification/api/useMarkNotificationsReadMutation.ts` прошёл без ошибок.
 - `pnpm lint` прошёл без ошибок; остались существующие warnings в generated `schema.d.ts` и `src/features/sign-up/model/useSignUpForm.ts`.
-- `pnpm exec vitest run --project unit src/entities/notification src/widgets/notifications` прошёл: 8 файлов, 39 тестов.
+- `pnpm test:unit` прошёл: 79 файлов, 451 тест.
+- `pnpm exec vitest run --project unit src/entities/notification src/widgets/notifications` прошёл: 8 файлов, 41 тест.
 - `pnpm exec vitest run --project storybook src/widgets/notifications/ui/NotificationsPanelView.stories.tsx src/widgets/header/Header.stories.tsx src/widgets/header/HeaderMobile.stories.tsx` прошёл: 3 файла, 22 теста.
+- `pnpm test:storybook` прошёл со второго релевантного запуска: 62 файла, 316 тестов. Первый sandbox-запуск упал до тестов на `listen EPERM`; первый unsandboxed-запуск прогрел Vite dependency cache и выявил defensive case в notification list normalization.
+- Headless Chromium smoke на `https://localhost:3000/settings` с `NEXT_PUBLIC_AUTH_MOCK=true NEXT_PUBLIC_NOTIFICATIONS_API_MOCK=true` прошёл: desktop badge `3 unread`, открытие списка отправило `POST /api/mock/notifications/read`, badge исчез, после навигации обратно не вернулся, mobile bell открыл popup рядом с меню, logout перевел на `/sign-in` и убрал notification buttons.
+- `pnpm build` был остановлен вручную после зависания дольше 4 минут на `Creating an optimized production build ...`.
 - `pnpm exec tsc --noEmit --pretty false` не прошёл только из-за существующей ошибки `src/shared/api/mock/subscriptionsStore.test.ts(65,24)`: helper типизирован как `'stripe'`, но тест передаёт `'paypal'`.
 
 ### 2026-09-02
