@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 
+import type { PaymentProvider, SubscriptionPeriod } from '@/entities/subscription'
+
 import {
   completeCheckoutSession,
   createCheckoutSession,
@@ -14,7 +16,7 @@ const NOW_MS = Date.UTC(2026, 7, 10, 12, 0, 0)
 const DAY_IN_MS = 24 * 60 * 60 * 1000
 
 /** Walks the whole buy flow: create a session, then report the outcome back. */
-const buy = (planId: 'day' | 'week' | 'month', nowMs = NOW_MS, provider = 'stripe' as const) => {
+const buy = (planId: SubscriptionPeriod, nowMs = NOW_MS, provider: PaymentProvider = 'stripe') => {
   const session = createCheckoutSession({ planId, provider })
 
   return completeCheckoutSession({ sessionId: session.id, outcome: 'success', nowMs })
