@@ -12,6 +12,12 @@
   line-height: var(--line-height-regular-14);
 }
 
+/* Brand logo of the provider the payment is created with, above the consent text. */
+.providerIcon {
+  display: block;
+  margin: 0 0 12px;
+}
+
 /* Consent: the checkbox and `OK` share one row, the button pinned to the right. */
 .consentActions {
   display: flex;

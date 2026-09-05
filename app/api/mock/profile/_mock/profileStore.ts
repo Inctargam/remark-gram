@@ -78,7 +78,7 @@ export const updateMockProfileAvatar = ({
   const profile = getState()
   const createdAt = new Date().toISOString()
   const avatarUrl = (size: number) =>
-    `/api/v1/profile/avatar/image?size=${size}&version=${encodeURIComponent(createdAt)}`
+    `/api/mock/profile/avatar/image?size=${size}&version=${encodeURIComponent(createdAt)}`
 
   profile.avatars = [
     { url: avatarUrl(192), width: 192, height: 192, fileSize, createdAt },

@@ -101,6 +101,61 @@
 #### Notes
 
 - Runtime smoke дошёл до real backend endpoint `/api/v1/files/image-uploads`, но end-to-end публикация заблокирована backend-ошибкой `503 UNAVAILABLE / ECONNREFUSED 10.109.248.235:4348` во внутренней Files/Posts зависимости.
+### 2026-08-20
+
+#### Auth
+
+- Моковая авторизация через `/api/mock/auth/me` включается по умолчанию, если `NEXT_PUBLIC_AUTH_MOCK` не задан; явное значение `false` сохраняет переключение на настоящий backend.
+- Production-сборка без локального `.env.local` получает мокового текущего пользователя, поэтому owner-only элементы профиля, включая `Profile Settings`, доступны на временных моках.
+
+#### Verification
+
+- ESLint `SessionBootstrap.tsx` прошёл без ошибок и предупреждений.
+- Focused Storybook-проверка `ProtectedRoute.stories.tsx` прошла: 1 файл, 7 тестов.
+- Production build Next.js прошёл; маршрут `/api/mock/auth/me` зарегистрирован.
+
+### 2026-08-19
+
+#### Profile API
+
+- Временный мок профиля перенесён с `/api/v1/profile` на `/api/mock/profile`, включая загрузку, удаление и выдачу изображения аватара.
+- Клиентские запросы General Information и управления аватаром переведены на новый мок-префикс, чтобы production ingress не отправлял их в настоящий backend по зарезервированному `/api/v1`.
+- Тест мок-обработчика аватара проверяет формирование URL изображения через `/api/mock/profile/avatar/image`.
+
+#### Verification
+
+- Целевые unit-тесты прошли: 3 файла, 15 тестов.
+- ESLint изменённых файлов прошёл без ошибок и предупреждений.
+- Production build Next.js прошёл; зарегистрированы `/api/mock/profile`, `/api/mock/profile/avatar` и `/api/mock/profile/avatar/image`, старые маршруты `/api/v1/profile` отсутствуют.
+
+#### Notes
+
+- `pnpm exec vitest` не запустился из-за недоступной проверки подписи registry; проверки выполнены установленными локальными бинарниками Vitest, ESLint и Next.js без изменения зависимостей.
+
+### 2026-08-16
+
+#### Payments
+
+- Оплата через PayPal (ветка `feat/payments_paypal`) добавлена в существующий мок-флоу покупки по аналогии со Stripe: провайдер остаётся параметром одного сценария, отдельная ветка не создавалась.
+- Мок-хендлер `subscriptions/checkout` теперь возвращает провайдер-специфичный `checkoutUrl`: `stripe` → `/payments/mock-checkout`, `paypal` → `/payments/mock-paypal`.
+- Добавлена заглушка hosted approval-страницы PayPal (`/payments/mock-paypal`, FSD-слайс `pages/mock-paypal`): кнопки `Approve`/`Cancel` (вместо `Pay`/`Cancel` у Stripe), capture имитируется существующим `completeCheckoutSession` через `useCompleteCheckoutMutation`, импортированный из публичного API `pages/mock-checkout` без переноса файлов.
+- Consent-модалка создания платежа показывает бренд-логотип выбранного провайдера (`icon-paypal`/`icon-stripe`); текст согласия остался общим для обоих провайдеров.
+- Добавлены env-константы PayPal: `NEXT_PUBLIC_PAYPAL_CLIENT_ID` (пустой до появления бэкенда) и `NEXT_PUBLIC_PAYPAL_SANDBOX`, а также модуль `shared/config/paypal.ts` с `PAYPAL_CLIENT_ID`, `PAYPAL_SANDBOX` и `PAYPAL_APPROVAL_BASE_URL`.
+- В `entities/subscription/api/subscriptionsApi.ts` зафиксирован TODO-шов `TODO(paypal-capture)`: реальный возвратный флоу PayPal (`token`/`PayerID` → capture) появится после бэкенда, мок-флоу ничего дополнительно не требует.
+- В `.env.local` добавлен отсутствовавший флаг `NEXT_PUBLIC_PAYMENTS_API_MOCK=true` — без него вкладка Account Management ходила на реальный бэкенд `remark-gram.com` и не загружалась (`ERR_TIMED_OUT`).
+
+#### Verification
+
+- `pnpm test:unit` прошёл: 360 тестов.
+- `pnpm vitest run --project storybook` прошёл: 305 тестов (для запуска установлен Playwright-браузер Chromium).
+- `pnpm lint` прошёл: 0 ошибок (1158 предупреждений prettier в сгенерированном `schema.d.ts`, существовавших до изменений).
+- `pnpm build` прошёл успешно, роут `/payments/mock-paypal` присутствует в сборке.
+- `tsc --noEmit` не завершается из-за существующих ссылок `.next/types/validator.ts` на отсутствующие mock payment routes; изменённые файлы новых TypeScript-ошибок не добавили.
+
+#### Notes
+
+- Реальный возвратный флоу PayPal (approve-редирект с `token`/`PayerID` и server-to-server capture) — зона бэкенда; на моках не имитируется, задокументирован как `TODO(paypal-capture)`.
+- Коммиты: `858ccd5`, `7ff3f8f`, `3a62536`, `7f020d7`, `3425c56`.
 
 ### 2026-08-15
 
@@ -314,6 +369,13 @@
 
 ### 2026-08-11
 
+#### Global Loading
+
+- Добавлена глобальная индикация загрузки: тонкая полоса в верхней части страницы появляется при любом активном query-запросе или мутации TanStack Query.
+- Компонент `ProgressBar` реализован на основе `@base-ui/react/progress` в `src/shared/ui/progress-bar/`: индетерминантная анимация скольжения синего индикатора по тёмной подложке, цвета совпадают с `--color-primary-500` и `--color-primary-900` из токенов.
+- Хук `useGlobalLoading` в `src/shared/lib/tanstack/` агрегирует `useIsFetching` и `useIsMutating` со сглаживанием через `useDeferredValue`, возвращает `boolean`.
+- Индикатор встроен в `AppShellView` и отображается поверх всего лейаута (`z-index: 9999`).
+
 #### Profile SSR
 
 - Первая SSR-страница постов профиля теперь передается в `useProfilePostsQuery()` как `initialData` React Query infinite query.
@@ -339,6 +401,7 @@
 - `pnpm exec tsc --noEmit` прошёл успешно.
 - `pnpm exec tsc --noEmit --pretty false` прошёл успешно.
 - `pnpm exec prettier --check CHANGELOG.md src/entities/post/api/useProfilePostsQuery.ts src/entities/post/api/profilePostsQueryData.ts src/entities/post/api/profilePostsQueryData.test.ts src/widgets/profile-posts/ui/ProfilePostsGrid.tsx` прошёл успешно.
+- `pnpm lint` прошёл без ошибок (Global Loading).
 
 #### Profile
 

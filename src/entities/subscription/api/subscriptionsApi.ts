@@ -18,6 +18,11 @@ import type {
  *
  * TODO(subscriptions-schema): replace hand-written types and paths with the generated
  * openapi-fetch client once subscription endpoints appear in `schema.d.ts`.
+ *
+ * TODO(paypal-capture): the real PayPal return leg differs from Stripe — the approval
+ * redirect brings back `token`/`PayerID` query params and needs a server-to-server
+ * capture before the outcome is known. Add `capturePaypalOrder({ token })` here once the
+ * backend exposes the capture endpoint; the mock flow needs nothing extra.
  */
 const MOCK_SUBSCRIPTIONS_PATH = '/api/mock/subscriptions'
 const REAL_SUBSCRIPTIONS_PATH = '/api/v1/subscriptions'
