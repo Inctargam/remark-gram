@@ -1,4 +1,7 @@
+'use client'
+
 import type { Post } from '@/entities/post'
+import { useCurrentUser } from '@/shared/auth'
 import { ProfilePostsGrid } from '@/widgets/profile-posts'
 
 import type { PublicProfile } from '../model/publicProfile'
@@ -29,6 +32,8 @@ const getProfileStats = ({
 ]
 
 export const ProfilePageView = ({ initialSelectedPost, profile, userId }: ProfilePageViewProps) => {
+  const currentUser = useCurrentUser()
+  const username = currentUser?.id === userId ? currentUser.username : profile.username
   const stats = getProfileStats(profile)
 
   return (
@@ -39,7 +44,7 @@ export const ProfilePageView = ({ initialSelectedPost, profile, userId }: Profil
         <div className={styles.summary}>
           <div className={styles.topRow}>
             <h1 className={styles.title} id="profile-title">
-              {profile.username}
+              {username}
             </h1>
             <ProfileSettingsControl userId={userId} />
           </div>

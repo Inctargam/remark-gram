@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { getRouter } from '@storybook/nextjs-vite/navigation.mock'
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
 import { expect, screen, userEvent, waitFor, within } from 'storybook/test'
 
 import type { Post, PostsPage } from '@/entities/post'
@@ -108,15 +109,19 @@ type StoryProps = ProfilePageViewProps & {
 }
 
 const ProfilePageStory = ({ initialPostsPage, ...args }: StoryProps) => {
-  const queryClient = new QueryClient()
+  const [dehydratedState] = useState(() => {
+    const queryClient = new QueryClient()
 
-  queryClient.setQueryData(postsQueryKeys.list(args.userId), {
-    pages: [initialPostsPage],
-    pageParams: [PROFILE_POSTS_INITIAL_PAGE_PARAM],
+    queryClient.setQueryData(postsQueryKeys.list(args.userId), {
+      pages: [initialPostsPage],
+      pageParams: [PROFILE_POSTS_INITIAL_PAGE_PARAM],
+    })
+
+    return dehydrate(queryClient)
   })
 
   return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
+    <HydrationBoundary state={dehydratedState}>
       <ProfilePageView {...args} />
     </HydrationBoundary>
   )

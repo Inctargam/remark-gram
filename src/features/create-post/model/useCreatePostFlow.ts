@@ -1,20 +1,25 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
 import { normalizePostDescription } from '@/entities/post'
 
+import { isPublishPostAbortError } from '../api/publishPostApi'
 import { usePublishPostMutation } from '../api/usePublishPostMutation'
-import { exportEditedImage } from '../lib/exportEditedImage'
+import { exportEditedImage, type ExportedPostPhoto } from '../lib/exportEditedImage'
 import { createPostDraftFromState } from './createPostDraft'
 import { validateCreatePostFiles } from './createPostFile'
 import type { CreatePostStep } from './createPostFlow'
+import { getCreatePostPublishErrorMessage } from './createPostPublishError'
 import { useCreatePostDraft } from './useCreatePostDraft'
 import { useCreatePostPhotos } from './useCreatePostPhotos'
 
 export const useCreatePostFlow = () => {
   const [step, setStep] = useState<CreatePostStep>('add-photo')
   const [description, setDescription] = useState('')
+  const [isPreparingPublication, setIsPreparingPublication] = useState(false)
   const [publishError, setPublishError] = useState<string | null>(null)
   const [uploadError, setUploadError] = useState<string | null>(null)
+  const isPublishInFlightRef = useRef(false)
+  const publishAbortControllerRef = useRef<AbortController | null>(null)
   const publishPostMutation = usePublishPostMutation()
   const {
     hasDraft,
@@ -87,6 +92,9 @@ export const useCreatePostFlow = () => {
   }
 
   const resetFlowHandler = () => {
+    publishAbortControllerRef.current?.abort()
+    publishAbortControllerRef.current = null
+    isPublishInFlightRef.current = false
     resetPhotosHandler()
     setDescription('')
     setPublishError(null)
@@ -95,6 +103,8 @@ export const useCreatePostFlow = () => {
   }
 
   const saveCurrentDraftHandler = () => {
+    publishAbortControllerRef.current?.abort()
+
     if (!hasUnsavedChanges) {
       return
     }
@@ -124,31 +134,77 @@ export const useCreatePostFlow = () => {
   }
 
   const discardCreationHandler = () => {
+    publishAbortControllerRef.current?.abort()
     clearDraftHandler()
     resetFlowHandler()
   }
 
+  const abortPublicationHandler = () => {
+    publishAbortControllerRef.current?.abort()
+  }
+
   const publishPostHandler = async (onSuccess: () => void) => {
+    if (isPublishInFlightRef.current) {
+      return
+    }
+
+    isPublishInFlightRef.current = true
+    publishAbortControllerRef.current?.abort()
+    const abortController = new AbortController()
+
+    publishAbortControllerRef.current = abortController
     setPublishError(null)
+    setIsPreparingPublication(true)
+
+    let editedPhotos: ExportedPostPhoto[]
 
     try {
-      const editedPhotos = await Promise.all(photos.map(exportEditedImage))
-
-      publishPostMutation.mutate(
-        { description, photos: editedPhotos },
-        {
-          onSuccess: () => {
-            clearDraftHandler()
-            resetFlowHandler()
-            onSuccess()
-          },
-          onError: () => {
-            setPublishError('Failed to publish the post. Please try again.')
-          },
+      editedPhotos = await Promise.all(photos.map(exportEditedImage))
+      if (abortController.signal.aborted) {
+        setIsPreparingPublication(false)
+        isPublishInFlightRef.current = false
+        if (publishAbortControllerRef.current === abortController) {
+          publishAbortControllerRef.current = null
         }
-      )
+        return
+      }
     } catch {
+      if (abortController.signal.aborted) {
+        setIsPreparingPublication(false)
+        isPublishInFlightRef.current = false
+        if (publishAbortControllerRef.current === abortController) {
+          publishAbortControllerRef.current = null
+        }
+        return
+      }
+
       setPublishError('Failed to prepare photos for publication.')
+      setIsPreparingPublication(false)
+      isPublishInFlightRef.current = false
+      return
+    }
+
+    try {
+      setIsPreparingPublication(false)
+      await publishPostMutation.mutateAsync({
+        payload: { description, photos: editedPhotos },
+        signal: abortController.signal,
+      })
+      clearDraftHandler()
+      resetFlowHandler()
+      onSuccess()
+    } catch (error) {
+      if (abortController.signal.aborted || isPublishPostAbortError(error)) {
+        return
+      }
+
+      setPublishError(getCreatePostPublishErrorMessage(error))
+    } finally {
+      setIsPreparingPublication(false)
+      isPublishInFlightRef.current = false
+      if (publishAbortControllerRef.current === abortController) {
+        publishAbortControllerRef.current = null
+      }
     }
   }
 
@@ -156,13 +212,14 @@ export const useCreatePostFlow = () => {
     description,
     hasDraft,
     hasUnsavedChanges,
-    isPublishing: publishPostMutation.isPending,
+    isPublishing: isPreparingPublication || publishPostMutation.isPending,
     publishError,
     selectedPhoto,
     selectedPhotoId,
     step,
     photos,
     uploadError,
+    abortPublicationHandler,
     discardCreationHandler,
     openCropStepHandler,
     openDraftHandler,

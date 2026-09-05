@@ -4,6 +4,103 @@
 
 ## Unreleased
 
+### 2026-08-27
+
+#### Create Post
+
+- Закрытие create-post modal во время публикации теперь отменяет текущий publish flow через `AbortController`: новые upload/create запросы не стартуют после abort, а активные presigned uploads получают `AbortSignal`.
+- Отмена публикации через закрытие не показывает пользователю generic publish error, потому что это ожидаемое действие пользователя.
+
+#### Verification
+
+- `pnpm exec tsc --noEmit --pretty false` прошёл.
+- `pnpm exec vitest run --project unit src/features/create-post src/shared/api/openapi/client.test.ts src/shared/auth/refreshSession.test.ts` прошёл.
+- Focused ESLint для create-post прошёл.
+- `pnpm exec vitest run --project storybook src/features/create-post/ui/stories/CreatePostFlow.stories.tsx src/features/create-post/ui/close-creation/CloseCreationConfirm.stories.tsx` прошёл.
+
+### 2026-08-26
+
+#### Profile
+
+- Real numeric profile routes, например `/profile/3`, больше не получают `404` только из-за отсутствия mock-профиля: SSR отдаёт временный backend-compatible profile placeholder до появления полноценного public profile endpoint.
+- Direct URL real post modal, например `/profile/3?postId=5`, больше не получает SSR `404` из-за mock-only selected post lookup; проверка выбранного поста откладывается до клиентской загрузки real posts.
+- Для real numeric profile ids SSR больше не гидрирует пустую mock-страницу публикаций, чтобы клиентский `ProfilePostsGrid` мог сразу запросить реальные посты через backend API.
+- Собственный профиль показывает username из загруженного `/auth/me`, когда текущий пользователь уже есть в session store.
+
+#### Delete Post
+
+- После удаления публикации пост сразу удаляется из cached owner feed, а затем список дополнительно инвалидируется для синхронизации с backend.
+
+#### Verification
+
+- `pnpm exec tsc --noEmit --pretty false` прошёл.
+- `pnpm exec vitest run --project unit src/features/delete-post/model/forgetDeletedPost.test.ts src/pages/profile/api/profile.server.test.ts src/entities/post/api/profilePostsHydration.server.test.ts src/entities/post/api/postsApi.server.test.ts` прошёл.
+- `pnpm exec vitest run --project unit src/pages/profile/model/profileRoute.test.ts src/pages/profile/api/profile.server.test.ts src/entities/post/api/profilePostsHydration.server.test.ts src/entities/post/api/postsApi.server.test.ts` прошёл.
+- Focused ESLint для profile, profile posts hydration и delete-post cache cleanup прошёл.
+- `pnpm exec vitest run --project storybook src/pages/profile/ui/ProfilePage.stories.tsx` прошёл.
+
+### 2026-08-24
+
+#### Auth
+
+- OpenAPI-схема обновлена по актуальному Swagger: добавлен контракт `GET /api/v1/auth/me` для получения текущего пользователя.
+- После login и refresh-session приложение загружает текущего backend-пользователя через `/auth/me` и сохраняет его в session store.
+- Sign In обрабатывает backend-код `USER_ALREADY_LOGGED_IN`: если refresh-cookie уже активна, фронт восстанавливает сессию через refresh/`me` и ведёт пользователя в профиль вместо зависания на форме.
+- Sign In показывает отдельную ошибку загрузки профиля, если `/auth/me` после успешного refresh падает, вместо сообщения про неверный email или пароль.
+- Ошибка `5xx` от `/auth/me` больше не очищает access token как невалидную сессию: фронт сохраняет authenticated state без профиля, показывает form-level ошибку и не повторяет автоматический refresh после `409`, если `/me` уже недавно падал.
+- Authenticated redirect с `/profile` теперь ведёт на `/profile/{numericUserId}`, поэтому real auth flow больше не привязан к `mock-user-1`.
+- Owner checks используют текущего пользователя из session store, сохраняя mock fallback только до загрузки real user данных.
+
+#### Verification
+
+- `pnpm exec vitest run --project unit src/shared/auth src/app/providers src/features/create-post/api src/features/sign-in src/entities/post/api/postsApi.test.ts` прошёл.
+- `pnpm exec vitest run --project unit src/shared/auth src/features/sign-in src/app/providers` прошёл.
+- `pnpm exec tsc --noEmit --pretty false` прошёл.
+- Focused ESLint для auth, ProtectedRoute, sign-in, create-post и post API файлов прошёл.
+- `pnpm exec vitest run --project storybook src/app/providers/ProtectedRoute.stories.tsx` прошёл.
+- Storybook MCP `run-story-tests` и `preview-stories` для `ProtectedRoute.AuthenticatedProfile` не завершились за 300 секунд; сценарий проверен локальным Storybook/Vitest runner.
+
+### 2026-08-19
+
+#### Profile Posts
+
+- Real API для списка постов профиля переключён на контракт OpenAPI `GET /api/v1/users/{userId}/posts` с query-параметром `limit` вместо несуществующего `GET /api/v1/posts?userId=...&pageSize=...`; backend DTO маппится в стабильную UI-модель поста.
+- Для загрузки постов профиля добавлена TanStack Query retry policy: постоянные client errors (`4xx`, включая отсутствующий `GET /api/v1/posts`) больше не повторяются автоматически, а временные server/network ошибки всё ещё retry-ятся до лимита.
+- Real profile posts query не отправляет запросы с mock/non-numeric `userId` и не пытается продолжать пагинацию mock cursor-ом, пока current user/profile ещё не переведены на backend id.
+- Удалён устаревший public API `entities/post.createPost`, который отправлял пост с `images` как JSON; production create-post flow теперь доступен только через presigned upload adapter и финальный `{ imageIds }` payload.
+
+#### Verification
+
+- `pnpm exec vitest run --project unit src/entities/post/api/profilePostsQueryData.test.ts src/entities/post/api/postsApi.test.ts` прошёл.
+- `pnpm exec tsc --noEmit --pretty false` прошёл.
+- Focused ESLint для profile posts query files прошёл.
+
+### 2026-08-18
+
+#### Create Post
+
+- Добавлен typed API adapter для публикации поста через реальный backend flow: создание image upload sessions, прямой presigned upload в Object Storage, подтверждение загрузок и создание поста по `imageIds`.
+- Общий payload/result contract публикации вынесен из mock-адаптера, чтобы mock и будущий production hook использовали один feature-level тип.
+- Добавлены unit-тесты для успешной публикации, backend validation error и ошибки presigned upload.
+- `usePublishPostMutation` переключён на real API adapter; после успешной публикации по-прежнему инвалидируется cache списков постов профиля. Отдельного TanStack query key для Home posts сейчас нет, так как Home получает posts через SSR props.
+- Добавлен unit-тест mutation hook, который проверяет вызов real adapter и invalidation `postsQueryKeys.lists()`.
+- Удалены неиспользуемые mock-publish adapter и data URL conversion helper после переключения create-post flow на real API adapter.
+- Ошибки публикации поста теперь маппятся в пользовательские сообщения для истёкшей сессии, описания длиннее 500 символов, превышения лимита фото, неподдерживаемого формата/размера файла и временной недоступности backend-сервисов.
+- Backend error code сохраняется в `ApiErrorData`, чтобы feature-level UI мог отличать validation и service failures без разбора raw response.
+- OpenAPI-клиент теперь добавляет `Authorization: Bearer <accessToken>` из session store к запросам, когда пользователь авторизован; это исправляет `401 Authorization header missing` при публикации поста.
+- Перед запуском real publish flow создание поста проверяет access token в памяти и при необходимости пытается восстановить его через refresh-session, чтобы защищённые upload/create запросы не стартовали без авторизации.
+- Publish-кнопка блокируется уже во время подготовки отредактированных изображений перед API-запросами, чтобы пользователь не мог запустить двойную публикацию до перехода mutation в pending-состояние.
+
+#### Verification
+
+- Unit-тесты create-post и связанных shared auth/API модулей прошли.
+- TypeScript-проверка прошла.
+- Focused ESLint для create-post и связанных shared auth/API файлов прошёл.
+- Focused Storybook/Vitest для `CreatePostFlow` и `CloseCreationConfirm` прошёл.
+
+#### Notes
+
+- Runtime smoke дошёл до real backend endpoint `/api/v1/files/image-uploads`, но end-to-end публикация заблокирована backend-ошибкой `503 UNAVAILABLE / ECONNREFUSED 10.109.248.235:4348` во внутренней Files/Posts зависимости.
 ### 2026-08-20
 
 #### Auth

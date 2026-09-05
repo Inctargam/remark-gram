@@ -1,9 +1,10 @@
-import type { QueryClient } from '@tanstack/react-query'
+import type { InfiniteData, QueryClient } from '@tanstack/react-query'
 
+import type { PostsPage } from '@/entities/post'
 import { postsQueryKeys } from '@/entities/post'
 
 /** Only the cache calls the mutation needs — lets the unit test pass a plain object. */
-type PostsCache = Pick<QueryClient, 'invalidateQueries' | 'removeQueries'>
+type PostsCache = Pick<QueryClient, 'invalidateQueries' | 'removeQueries' | 'setQueriesData'>
 
 type DeletedPost = {
   postId: string
@@ -19,6 +20,22 @@ type DeletedPost = {
  */
 export const forgetDeletedPost = async (cache: PostsCache, { postId, ownerId }: DeletedPost) => {
   cache.removeQueries({ queryKey: postsQueryKeys.detail(postId) })
+  cache.setQueriesData<InfiniteData<PostsPage, string | null>>(
+    { queryKey: postsQueryKeys.list(ownerId) },
+    (data) => {
+      if (!data) {
+        return data
+      }
+
+      return {
+        ...data,
+        pages: data.pages.map((page) => ({
+          ...page,
+          items: page.items.filter(({ id }) => id !== postId),
+        })),
+      }
+    }
+  )
 
   await cache.invalidateQueries({ queryKey: postsQueryKeys.list(ownerId) })
 }

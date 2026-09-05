@@ -3,14 +3,18 @@ import type { Client } from 'openapi-fetch'
 import { apiClient } from '@/shared/api/openapi'
 import type { paths } from '@/shared/api/openapi/schema'
 
+import { createLoadCurrentUser } from './currentUserApi'
 import { sessionStore } from './sessionStore'
 
-type SessionApiClient = Pick<Client<paths>, 'POST'>
+type SessionApiClient = Pick<Client<paths>, 'GET' | 'POST'>
 
 export const createRefreshSession = (client: SessionApiClient) => {
   let refreshPromise: Promise<string | null> | null = null
+  const loadCurrentUser = createLoadCurrentUser(client)
 
   const requestAccessToken = async (): Promise<string | null> => {
+    let accessToken: string
+
     try {
       const { data, response } = await client.POST('/api/v1/auth/refresh-token')
 
@@ -21,13 +25,25 @@ export const createRefreshSession = (client: SessionApiClient) => {
         return null
       }
 
-      sessionStore.getState().setAuthenticated(data.accessToken)
-
-      return data.accessToken
+      accessToken = data.accessToken
     } catch {
       // TODO(auth-error-state): Preserve an unknown session state and show a retry UI.
       sessionStore.getState().setGuest()
 
+      return null
+    }
+
+    sessionStore.getState().setAuthenticated(accessToken)
+
+    try {
+      const currentUser = await loadCurrentUser()
+
+      if (!currentUser) {
+        return null
+      }
+
+      return accessToken
+    } catch {
       return null
     }
   }

@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'vitest'
 
+import { ApiError } from '@/shared/api/baseApi'
+
 import type { PostsPage } from '../model/types'
 import {
   getProfilePostsNextPageParam,
   PROFILE_POSTS_INITIAL_PAGE_PARAM,
   PROFILE_POSTS_STALE_TIME_MS,
+  shouldRetryProfilePostsQuery,
 } from './profilePostsQueryData'
 
 const initialPage: PostsPage = {
@@ -34,5 +37,19 @@ describe('profile posts query data', () => {
 
   it('reads the next cursor from a posts page', () => {
     expect(getProfilePostsNextPageParam(initialPage)).toBe('post-2')
+  })
+
+  it('does not retry permanent client errors', () => {
+    expect(
+      shouldRetryProfilePostsQuery(0, new ApiError(404, { message: 'Cannot GET /api/v1/posts' }))
+    ).toBe(false)
+  })
+
+  it('retries temporary server or network errors up to the profile posts limit', () => {
+    expect(shouldRetryProfilePostsQuery(0, new ApiError(502, { message: 'Bad Gateway' }))).toBe(
+      true
+    )
+    expect(shouldRetryProfilePostsQuery(2, new Error('Network failed'))).toBe(true)
+    expect(shouldRetryProfilePostsQuery(3, new Error('Network failed'))).toBe(false)
   })
 })

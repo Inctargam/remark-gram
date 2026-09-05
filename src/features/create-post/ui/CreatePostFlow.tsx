@@ -14,6 +14,7 @@ export const CreatePostFlow = ({ onClose }: Props) => {
   const [isOpen, setIsOpen] = useState(true)
   const [isCloseConfirmOpen, setIsCloseConfirmOpen] = useState(false)
   const {
+    abortPublicationHandler,
     description,
     discardCreationHandler,
     hasDraft,
@@ -54,6 +55,8 @@ export const CreatePostFlow = ({ onClose }: Props) => {
       setIsOpen(true)
       return
     }
+
+    abortPublicationHandler()
 
     if (shouldConfirmClose) {
       setIsCloseConfirmOpen(true)

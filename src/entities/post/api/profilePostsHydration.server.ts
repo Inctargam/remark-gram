@@ -14,10 +14,18 @@ type PrefetchedProfilePosts = {
   dehydratedState: DehydratedState
 }
 
+const isMockPostsApi = () => process.env.NEXT_PUBLIC_POSTS_API_MOCK === 'true'
+
+const isBackendProfileUserId = (userId: string) => /^[1-9]\d*$/.test(userId)
+
 export const prefetchProfilePostsQueryServer = async (
   userId: string
 ): Promise<PrefetchedProfilePosts | null> => {
   const queryClient = new QueryClient()
+
+  if (!isMockPostsApi() && isBackendProfileUserId(userId)) {
+    return { dehydratedState: dehydrate(queryClient) }
+  }
 
   try {
     await queryClient.prefetchInfiniteQuery({
