@@ -4,6 +4,27 @@
 
 ## Unreleased
 
+### 2026-09-13
+
+#### Notifications
+
+- Mock-уведомления теперь поддерживают отложенное событие активации подписки: после успешной mock-оплаты планируется `subscriptionActivated` через 30 секунд с текстом `Ваша подписка активирована и действует до xx.yy.zzzz`.
+- Отложенные mock-уведомления защищены от дублей по id подписки и очищают pending timers при reset store, чтобы тесты и dev hot reload не протекали между состояниями.
+
+#### Payments
+
+- Successful checkout в mock subscription store связывается с notification mock store и планирует activation notification только после успешного outcome; failed и replayed checkout sessions не создают новые уведомления.
+- После возврата с `payment=success` subscription flow инвалидирует notification queries сразу и повторно через 30 секунд, чтобы открытый UI подтянул delayed activation notification из mock history.
+
+#### Verification
+
+- `pnpm exec eslint --fix src/shared/api/mock/notificationsStore.ts src/shared/api/mock/notificationsStore.test.ts src/shared/api/mock/subscriptionsStore.ts src/shared/api/mock/subscriptionsStore.test.ts src/features/buy-subscription/model/useBuySubscription.ts src/entities/notification/model/notification.ts src/entities/notification/index.ts` прошёл без ошибок.
+- `pnpm exec vitest run --project unit src/shared/api/mock/notificationsStore.test.ts src/shared/api/mock/subscriptionsStore.test.ts src/features/buy-subscription/model/paymentResult.test.ts` прошёл: 3 файла, 31 тест.
+- `pnpm test:unit` прошёл: 79 файлов, 457 тестов.
+- `pnpm lint` прошёл без ошибок; остались существующие warnings в generated `schema.d.ts` и `src/features/sign-up/model/useSignUpForm.ts`.
+- `pnpm exec tsc --noEmit --pretty false` прошёл.
+- `pnpm build` не запускался в этом шаге; ранее он зависал на `Creating an optimized production build ...` и остается отдельным blocker.
+
 ### 2026-09-04
 
 #### Notifications

@@ -35,4 +35,5 @@ export {
   mapNotificationEvent,
   markNotificationsRead,
   selectLastMonthNotifications,
+  SUBSCRIPTION_ACTIVATION_NOTIFICATION_DELAY_MS,
 } from './model/notification'

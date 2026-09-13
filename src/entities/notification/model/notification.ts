@@ -41,6 +41,7 @@ export type NotificationPage = {
 
 const MS_IN_DAY = 24 * 60 * 60 * 1000
 const LAST_MONTH_DAYS = 31
+export const SUBSCRIPTION_ACTIVATION_NOTIFICATION_DELAY_MS = 30_000
 
 const formatSubscriptionDate = (isoDate: string): string => {
   const date = new Date(isoDate)

@@ -1,16 +1,22 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
   listNotifications,
   markNotificationsAsRead,
   prependNotification,
   resetNotificationsMockStore,
+  scheduleSubscriptionActivatedNotification,
 } from './notificationsStore'
 
 const NOW_MS = Date.UTC(2026, 8, 1, 12, 0, 0)
 
 beforeEach(() => {
   resetNotificationsMockStore()
+})
+
+afterEach(() => {
+  resetNotificationsMockStore()
+  vi.useRealTimers()
 })
 
 describe('listNotifications', () => {
@@ -88,5 +94,58 @@ describe('prependNotification', () => {
     expect(
       listNotifications({ limit: 1, nowMs: Date.UTC(2026, 8, 1, 13, 0, 0) }).items[0]?.id
     ).toBe('mock-notification-live')
+  })
+})
+
+describe('scheduleSubscriptionActivatedNotification', () => {
+  it('adds an activation notification after the configured delay', () => {
+    vi.useFakeTimers()
+
+    const notificationId = scheduleSubscriptionActivatedNotification({
+      subscriptionId: 'subscription-1',
+      expiresAt: '2026-09-30T12:00:00.000Z',
+      delayMs: 1_000,
+      nowMs: NOW_MS,
+    })
+
+    expect(listNotifications({ limit: 10, nowMs: NOW_MS }).items).not.toContainEqual(
+      expect.objectContaining({ id: notificationId })
+    )
+
+    vi.advanceTimersByTime(1_000)
+
+    expect(listNotifications({ limit: 1, nowMs: NOW_MS + 1_000 }).items[0]).toEqual(
+      expect.objectContaining({
+        id: notificationId,
+        kind: 'subscriptionActivated',
+        message: 'Ваша подписка активирована и действует до 30.09.2026',
+        readAt: null,
+      })
+    )
+  })
+
+  it('does not schedule duplicate activation notifications for the same subscription', () => {
+    vi.useFakeTimers()
+
+    scheduleSubscriptionActivatedNotification({
+      subscriptionId: 'subscription-1',
+      expiresAt: '2026-09-30T12:00:00.000Z',
+      delayMs: 1_000,
+      nowMs: NOW_MS,
+    })
+    scheduleSubscriptionActivatedNotification({
+      subscriptionId: 'subscription-1',
+      expiresAt: '2026-09-30T12:00:00.000Z',
+      delayMs: 1_000,
+      nowMs: NOW_MS,
+    })
+
+    vi.advanceTimersByTime(1_000)
+
+    expect(
+      listNotifications({ limit: 10, nowMs: NOW_MS + 1_000 }).items.filter(
+        ({ id }) => id === 'mock-notification-activation-subscription-1'
+      )
+    ).toHaveLength(1)
   })
 })

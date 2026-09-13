@@ -10,6 +10,8 @@ import type {
 } from '@/entities/subscription'
 import { findSubscriptionPlan } from '@/entities/subscription'
 
+import { scheduleSubscriptionActivatedNotification } from './notificationsStore'
+
 /**
  * In-memory subscriptions/payments store for the mock API.
  * Kept on `globalThis` so it survives dev-server hot reloads — otherwise every edit
@@ -215,7 +217,17 @@ export const completeCheckoutSession = ({
     return { outcome, accountStatus: null }
   }
 
-  createSubscription(state, { planId: session.planId, provider: session.provider }, nowMs)
+  const subscription = createSubscription(
+    state,
+    { planId: session.planId, provider: session.provider },
+    nowMs
+  )
+
+  scheduleSubscriptionActivatedNotification({
+    subscriptionId: subscription.id,
+    expiresAt: subscription.expiresAt,
+    nowMs,
+  })
 
   return { outcome, accountStatus: toAccountStatus(state) }
 }

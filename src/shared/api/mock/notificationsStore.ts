@@ -4,6 +4,7 @@ import {
   mapNotificationEvent,
   markNotificationsRead,
   selectLastMonthNotifications,
+  SUBSCRIPTION_ACTIVATION_NOTIFICATION_DELAY_MS,
 } from '@/entities/notification'
 
 /**
@@ -15,6 +16,7 @@ const STORE_KEY = '__inctagramNotificationsMockStore'
 type NotificationsStoreState = {
   /** Newest first — the order the header panel renders. */
   notifications: Notification[]
+  scheduledNotificationTimers: Map<string, ReturnType<typeof globalThis.setTimeout>>
 }
 
 type GlobalWithNotificationsStore = typeof globalThis & {
@@ -58,6 +60,7 @@ const createSeedEvents = (): NotificationEvent[] => [
 
 const createSeedState = (): NotificationsStoreState => ({
   notifications: createSeedEvents().map(mapNotificationEvent),
+  scheduledNotificationTimers: new Map(),
 })
 
 const getState = (): NotificationsStoreState => {
@@ -70,7 +73,12 @@ const getState = (): NotificationsStoreState => {
 
 /** Test-only: brings the store back to its seeded state. */
 export const resetNotificationsMockStore = () => {
-  ;(globalThis as GlobalWithNotificationsStore)[STORE_KEY] = createSeedState()
+  const globalWithStore = globalThis as GlobalWithNotificationsStore
+
+  globalWithStore[STORE_KEY]?.scheduledNotificationTimers.forEach((timerId) => {
+    globalThis.clearTimeout(timerId)
+  })
+  globalWithStore[STORE_KEY] = createSeedState()
 }
 
 export type ListNotificationsParams = {
@@ -135,8 +143,54 @@ export const markNotificationsAsRead = ({
 
 export const prependNotification = (event: NotificationEvent): Notification => {
   const notification = mapNotificationEvent(event)
+  const state = getState()
 
-  getState().notifications.unshift(notification)
+  state.notifications = [
+    notification,
+    ...state.notifications.filter(({ id }) => id !== notification.id),
+  ]
 
   return { ...notification }
+}
+
+export type ScheduleSubscriptionActivatedNotificationParams = {
+  subscriptionId: string
+  expiresAt: string
+  delayMs?: number
+  nowMs?: number
+}
+
+export const scheduleSubscriptionActivatedNotification = ({
+  subscriptionId,
+  expiresAt,
+  delayMs = SUBSCRIPTION_ACTIVATION_NOTIFICATION_DELAY_MS,
+  nowMs = Date.now(),
+}: ScheduleSubscriptionActivatedNotificationParams): string => {
+  const state = getState()
+  const id = `mock-notification-activation-${subscriptionId}`
+
+  if (
+    state.scheduledNotificationTimers.has(id) ||
+    state.notifications.some((notification) => notification.id === id)
+  ) {
+    return id
+  }
+
+  const timeoutId = globalThis.setTimeout(() => {
+    state.scheduledNotificationTimers.delete(id)
+    prependNotification({
+      id,
+      kind: 'subscriptionActivated',
+      createdAt: new Date(nowMs + delayMs).toISOString(),
+      payload: { expiresAt },
+    })
+  }, delayMs)
+
+  if (typeof timeoutId === 'object' && 'unref' in timeoutId) {
+    timeoutId.unref()
+  }
+
+  state.scheduledNotificationTimers.set(id, timeoutId)
+
+  return id
 }
