@@ -4,6 +4,20 @@
 
 ## Unreleased
 
+### 2026-09-28
+
+#### Documentation
+
+- Объединены записи CHANGELOG.md текущей ветки и develop; повторяющиеся записи сохранены в одном экземпляре.
+- Даты упорядочены по убыванию; записи одной даты объединены под общим заголовком с сохранением описаний и результатов проверок.
+
+#### Verification
+
+- Проверка структуры через Node.js: даты уникальны и упорядочены, содержимое записей обеих веток сохранено, конфликтные маркеры отсутствуют.
+- `git diff --check` прошёл.
+- `git diff --cached --check` прошёл; после слияния `origin/develop` список неразрешённых конфликтов пуст, изменён только CHANGELOG.md.
+- `pnpm lint`, `pnpm build` и Storybook-тесты не запускались: изменён только changelog.
+
 ### 2026-09-13
 
 #### Notifications
@@ -110,62 +124,6 @@
 - Backend contract уведомлений не найден в локальных материалах и OpenAPI schema; реализация временно использует mock contract до появления настоящих WebSocket/REST endpoints.
 - Storybook MCP tools недоступны в текущем наборе tools, поэтому UI-панель уведомлений пока не реализовывалась.
 
-### 2026-08-20
-
-#### Auth
-
-- Моковая авторизация через `/api/mock/auth/me` включается по умолчанию, если `NEXT_PUBLIC_AUTH_MOCK` не задан; явное значение `false` сохраняет переключение на настоящий backend.
-- Production-сборка без локального `.env.local` получает мокового текущего пользователя, поэтому owner-only элементы профиля, включая `Profile Settings`, доступны на временных моках.
-
-#### Verification
-
-- ESLint `SessionBootstrap.tsx` прошёл без ошибок и предупреждений.
-- Focused Storybook-проверка `ProtectedRoute.stories.tsx` прошла: 1 файл, 7 тестов.
-- Production build Next.js прошёл; маршрут `/api/mock/auth/me` зарегистрирован.
-
-### 2026-08-19
-
-#### Profile API
-
-- Временный мок профиля перенесён с `/api/v1/profile` на `/api/mock/profile`, включая загрузку, удаление и выдачу изображения аватара.
-- Клиентские запросы General Information и управления аватаром переведены на новый мок-префикс, чтобы production ingress не отправлял их в настоящий backend по зарезервированному `/api/v1`.
-- Тест мок-обработчика аватара проверяет формирование URL изображения через `/api/mock/profile/avatar/image`.
-
-#### Verification
-
-- Целевые unit-тесты прошли: 3 файла, 15 тестов.
-- ESLint изменённых файлов прошёл без ошибок и предупреждений.
-- Production build Next.js прошёл; зарегистрированы `/api/mock/profile`, `/api/mock/profile/avatar` и `/api/mock/profile/avatar/image`, старые маршруты `/api/v1/profile` отсутствуют.
-
-#### Notes
-
-- `pnpm exec vitest` не запустился из-за недоступной проверки подписи registry; проверки выполнены установленными локальными бинарниками Vitest, ESLint и Next.js без изменения зависимостей.
-
-### 2026-08-16
-
-#### Payments
-
-- Оплата через PayPal (ветка `feat/payments_paypal`) добавлена в существующий мок-флоу покупки по аналогии со Stripe: провайдер остаётся параметром одного сценария, отдельная ветка не создавалась.
-- Мок-хендлер `subscriptions/checkout` теперь возвращает провайдер-специфичный `checkoutUrl`: `stripe` → `/payments/mock-checkout`, `paypal` → `/payments/mock-paypal`.
-- Добавлена заглушка hosted approval-страницы PayPal (`/payments/mock-paypal`, FSD-слайс `pages/mock-paypal`): кнопки `Approve`/`Cancel` (вместо `Pay`/`Cancel` у Stripe), capture имитируется существующим `completeCheckoutSession` через `useCompleteCheckoutMutation`, импортированный из публичного API `pages/mock-checkout` без переноса файлов.
-- Consent-модалка создания платежа показывает бренд-логотип выбранного провайдера (`icon-paypal`/`icon-stripe`); текст согласия остался общим для обоих провайдеров.
-- Добавлены env-константы PayPal: `NEXT_PUBLIC_PAYPAL_CLIENT_ID` (пустой до появления бэкенда) и `NEXT_PUBLIC_PAYPAL_SANDBOX`, а также модуль `shared/config/paypal.ts` с `PAYPAL_CLIENT_ID`, `PAYPAL_SANDBOX` и `PAYPAL_APPROVAL_BASE_URL`.
-- В `entities/subscription/api/subscriptionsApi.ts` зафиксирован TODO-шов `TODO(paypal-capture)`: реальный возвратный флоу PayPal (`token`/`PayerID` → capture) появится после бэкенда, мок-флоу ничего дополнительно не требует.
-- В `.env.local` добавлен отсутствовавший флаг `NEXT_PUBLIC_PAYMENTS_API_MOCK=true` — без него вкладка Account Management ходила на реальный бэкенд `remark-gram.com` и не загружалась (`ERR_TIMED_OUT`).
-
-#### Verification
-
-- `pnpm test:unit` прошёл: 360 тестов.
-- `pnpm vitest run --project storybook` прошёл: 305 тестов (для запуска установлен Playwright-браузер Chromium).
-- `pnpm lint` прошёл: 0 ошибок (1158 предупреждений prettier в сгенерированном `schema.d.ts`, существовавших до изменений).
-- `pnpm build` прошёл успешно, роут `/payments/mock-paypal` присутствует в сборке.
-- `tsc --noEmit` не завершается из-за существующих ссылок `.next/types/validator.ts` на отсутствующие mock payment routes; изменённые файлы новых TypeScript-ошибок не добавили.
-
-#### Notes
-
-- Реальный возвратный флоу PayPal (approve-редирект с `token`/`PayerID` и server-to-server capture) — зона бэкенда; на моках не имитируется, задокументирован как `TODO(paypal-capture)`.
-- Коммиты: `858ccd5`, `7ff3f8f`, `3a62536`, `7f020d7`, `3425c56`.
-
 ### 2026-08-27
 
 #### Create Post
@@ -222,7 +180,36 @@
 - `pnpm exec vitest run --project storybook src/app/providers/ProtectedRoute.stories.tsx` прошёл.
 - Storybook MCP `run-story-tests` и `preview-stories` для `ProtectedRoute.AuthenticatedProfile` не завершились за 300 секунд; сценарий проверен локальным Storybook/Vitest runner.
 
+### 2026-08-20
+
+#### Auth
+
+- Моковая авторизация через `/api/mock/auth/me` включается по умолчанию, если `NEXT_PUBLIC_AUTH_MOCK` не задан; явное значение `false` сохраняет переключение на настоящий backend.
+- Production-сборка без локального `.env.local` получает мокового текущего пользователя, поэтому owner-only элементы профиля, включая `Profile Settings`, доступны на временных моках.
+
+#### Verification
+
+- ESLint `SessionBootstrap.tsx` прошёл без ошибок и предупреждений.
+- Focused Storybook-проверка `ProtectedRoute.stories.tsx` прошла: 1 файл, 7 тестов.
+- Production build Next.js прошёл; маршрут `/api/mock/auth/me` зарегистрирован.
+
 ### 2026-08-19
+
+#### Profile API
+
+- Временный мок профиля перенесён с `/api/v1/profile` на `/api/mock/profile`, включая загрузку, удаление и выдачу изображения аватара.
+- Клиентские запросы General Information и управления аватаром переведены на новый мок-префикс, чтобы production ingress не отправлял их в настоящий backend по зарезервированному `/api/v1`.
+- Тест мок-обработчика аватара проверяет формирование URL изображения через `/api/mock/profile/avatar/image`.
+
+#### Verification
+
+- Целевые unit-тесты прошли: 3 файла, 15 тестов.
+- ESLint изменённых файлов прошёл без ошибок и предупреждений.
+- Production build Next.js прошёл; зарегистрированы `/api/mock/profile`, `/api/mock/profile/avatar` и `/api/mock/profile/avatar/image`, старые маршруты `/api/v1/profile` отсутствуют.
+
+#### Notes
+
+- `pnpm exec vitest` не запустился из-за недоступной проверки подписи registry; проверки выполнены установленными локальными бинарниками Vitest, ESLint и Next.js без изменения зависимостей.
 
 #### Profile Posts
 
@@ -263,6 +250,31 @@
 #### Notes
 
 - Runtime smoke дошёл до real backend endpoint `/api/v1/files/image-uploads`, но end-to-end публикация заблокирована backend-ошибкой `503 UNAVAILABLE / ECONNREFUSED 10.109.248.235:4348` во внутренней Files/Posts зависимости.
+
+### 2026-08-16
+
+#### Payments
+
+- Оплата через PayPal (ветка `feat/payments_paypal`) добавлена в существующий мок-флоу покупки по аналогии со Stripe: провайдер остаётся параметром одного сценария, отдельная ветка не создавалась.
+- Мок-хендлер `subscriptions/checkout` теперь возвращает провайдер-специфичный `checkoutUrl`: `stripe` → `/payments/mock-checkout`, `paypal` → `/payments/mock-paypal`.
+- Добавлена заглушка hosted approval-страницы PayPal (`/payments/mock-paypal`, FSD-слайс `pages/mock-paypal`): кнопки `Approve`/`Cancel` (вместо `Pay`/`Cancel` у Stripe), capture имитируется существующим `completeCheckoutSession` через `useCompleteCheckoutMutation`, импортированный из публичного API `pages/mock-checkout` без переноса файлов.
+- Consent-модалка создания платежа показывает бренд-логотип выбранного провайдера (`icon-paypal`/`icon-stripe`); текст согласия остался общим для обоих провайдеров.
+- Добавлены env-константы PayPal: `NEXT_PUBLIC_PAYPAL_CLIENT_ID` (пустой до появления бэкенда) и `NEXT_PUBLIC_PAYPAL_SANDBOX`, а также модуль `shared/config/paypal.ts` с `PAYPAL_CLIENT_ID`, `PAYPAL_SANDBOX` и `PAYPAL_APPROVAL_BASE_URL`.
+- В `entities/subscription/api/subscriptionsApi.ts` зафиксирован TODO-шов `TODO(paypal-capture)`: реальный возвратный флоу PayPal (`token`/`PayerID` → capture) появится после бэкенда, мок-флоу ничего дополнительно не требует.
+- В `.env.local` добавлен отсутствовавший флаг `NEXT_PUBLIC_PAYMENTS_API_MOCK=true` — без него вкладка Account Management ходила на реальный бэкенд `remark-gram.com` и не загружалась (`ERR_TIMED_OUT`).
+
+#### Verification
+
+- `pnpm test:unit` прошёл: 360 тестов.
+- `pnpm vitest run --project storybook` прошёл: 305 тестов (для запуска установлен Playwright-браузер Chromium).
+- `pnpm lint` прошёл: 0 ошибок (1158 предупреждений prettier в сгенерированном `schema.d.ts`, существовавших до изменений).
+- `pnpm build` прошёл успешно, роут `/payments/mock-paypal` присутствует в сборке.
+- `tsc --noEmit` не завершается из-за существующих ссылок `.next/types/validator.ts` на отсутствующие mock payment routes; изменённые файлы новых TypeScript-ошибок не добавили.
+
+#### Notes
+
+- Реальный возвратный флоу PayPal (approve-редирект с `token`/`PayerID` и server-to-server capture) — зона бэкенда; на моках не имитируется, задокументирован как `TODO(paypal-capture)`.
+- Коммиты: `858ccd5`, `7ff3f8f`, `3a62536`, `7f020d7`, `3425c56`.
 
 ### 2026-08-15
 
@@ -416,64 +428,6 @@
 - `pnpm build` был остановлен вручную после повторного длительного зависания на этапе `Creating an optimized production build ...` без вывода ошибок.
 - Storybook MCP `get-storybook-story-instructions`, `run-story-tests` и `preview-stories` не завершились за 300 секунд; focused story-тесты запущены локально через Vitest.
 
-### 2026-08-10 — 2026-08-12 (ветка `payments-UC1-4-stripe`, UC-1 – UC-4)
-
-Оплата и подписки целиком на моках (без Stripe SDK и ключей) — до появления бэкенда за платежи отвечает `subscriptionsStore.ts` на `globalThis`, по образцу `postsStore.ts`.
-
-#### Payments
-
-- Домен: сущности `entities/subscription` (тип аккаунта, подписка, каталог планов `day`/`week`/`month`) и `entities/payment` (постраничная история платежей). Весь обмен идёт через `entities/*/api/*Api.ts` — единственные файлы, которые переедут на реальный бэкенд (переключатель `NEXT_PUBLIC_PAYMENTS_API_MOCK`). Пять мок-роутов: `subscriptions/current`, `subscriptions/checkout`, `subscriptions/checkout/{id}/complete`, `subscriptions/auto-renewal`, `payments`.
-- Правила домена — в сторе, не в UI: новая подписка встаёт в конец очереди, автопродление остаётся включённым только у последней подписки, `nextPaymentAt` считается от хвоста очереди. Повторное завершение сессии отбивается `409`.
-- `widgets/account-management` — вкладка «Account Management»: тип аккаунта, планы, блок текущей подписки (очередь — `Table`, строка на подписку, `Next payment` только у хвоста, UC-3), кнопки `Stripe`/`PayPal`. Провайдер — параметр одного сценария (`PaymentProvider`), а не два флоу.
-- `features/buy-subscription` — согласие (`Modal`, не `ConfirmDialog`: по макету одна кнопка), создание сессии, уход на `payments/mock-checkout` (заглушка внешнего сервиса, `pages/mock-checkout`, снимается вместе с мок-API), разбор результата по `?payment=success|failed` после возврата. Переход — полная навигация (`window.location.assign`), не роутер. `returnUrl` принимается только same-origin — иначе открытый редирект.
-- `features/cancel-auto-renewal` — чекбокс `Auto-Renewal` (UC-2), оптимистичное обновление с откатом на ошибке.
-- `widgets/my-payments` — вкладка «My payments» (UC-4): таблица с пагинацией, номер страницы в query (`page`, без `page=1`), размер страницы — локальное состояние.
-- **Интеграция (этап 7):** виджеты подключены в реальный каркас настроек (`/settings`, вкладки `subscriptions`/`payments` из `develop`), временный роут `/profile/settings` и `ROUTES.profileSettings` удалены. Найден и исправлен баг: закрытие модалки результата оплаты стирало из query каркаса весь набор параметров, а не только результат, — из-за этого пользователя сбрасывало на вкладку `General information` вместо `Account Management`.
-
-#### Shared UI
-
-- Новый компонент `shared/ui/table` — компаунд `Table.Root/Head/Body/Row/HeadCell/Cell` со встроенными `Table.Empty` и `Table.Skeleton`, горизонтальный скролл на узких экранах.
-- Заполнен пустой `shared/ui/pagination/index.ts` (импорт через публичный API не компилировался).
-- `shared/lib/date/formatShortDate.ts` — общий формат дат для вкладок подписок и платежей.
-
-#### Tooling
-
-- `withMockDelay` переехал в общий `app/api/mock/_mock/`, переменная переименована в `MOCK_API_DELAY_MS`.
-
-#### Tests
-
-- Стор, мок-хендлеры, слой запросов, парсинг query-параметров, сторис на все состояния виджетов и фич покрыты юнит- и Storybook-тестами на каждом этапе.
-
-#### Shared UI (попутный фикс)
-
-- `shared/ui/modal/Modal.tsx`: у `Dialog.Close` восстановлен `disabled={dismissDisabled}` — атрибут потерялся при мердже каркаса настроек (`fb2610a`), из-за чего кнопка закрытия модалки оставалась активной во время pending-состояния. Ломало три сторис-теста (`Modal`, `ConfirmDialog`, `ProfileAvatar`), не связанных с этой веткой напрямую, но обнаруженных при её `pnpm test:storybook`.
-
-#### Verification
-
-- Финальное состояние перед PR: `pnpm exec tsc --noEmit`, `pnpm lint` (0 ошибок), `pnpm build` — все чисто. `pnpm test:unit` — 318 тестов пройдено.
-- `pnpm test:storybook` — 274 теста, все пройдены после фикса `Modal.tsx` (до фикса было 3 упавших из-за чужого бага в мердже).
-
-#### Notes
-
-- PayPal (Р4, Б2): слот `onProviderSelect`/`PaymentProvider` на месте, но согласование точки подключения с разработчиком B не проведено — открытый вопрос вне кода.
-- Смена типа аккаунта на `Personal` после окончания подписки — зона бэкенда, на фронте не реализована умышленно.
-
-#### App Shell
-
-- На desktop общий header теперь прокручивается вместе с документом, а sidebar после прокрутки header закрепляется у верхнего края viewport и занимает всю доступную высоту.
-- Mobile-поведение не изменено: верхняя и нижняя навигация сохраняют существующее sticky-позиционирование.
-- Storybook-сценарии оболочки и профиля обновлены для проверки нового поведения desktop-прокрутки.
-
-#### Verification
-
-- Все 12 Storybook-тестов `AppShellView` и `ProfilePage` прошли локально в Chromium через проектный Vitest runner.
-- ESLint затронутых TSX-файлов и stylelint CSS-модуля оболочки прошли через локальные исполняемые файлы проекта.
-- `tsc --noEmit` не завершился из-за существующих ссылок в `.next/types/validator.ts` на отсутствующие mock-payment routes; затронутые файлы новых TypeScript-ошибок не добавили.
-
-#### Notes
-
-- Storybook MCP недоступен в текущей сессии; документация и сценарии проверены по исходникам, браузерная проверка выполнена локальным Storybook/Vitest runner.
-
 ### 2026-08-11
 
 #### Profile SSR
@@ -600,7 +554,197 @@
 - TypeScript, ESLint затронутых компонентов и stylelint мобильных стилей прошли.
 - В браузере подтверждены мобильные варианты `EN` / `RU` и ширина popup 88 px.
 
+#### Global Loading
+
+- Добавлена глобальная индикация загрузки: тонкая полоса в верхней части страницы появляется при любом активном query-запросе или мутации TanStack Query.
+- Компонент `ProgressBar` реализован на основе `@base-ui/react/progress` в `src/shared/ui/progress-bar/`: индетерминантная анимация скольжения синего индикатора по тёмной подложке, цвета совпадают с `--color-primary-500` и `--color-primary-900` из токенов.
+- Хук `useGlobalLoading` в `src/shared/lib/tanstack/` агрегирует `useIsFetching` и `useIsMutating` со сглаживанием через `useDeferredValue`, возвращает `boolean`.
+- Индикатор встроен в `AppShellView` и отображается поверх всего лейаута (`z-index: 9999`).
+
+#### Profile SSR
+
+- Первая SSR-страница постов профиля теперь передается в `useProfilePostsQuery()` как `initialData` React Query infinite query.
+- Для SSR-seed данных задан короткий `staleTime`, чтобы после гидрации клиент не отправлял дублирующий запрос за той же первой страницей.
+- Добавлена unit-проверка формы `pages/pageParams`, которую ожидает TanStack Query для infinite query.
+- Выбранный пост на странице профиля теперь синхронизирован с URL `?postId=...`: открытие публикации делает client navigation, закрытие удаляет параметр, а прямой SSR-вход использует `initialSelectedPost`.
+- Добавлен внутренний helper сборки URL профиля с unit-проверками сохранения сторонних query params и удаления `postId`.
+
+#### Shared UI
+
+- Кнопка закрытия `Modal` теперь получает `disabled` при `dismissDisabled`, чтобы pending-состояния блокировали все способы закрытия и Storybook-сценарий соответствовал поведению компонента.
+
+#### Verification
+
+- `pnpm exec vitest run --project unit src/entities/post/api/profilePostsQueryData.test.ts` прошёл успешно.
+- `pnpm exec vitest run --project unit src/widgets/profile-posts/lib/profilePostUrl.test.ts src/entities/post/api/profilePostsQueryData.test.ts` прошёл успешно.
+- `pnpm test:unit` прошёл: 44 файла, 253 теста.
+- `pnpm exec vitest run --project storybook src/pages/profile/ui/ProfilePage.stories.tsx` прошёл успешно.
+- `pnpm exec vitest run --project storybook src/pages/profile/ui/ProfilePage.stories.tsx src/shared/ui/modal/Modal.stories.tsx` прошёл успешно.
+- `pnpm exec vitest run --project storybook src/shared/ui/modal/Modal.stories.tsx` прошёл успешно.
+- `pnpm exec eslint src/entities/post/api/useProfilePostsQuery.ts src/entities/post/api/profilePostsQueryData.ts src/entities/post/api/profilePostsQueryData.test.ts src/widgets/profile-posts/ui/ProfilePostsGrid.tsx` прошёл успешно.
+- `pnpm exec eslint src/widgets/profile-posts/ui/ProfilePostsGrid.tsx src/widgets/profile-posts/lib/profilePostUrl.ts src/widgets/profile-posts/lib/profilePostUrl.test.ts src/pages/profile/ui/ProfilePage.stories.tsx src/shared/ui/modal/Modal.tsx` прошёл успешно.
+- `pnpm exec tsc --noEmit` прошёл успешно.
+- `pnpm exec tsc --noEmit --pretty false` прошёл успешно.
+- `pnpm exec prettier --check CHANGELOG.md src/entities/post/api/useProfilePostsQuery.ts src/entities/post/api/profilePostsQueryData.ts src/entities/post/api/profilePostsQueryData.test.ts src/widgets/profile-posts/ui/ProfilePostsGrid.tsx` прошёл успешно.
+- `pnpm lint` прошёл без ошибок (Global Loading).
+
+#### Profile
+
+- Профиль приведён к desktop- и mobile-макетам Figma без изменения данных и интерактивных сценариев: на мобильных экранах аватар и статистика собраны в одну строку, встроенная кнопка настроек скрыта как дублирующая пункт мобильного меню, а публикации образуют три квадратные колонки с зазором `3px`.
+- На desktop профиль использует единственную прокрутку документа; sidebar остаётся доступным благодаря sticky-позиционированию. На mobile также сохранена обычная прокрутка документа со sticky-навигацией.
+- Storybook дополнен desktop- и mobile-сценариями, проверяющими отсутствие вложенного скролла профиля, закрепление sidebar и геометрию мобильной сетки.
+
+#### Verification
+
+- Все 7 Storybook-тестов `ProfilePage` прошли локально в Chromium через проектный Vitest runner.
+- ESLint затронутых TSX-файлов, stylelint CSS-модулей профиля и TypeScript `tsc --noEmit` прошли через локальные исполняемые файлы проекта.
+
+#### Notes
+
+- Геометрия сверена через `figma-bridge` с desktop-фреймом `304:3572` и mobile-фреймом `3800:16667`.
+- Storybook MCP использован для документации компонентов; его повторные test/preview-вызовы не завершились, поэтому итоговая браузерная проверка выполнена локальным Storybook/Vitest runner.
+
+#### Create Post
+
+- Для editor-шагов создания публикации добавлен точечный адаптив на viewport не шире `560px` и не выше `800px`: модальное окно ограничивается динамической высотой экрана, а его содержимое прокручивается внутри без смещения заголовка.
+- На коротких мобильных экранах рабочая область crop/filter/publication уменьшается до диапазона `200–280px`; desktop и мобильные экраны нормальной высоты сохраняют прежнюю геометрию.
+- Добавлен Storybook-сценарий кроппинга `360×740`, проверяющий границы диалога и доступность кнопки `Next` после внутренней прокрутки. Скрытый input выбора фотографий получил доступную подпись.
+
+#### Verification
+
+- Storybook-тесты `CreatePostFlow` прошли для crop с одной и несколькими фотографиями, короткого mobile viewport, filters и publication.
+- ESLint затронутых TSX-файлов, stylelint `createPost.module.css` и TypeScript `tsc --noEmit` прошли через локальные исполняемые файлы проекта.
+
+#### Notes
+
+- A11y-аудит продолжает фиксировать ранее существующий недостаточный контраст общих primary/outline-кнопок и части текстовых токенов; цвета не менялись в рамках адаптивного исправления.
+
+#### Home
+
+- Главная страница авторизованного пользователя сверена с desktop-макетом Figma: сохранены панель зарегистрированных пользователей и четыре полноразмерные заглушки карточек `234×391px` внутри существующего `AppShell` с сайдбаром.
+- Сетка публикаций теперь выбирает количество колонок по фактически доступной ширине контента, поэтому корректно перестраивается после появления desktop-сайдбара и в мобильной оболочке с нижней навигацией.
+- В Storybook добавлены отдельные авторизованные desktop- и mobile-сценарии с проверками геометрии заглушек и соответствующей навигации.
+
+#### Verification
+
+- Storybook-тесты `HomePage` прошли для default, empty, authenticated desktop и authenticated mobile состояний.
+- ESLint для `HomePage.stories.tsx`, stylelint для `homePage.module.css` и TypeScript `tsc --noEmit` прошли через локальные исполняемые файлы проекта.
+
+#### Notes
+
+- Desktop-геометрия сверена через `figma-bridge` с фреймами `65304:8813` и `65304:8883`; отдельного мобильного макета главной страницы в Figma нет, поэтому mobile-композиция следует существующим правилам гостевой страницы и авторизованного `AppShell`.
+- Команды через `pnpm` не запустились из-за недоступной сетевой проверки подписи закрепленной версии; зависимости не изменялись.
+
+#### Auth
+
+- Карточка `Sign In` сохраняет минимальную высоту из макета и теперь расширяется вместе с сообщениями валидации, поэтому нижний блок регистрации остаётся внутри рамки при ошибках в обоих полях.
+- Storybook-сценарий с ошибками дополнен проверкой, что ссылка `Sign Up` не выходит за нижнюю границу карточки.
+- Аналогичное адаптивное поведение добавлено карточке `Sign Up`: при нескольких ошибках рамка растёт вместе с формой, а нижний блок входа остаётся внутри карточки.
+- Storybook-сценарий регистрации проверяет, что ссылка `Sign In` не выходит за нижнюю границу карточки.
+
+#### Verification
+
+- Storybook-тесты `SignInForm` в состояниях по умолчанию и с двумя ошибками прошли.
+- Storybook-тесты `SignUpForm` в состояниях по умолчанию и с несколькими ошибками прошли.
+- ESLint, stylelint и Prettier для изменённых файлов прошли через локальные исполняемые файлы.
+
+#### Notes
+
+- A11y-аудит повторно зафиксировал существующий недостаточный контраст текста ошибок; цветовые токены не менялись в рамках исправления геометрии карточки.
+- `pnpm` не запустился из-за недоступной сетевой проверки подписи закреплённой версии; локальные проверки выполнены без изменения зависимостей.
+
+#### Legal Documents
+
+- Страницы `Privacy Policy` и `Terms of Service` приведены к desktop- и mobile-макетам Figma: добавлены адаптивная ширина текста, мобильная компоновка заголовка и кнопка возврата на `/sign-up` с доступной подписью для скринридеров.
+- На странице `Privacy Policy` сохранён действующий текст о лицензии источника геоданных; внешние ссылки открываются в новых вкладках. После него добавлен временный текст из макета для проверки длинной страницы и прокрутки.
+- `Terms of Service` временно использует тот же длинный текст из макета. Временное содержимое вынесено в общий локальный компонент страницы, чтобы позднее заменить его без дублирования.
+- Storybook-сценарии проверяют заголовки, переход назад, сохранённый лицензионный текст, временное содержимое и поведение внешних ссылок.
+
+#### Verification
+
+- Storybook-тесты `LegalDocumentPage` прошли: 1 файл, 2 теста.
+- Prettier, ESLint, stylelint и `tsc --noEmit` для затронутой области прошли.
+- Production-сборка Next.js 16.2.6 прошла через локальный `next.cmd build`.
+- Геометрия проверена в браузере на ширинах 1280 и 360 px; горизонтального переполнения нет.
+
+#### Notes
+
+- Состояния сверены через `figma-bridge` с фреймами `16760:8576`, `16760:12586`, `16760:12676` и `16760:12743`.
+- Storybook MCP не был опубликован среди инструментов текущей сессии, поэтому использованы существующие stories и проектный Storybook/Vitest runner.
+- `pnpm` не запустился из-за недоступной сетевой проверки подписи закреплённой версии; проверки выполнены уже установленными локальными исполняемыми файлами без изменения зависимостей.
+
+#### Header
+
+- Эксперимент с отдельным позиционированием мобильного списка языков отменён; восстановлено исходное поведение `Select` без дополнительного API для Positioner.
+- В мобильном списке полные названия языков заменены на `EN` / `RU`, а минимальная ширина popup уменьшена до 88 px; desktop сохраняет `English` / `Russian`.
+- Desktop- и mobile-варианты переключателя языка в `AppShellView` переиспользуются между гостевым и авторизованным состояниями без дублирования JSX; поведение компонента не изменено.
+
+#### Verification
+
+- Storybook-тесты `Select`, `HeaderLanguageSwitcher` и `AppShellView` прошли: 3 файла, 14 тестов.
+- После устранения дублирования повторно прошли Storybook-тесты `AppShellView`: 1 файл, 5 тестов; TypeScript и ESLint изменённого компонента прошли без ошибок.
+- TypeScript, ESLint затронутых компонентов и stylelint мобильных стилей прошли.
+- В браузере подтверждены мобильные варианты `EN` / `RU` и ширина popup 88 px.
+
 ### 2026-08-10
+
+**2026-08-12 (ветка `payments-UC1-4-stripe`, UC-1 – UC-4)**
+
+Оплата и подписки целиком на моках (без Stripe SDK и ключей) — до появления бэкенда за платежи отвечает `subscriptionsStore.ts` на `globalThis`, по образцу `postsStore.ts`.
+
+#### Payments
+
+- Домен: сущности `entities/subscription` (тип аккаунта, подписка, каталог планов `day`/`week`/`month`) и `entities/payment` (постраничная история платежей). Весь обмен идёт через `entities/*/api/*Api.ts` — единственные файлы, которые переедут на реальный бэкенд (переключатель `NEXT_PUBLIC_PAYMENTS_API_MOCK`). Пять мок-роутов: `subscriptions/current`, `subscriptions/checkout`, `subscriptions/checkout/{id}/complete`, `subscriptions/auto-renewal`, `payments`.
+- Правила домена — в сторе, не в UI: новая подписка встаёт в конец очереди, автопродление остаётся включённым только у последней подписки, `nextPaymentAt` считается от хвоста очереди. Повторное завершение сессии отбивается `409`.
+- `widgets/account-management` — вкладка «Account Management»: тип аккаунта, планы, блок текущей подписки (очередь — `Table`, строка на подписку, `Next payment` только у хвоста, UC-3), кнопки `Stripe`/`PayPal`. Провайдер — параметр одного сценария (`PaymentProvider`), а не два флоу.
+- `features/buy-subscription` — согласие (`Modal`, не `ConfirmDialog`: по макету одна кнопка), создание сессии, уход на `payments/mock-checkout` (заглушка внешнего сервиса, `pages/mock-checkout`, снимается вместе с мок-API), разбор результата по `?payment=success|failed` после возврата. Переход — полная навигация (`window.location.assign`), не роутер. `returnUrl` принимается только same-origin — иначе открытый редирект.
+- `features/cancel-auto-renewal` — чекбокс `Auto-Renewal` (UC-2), оптимистичное обновление с откатом на ошибке.
+- `widgets/my-payments` — вкладка «My payments» (UC-4): таблица с пагинацией, номер страницы в query (`page`, без `page=1`), размер страницы — локальное состояние.
+- **Интеграция (этап 7):** виджеты подключены в реальный каркас настроек (`/settings`, вкладки `subscriptions`/`payments` из `develop`), временный роут `/profile/settings` и `ROUTES.profileSettings` удалены. Найден и исправлен баг: закрытие модалки результата оплаты стирало из query каркаса весь набор параметров, а не только результат, — из-за этого пользователя сбрасывало на вкладку `General information` вместо `Account Management`.
+
+#### Shared UI
+
+- Новый компонент `shared/ui/table` — компаунд `Table.Root/Head/Body/Row/HeadCell/Cell` со встроенными `Table.Empty` и `Table.Skeleton`, горизонтальный скролл на узких экранах.
+- Заполнен пустой `shared/ui/pagination/index.ts` (импорт через публичный API не компилировался).
+- `shared/lib/date/formatShortDate.ts` — общий формат дат для вкладок подписок и платежей.
+
+#### Tooling
+
+- `withMockDelay` переехал в общий `app/api/mock/_mock/`, переменная переименована в `MOCK_API_DELAY_MS`.
+
+#### Tests
+
+- Стор, мок-хендлеры, слой запросов, парсинг query-параметров, сторис на все состояния виджетов и фич покрыты юнит- и Storybook-тестами на каждом этапе.
+
+#### Shared UI (попутный фикс)
+
+- `shared/ui/modal/Modal.tsx`: у `Dialog.Close` восстановлен `disabled={dismissDisabled}` — атрибут потерялся при мердже каркаса настроек (`fb2610a`), из-за чего кнопка закрытия модалки оставалась активной во время pending-состояния. Ломало три сторис-теста (`Modal`, `ConfirmDialog`, `ProfileAvatar`), не связанных с этой веткой напрямую, но обнаруженных при её `pnpm test:storybook`.
+
+#### Verification
+
+- Финальное состояние перед PR: `pnpm exec tsc --noEmit`, `pnpm lint` (0 ошибок), `pnpm build` — все чисто. `pnpm test:unit` — 318 тестов пройдено.
+- `pnpm test:storybook` — 274 теста, все пройдены после фикса `Modal.tsx` (до фикса было 3 упавших из-за чужого бага в мердже).
+
+#### Notes
+
+- PayPal (Р4, Б2): слот `onProviderSelect`/`PaymentProvider` на месте, но согласование точки подключения с разработчиком B не проведено — открытый вопрос вне кода.
+- Смена типа аккаунта на `Personal` после окончания подписки — зона бэкенда, на фронте не реализована умышленно.
+
+#### App Shell
+
+- На desktop общий header теперь прокручивается вместе с документом, а sidebar после прокрутки header закрепляется у верхнего края viewport и занимает всю доступную высоту.
+- Mobile-поведение не изменено: верхняя и нижняя навигация сохраняют существующее sticky-позиционирование.
+- Storybook-сценарии оболочки и профиля обновлены для проверки нового поведения desktop-прокрутки.
+
+#### Verification
+
+- Все 12 Storybook-тестов `AppShellView` и `ProfilePage` прошли локально в Chromium через проектный Vitest runner.
+- ESLint затронутых TSX-файлов и stylelint CSS-модуля оболочки прошли через локальные исполняемые файлы проекта.
+- `tsc --noEmit` не завершился из-за существующих ссылок в `.next/types/validator.ts` на отсутствующие mock-payment routes; затронутые файлы новых TypeScript-ошибок не добавили.
+
+#### Notes
+
+- Storybook MCP недоступен в текущей сессии; документация и сценарии проверены по исходникам, браузерная проверка выполнена локальным Storybook/Vitest runner.
 
 #### Profile SSR
 
@@ -970,7 +1114,7 @@
 - `pnpm exec vitest run --project=storybook` — 37 файлов, 158 тестов, прошло. Скрипта `pnpm test:storybook` в проекте нет.
 - Новая стори проверена на ловлю регрессии: при временном снятии `sticky` с шапки и со слота сайдбара она падает.
 
-### 2026-08-02 — Причёсывание кода постов перед PR
+**Причёсывание кода постов перед PR**
 
 #### Posts
 
@@ -1002,7 +1146,9 @@
 - Новые стори: `ConfirmDialog / KeepsOpenOnConfirm` и `ProfilePostsGridView / LoadNextPageFailed`.
 - В репозитории остаются четыре чужие ошибки `simple-import-sort/exports` (`shared/ui/icon`, `shared/ui/select`, `widgets/navigation`) — они не из этой ветки и правятся отдельно.
 
-### 2026-08-01 — Настраиваемая задержка мок-API постов
+### 2026-08-01
+
+**Настраиваемая задержка мок-API постов**
 
 #### Posts
 
@@ -1014,13 +1160,13 @@
 
 - Новые unit-тесты `mockDelay`: разбор значения переменной окружения, мгновенный возврат без настройки, ожидание заданного интервала на фейковых таймерах, проброс аргументов в обёрнутый хендлер.
 
-### 2026-08-01 — Меню из трёх точек не открывалось внутри модалки
+**Меню из трёх точек не открывалось внутри модалки**
 
 #### Shared UI
 
 - `DropdownMenu` получил `z-index: 200` на позиционер. Меню портируется в конец `body` и своего z-index не имело, поэтому внутри просмотра поста оно раскрывалось под попапом диалога (бэкдроп 100, попап 101) и выглядело неработающей кнопкой. Обнаружено ручным прогоном: стори-тесты кликают по элементу и перекрытие не ловят.
 
-### 2026-08-01 — Мок-API постов отвязан от базового URL бэкенда
+**Мок-API постов отвязан от базового URL бэкенда**
 
 #### Posts
 
@@ -1051,7 +1197,7 @@
 
 - Когда появится бэкенд постов, мок-режим удаляется вместе с флагом `NEXT_PUBLIC_POSTS_API_MOCK`, и `postsApi` возвращается к общему базовому URL.
 
-### 2026-08-01 — Этап 6: UC-3, удаление поста
+**Этап 6: UC-3, удаление поста**
 
 #### Posts
 
@@ -1084,7 +1230,7 @@
 - Отдельных стори на контейнер `ProfilePostsGrid` нет: он тянет запросы и кеш, поэтому проверяется через сторис страницы (`ProfilePage.stories`), а презентационная часть — через `ProfilePostsGridView.stories`.
 - Формулировка ТЗ «уходит на домашнюю страницу» трактована как страница профиля владельца. Если имелась в виду главная `/`, правка локализована в `ProfilePostsGrid`.
 
-### 2026-08-01 — Этап 5: UC-2, редактирование поста
+**Этап 5: UC-2, редактирование поста**
 
 #### Posts
 
@@ -1120,7 +1266,7 @@
 - Ветка `Save Changes` заблокирован при превышении 500 символов проверена только unit-тестом `isValidPostDescription`: через интерфейс это состояние недостижимо, поле само режет ввод по `maxLength`. Проверка остаётся защитой от слишком длинного описания, пришедшего из хранилища.
 - Заголовок диалога подтверждения (`Close Post`) макетом не подтверждён — отдельного фрейма на него в Figma нет. Текст тела взят из ТЗ дословно.
 
-### 2026-08-01 — Этап 4: просмотр поста
+**Этап 4: просмотр поста**
 
 #### Posts
 
@@ -1159,7 +1305,7 @@
 - Раскладка сверена с макетом по метаданным и рендеру Figma; вживую в браузере страница не открывалась — поведение закрыто сторис-тестами.
 - Макеты: файл Figma `wIrkRSQnSb5kMbFftswpu6`, фреймы `My Post` (`309:4336`) и `Edit Post` (`309:6064`).
 
-### 2026-08-01 — Этапы 3 и 7: сетка постов профиля и стыковка с созданием поста
+**Этапы 3 и 7: сетка постов профиля и стыковка с созданием поста**
 
 #### Profile
 
@@ -1208,7 +1354,7 @@
 
 - Ленту профиля пока сортирует мок; клиент порядок не меняет.
 
-### 2026-08-01 — Этап 2: моки постов и слой `entities/post`
+**Этап 2: моки постов и слой `entities/post`**
 
 #### Posts
 
@@ -1244,8 +1390,6 @@
 - Флаг `NEXT_PUBLIC_POSTS_API_MOCK=true` добавлен в локальный `.env.local`; файл в `.gitignore`, каждому разработчику нужно прописать его у себя, иначе запросы уйдут на несуществующий `/api/v1/posts`.
 - `publishPostMock` из `features/create-post` пока по-прежнему ничего не сохраняет — стыковка с мок-стором запланирована на Этап 7 роадмапа.
 
-### 2026-08-01
-
 #### Shared UI
 
 - Добавлен `shared/ui/dropdown-menu` на `@base-ui/react/menu` — контекстное меню под действия поста (Edit / Delete). Триггер рендерится как `<button>`, по умолчанию с иконкой `icon-more-horizontal`; своё содержимое передаётся пропом `trigger`. Проп `ariaLabel` обязателен, потому что дефолтный триггер иконочный и другого доступного имени у него нет. Клавиатурная навигация и роли (`menu`/`menuitem`) идут от Base UI, руками не дублируются.
@@ -1276,8 +1420,6 @@
 
 - Для прогона story-тестов локально понадобилось доустановить браузер: `pnpm exec playwright install chromium`.
 - Пропсы существующих компонентов сверялись по исходникам (`Modal.tsx`, `Button.tsx`) и типам `@base-ui/react`, а не через MCP `inctagram-storybook`: этот сервер настроен для Codex и в текущем окружении недоступен.
-
-### 2026-08-01
 
 #### Tooling
 
@@ -1338,73 +1480,6 @@
 - `pnpm exec tsc --noEmit` прошёл успешно.
 - `pnpm exec vitest run src/features/create-post` прошёл успешно: 7 файлов, 22 теста.
 - `pnpm exec vitest run --project storybook src/features/create-post/ui/stories/CreatePostFlow.stories.tsx src/features/create-post/ui/close-creation/CloseCreationConfirm.stories.tsx` прошёл успешно: 2 файла, 7 тестов.
-
-### 2026-06-29
-
-#### Create Post
-
-- Добавлены Storybook stories для ключевых состояний create-post wizard: пустая загрузка, ошибка валидации, crop для одного и нескольких фото, filters, publication и отдельная story для confirm закрытия.
-- Для create-post modal stories отключён inline-render в Storybook Docs, чтобы открытые fixed-модалки рендерились в iframe и не накладывались друг на друга на странице документации.
-- Добавлены unit-тесты in-memory draft model: сохранение, восстановление редактируемого состояния без object URL и очистка черновика.
-
-#### Verification
-
-- `pnpm exec eslint src/pages/create-post/ui/CreatePostFlow.stories.tsx src/pages/create-post/ui/CloseCreationConfirm.stories.tsx src/pages/create-post/model/createPostDraft.test.ts` прошёл успешно.
-- `pnpm exec vitest run --project unit src/pages/create-post/model/createPostDraft.test.ts` прошёл успешно: 1 файл, 3 теста.
-- `pnpm exec vitest run --project storybook src/pages/create-post/ui/CreatePostFlow.stories.tsx src/pages/create-post/ui/CloseCreationConfirm.stories.tsx` прошёл успешно: 2 файла, 7 тестов.
-- Storybook Docs для `pages/CreatePostFlow` визуально проверен на `http://localhost:6006/?path=/docs/pages-createpostflow--docs`: stories рендерятся через iframe, наложений fixed-модалок в основном docs DOM не найдено.
-- `pnpm exec vitest run --project unit` прошёл успешно: 16 файлов, 78 тестов.
-- `pnpm build` прошёл успешно.
-- `pnpm lint` не прошёл из-за существующих несвязанных ошибок сортировки export в `src/shared/ui/alert/index.ts`, `src/shared/ui/icon/index.ts`, `src/shared/ui/select/index.ts`, `src/widgets/navigation/index.ts` и существующих prettier warnings вне изменённых файлов.
-- Storybook MCP tools не были доступны в текущем наборе инструментов Codex; затронутые Storybook tests запущены через `pnpm exec vitest run --project storybook`.
-
-### 2026-06-25
-
-#### Create Post
-
-- В модальный сценарий `Add Photo` добавлен скрытый file input для выбора JPEG/PNG-фотографий с поддержкой multiple upload.
-- Добавлена page-local модель валидации файлов публикации: до 10 фото, JPEG/PNG, размер каждого файла не больше 20 MB.
-- После успешного выбора создаются object URL preview, показывается первое выбранное фото и количество выбранных фото; object URL освобождаются при размонтировании сценария.
-- Для ошибок выбора файла добавлен alert в модалке, включая отдельное сообщение для превышения лимита количества фото.
-- Добавлена pinned-зависимость `react-easy-crop@6.0.2` для настройки обрезки фотографий.
-- После успешной загрузки wizard переходит на шаг `Cropping`, где для каждой фотографии отдельно сохраняются crop position, zoom, aspect ratio и crop area в пикселях.
-- Реализованы cropper, переключатели `1:1`, `4:5`, `16:9`, zoom slider и thumbnail strip для переключения между выбранными фотографиями без потери настроек.
-- В cropper добавлен формат `Original`, который выбран по умолчанию и сохраняет исходное соотношение сторон фотографии без принудительной обрезки.
-- Управление выбранными фотографиями, текущей фотографией, crop-настройками и cleanup object URL вынесено из общего flow-hook в отдельный `useCreatePostPhotos`.
-- Добавлен шаг `Filters`: выбор фильтра сохраняется отдельно для каждой фотографии, preview применяет CSS-filter, а `Back` возвращает пользователя на crop-step.
-- Добавлен шаг `Publication` с preview выбранной фотографии, полем `Description`, ограничением описания до 500 символов и счётчиком символов; `Publish` оставлен неактивным до этапа mock publish.
-- Кнопка `Publish` подключена к TanStack Query mock mutation: перед отправкой фотографии экспортируются через Canvas с учётом crop area и CSS-фильтра, после успешного mock publish форма закрывается с переходом на профиль.
-- Preview на шагах `Filters` и `Publication` строится через тот же Canvas export, что и publish payload, поэтому crop и filter совпадают с итоговым файлом.
-- На шагах `Filters` и `Publication` добавлено переключение между несколькими фотографиями через overlay-стрелки и pagination dots; при одном фото лишняя навигация не отображается.
-- При переходе на шаги `Filters` и `Publication` активная фотография сбрасывается на первую, чтобы каждый этап начинался с начала набора.
-- При закрытии начатого создания публикации показывается confirm: можно сохранить in-memory draft на текущую сессию, восстановить его через `Open Draft` или удалить через `Discard`.
-- Исправлено растягивание фотографии в cropped preview: изображение позиционируется внутри crop area без искажения исходных пропорций.
-- На шагах `Filters` и `Publication` убрана тёмная подложка итогового preview, чтобы область соответствовала размеру обработанной фотографии.
-- На шаге `Cropping` убраны тёмная подложка рабочей области и затемняющий overlay cropper.
-
-#### Verification
-
-- `pnpm exec eslint 'app/(main)/create/page.tsx' src/pages/create-post` прошёл успешно.
-- `pnpm exec vitest run --project unit src/pages/create-post/model/createPostFile.test.ts` прошёл успешно: 1 файл, 7 тестов.
-- `pnpm exec eslint src/pages/create-post` прошёл успешно.
-- `pnpm exec vitest run --project unit src/pages/create-post` прошёл успешно: 4 файла, 12 тестов.
-- `pnpm exec tsc --noEmit` прошёл успешно.
-- `pnpm build` не запускался повторно: на предыдущем этапе команда зависала на `Creating an optimized production build ...` без вывода ошибок.
-- Storybook tests не запускались, потому что stories не изменялись и Storybook MCP tools недоступны в текущей сессии.
-
-### 2026-06-24
-
-#### Create Post
-
-- Добавлен route `/create` с тонким Next.js route-файлом и page-slice `pages/create-post`.
-- Реализован первый экран модального сценария `Add Photo` на существующих shared `Modal`, `Button` и `Icon`: placeholder, кнопка `Select from Computer` и кнопка `Open Draft`.
-
-#### Verification
-
-- `pnpm exec eslint 'app/(main)/create/page.tsx' src/pages/create-post` прошёл успешно.
-- `pnpm exec tsc --noEmit` прошёл успешно.
-- `pnpm build` был остановлен вручную после длительного зависания на этапе `Creating an optimized production build ...` без вывода ошибок.
-- Storybook tests не запускались, потому что stories не изменялись и Storybook MCP tools недоступны в текущей сессии.
 
 ### 2026-07-14
 
@@ -1504,6 +1579,73 @@
 - `pnpm exec eslint src/shared/api/openapi/client.ts src/shared/api/openapi/index.ts` прошел успешно.
 - Storybook tests не запускались, потому что UI и stories не изменялись.
 
+### 2026-06-29
+
+#### Create Post
+
+- Добавлены Storybook stories для ключевых состояний create-post wizard: пустая загрузка, ошибка валидации, crop для одного и нескольких фото, filters, publication и отдельная story для confirm закрытия.
+- Для create-post modal stories отключён inline-render в Storybook Docs, чтобы открытые fixed-модалки рендерились в iframe и не накладывались друг на друга на странице документации.
+- Добавлены unit-тесты in-memory draft model: сохранение, восстановление редактируемого состояния без object URL и очистка черновика.
+
+#### Verification
+
+- `pnpm exec eslint src/pages/create-post/ui/CreatePostFlow.stories.tsx src/pages/create-post/ui/CloseCreationConfirm.stories.tsx src/pages/create-post/model/createPostDraft.test.ts` прошёл успешно.
+- `pnpm exec vitest run --project unit src/pages/create-post/model/createPostDraft.test.ts` прошёл успешно: 1 файл, 3 теста.
+- `pnpm exec vitest run --project storybook src/pages/create-post/ui/CreatePostFlow.stories.tsx src/pages/create-post/ui/CloseCreationConfirm.stories.tsx` прошёл успешно: 2 файла, 7 тестов.
+- Storybook Docs для `pages/CreatePostFlow` визуально проверен на `http://localhost:6006/?path=/docs/pages-createpostflow--docs`: stories рендерятся через iframe, наложений fixed-модалок в основном docs DOM не найдено.
+- `pnpm exec vitest run --project unit` прошёл успешно: 16 файлов, 78 тестов.
+- `pnpm build` прошёл успешно.
+- `pnpm lint` не прошёл из-за существующих несвязанных ошибок сортировки export в `src/shared/ui/alert/index.ts`, `src/shared/ui/icon/index.ts`, `src/shared/ui/select/index.ts`, `src/widgets/navigation/index.ts` и существующих prettier warnings вне изменённых файлов.
+- Storybook MCP tools не были доступны в текущем наборе инструментов Codex; затронутые Storybook tests запущены через `pnpm exec vitest run --project storybook`.
+
+### 2026-06-25
+
+#### Create Post
+
+- В модальный сценарий `Add Photo` добавлен скрытый file input для выбора JPEG/PNG-фотографий с поддержкой multiple upload.
+- Добавлена page-local модель валидации файлов публикации: до 10 фото, JPEG/PNG, размер каждого файла не больше 20 MB.
+- После успешного выбора создаются object URL preview, показывается первое выбранное фото и количество выбранных фото; object URL освобождаются при размонтировании сценария.
+- Для ошибок выбора файла добавлен alert в модалке, включая отдельное сообщение для превышения лимита количества фото.
+- Добавлена pinned-зависимость `react-easy-crop@6.0.2` для настройки обрезки фотографий.
+- После успешной загрузки wizard переходит на шаг `Cropping`, где для каждой фотографии отдельно сохраняются crop position, zoom, aspect ratio и crop area в пикселях.
+- Реализованы cropper, переключатели `1:1`, `4:5`, `16:9`, zoom slider и thumbnail strip для переключения между выбранными фотографиями без потери настроек.
+- В cropper добавлен формат `Original`, который выбран по умолчанию и сохраняет исходное соотношение сторон фотографии без принудительной обрезки.
+- Управление выбранными фотографиями, текущей фотографией, crop-настройками и cleanup object URL вынесено из общего flow-hook в отдельный `useCreatePostPhotos`.
+- Добавлен шаг `Filters`: выбор фильтра сохраняется отдельно для каждой фотографии, preview применяет CSS-filter, а `Back` возвращает пользователя на crop-step.
+- Добавлен шаг `Publication` с preview выбранной фотографии, полем `Description`, ограничением описания до 500 символов и счётчиком символов; `Publish` оставлен неактивным до этапа mock publish.
+- Кнопка `Publish` подключена к TanStack Query mock mutation: перед отправкой фотографии экспортируются через Canvas с учётом crop area и CSS-фильтра, после успешного mock publish форма закрывается с переходом на профиль.
+- Preview на шагах `Filters` и `Publication` строится через тот же Canvas export, что и publish payload, поэтому crop и filter совпадают с итоговым файлом.
+- На шагах `Filters` и `Publication` добавлено переключение между несколькими фотографиями через overlay-стрелки и pagination dots; при одном фото лишняя навигация не отображается.
+- При переходе на шаги `Filters` и `Publication` активная фотография сбрасывается на первую, чтобы каждый этап начинался с начала набора.
+- При закрытии начатого создания публикации показывается confirm: можно сохранить in-memory draft на текущую сессию, восстановить его через `Open Draft` или удалить через `Discard`.
+- Исправлено растягивание фотографии в cropped preview: изображение позиционируется внутри crop area без искажения исходных пропорций.
+- На шагах `Filters` и `Publication` убрана тёмная подложка итогового preview, чтобы область соответствовала размеру обработанной фотографии.
+- На шаге `Cropping` убраны тёмная подложка рабочей области и затемняющий overlay cropper.
+
+#### Verification
+
+- `pnpm exec eslint 'app/(main)/create/page.tsx' src/pages/create-post` прошёл успешно.
+- `pnpm exec vitest run --project unit src/pages/create-post/model/createPostFile.test.ts` прошёл успешно: 1 файл, 7 тестов.
+- `pnpm exec eslint src/pages/create-post` прошёл успешно.
+- `pnpm exec vitest run --project unit src/pages/create-post` прошёл успешно: 4 файла, 12 тестов.
+- `pnpm exec tsc --noEmit` прошёл успешно.
+- `pnpm build` не запускался повторно: на предыдущем этапе команда зависала на `Creating an optimized production build ...` без вывода ошибок.
+- Storybook tests не запускались, потому что stories не изменялись и Storybook MCP tools недоступны в текущей сессии.
+
+### 2026-06-24
+
+#### Create Post
+
+- Добавлен route `/create` с тонким Next.js route-файлом и page-slice `pages/create-post`.
+- Реализован первый экран модального сценария `Add Photo` на существующих shared `Modal`, `Button` и `Icon`: placeholder, кнопка `Select from Computer` и кнопка `Open Draft`.
+
+#### Verification
+
+- `pnpm exec eslint 'app/(main)/create/page.tsx' src/pages/create-post` прошёл успешно.
+- `pnpm exec tsc --noEmit` прошёл успешно.
+- `pnpm build` был остановлен вручную после длительного зависания на этапе `Creating an optimized production build ...` без вывода ошибок.
+- Storybook tests не запускались, потому что stories не изменялись и Storybook MCP tools недоступны в текущей сессии.
+
 ### 2026-06-21
 
 #### Auth
@@ -1597,6 +1739,28 @@
 - `pnpm exec tsc --noEmit` прошел успешно.
 - Storybook MCP `run-story-tests` для удаленной OAuth-error story больше не применим; проверка ранее показывала существующую проблему контраста у primary-кнопки `Sign In`.
 
+#### Shared UI
+
+- `Recaptcha` переведена на строго контролируемый контракт: компонент больше не хранит внутреннее состояние, не запускает таймер проверки и только сообщает родителю о запросе проверки через `onVerifyRequest`.
+- Storybook-сценарии `Recaptcha` обновлены под внешний state, а форма восстановления пароля использует новый callback-контракт без изменения пользовательского поведения.
+- Из публичного `RecaptchaState` удалено состояние `hover`; наведение осталось обычным CSS-состоянием, а не частью controlled API.
+
+#### Auth
+
+- В форме восстановления пароля изменение email теперь инвалидирует текущую mock reCAPTCHA и отменяет незавершенный таймер проверки, чтобы старый результат не мог подтвердить новый email.
+- Submit-условие формы восстановления пароля выделено в `canSubmit`, а `disabled`-состояние кнопки теперь является производным от этого сценарного условия.
+- Добавлен Storybook-сценарий на быстрый ввод нового email во время `loading`-состояния reCAPTCHA.
+
+#### Verification
+
+- `pnpm exec eslint src/shared/ui/recaptcha/Recaptcha.tsx src/shared/ui/recaptcha/Recaptcha.stories.tsx src/features/forgot-password/ui/ForgotPasswordForm.tsx` прошел успешно.
+- `pnpm exec eslint src/features/forgot-password/model/useForgotPasswordForm.ts src/features/forgot-password/ui/ForgotPasswordForm.stories.tsx` прошел успешно.
+- `pnpm exec eslint src/shared/ui/recaptcha/Recaptcha.tsx src/shared/ui/recaptcha/Recaptcha.stories.tsx src/features/forgot-password/model/useForgotPasswordForm.ts src/features/forgot-password/ui/ForgotPasswordForm.stories.tsx` прошел успешно.
+- `pnpm exec tsc --noEmit` прошел успешно.
+- `pnpm exec vitest run --project storybook src/shared/ui/recaptcha/Recaptcha.stories.tsx` прошел успешно; первый запуск упал на Vite dependency optimization reload, повторный запуск прошел: 8 тестов.
+- `pnpm exec vitest run --project storybook src/features/forgot-password/ui/ForgotPasswordForm.stories.tsx` прошел успешно: 2 теста.
+- `pnpm exec vitest run --project storybook src/shared/ui/recaptcha/Recaptcha.stories.tsx src/features/forgot-password/ui/ForgotPasswordForm.stories.tsx` прошел успешно: 9 тестов.
+
 ### 2026-06-13
 
 #### Auth
@@ -1667,6 +1831,21 @@
 - `pnpm build` прошел успешно.
 - Storybook MCP-тест `features-signinform--default` не прошел из-за ошибки динамического импорта Storybook cache module `@storybook_react-dom-shim.js`.
 
+#### Auth — Registration (UC-1)
+
+- Реализован полный флоу регистрации: форма с валидацией `onBlur`, отправка на `POST /v1/auth/registration`, модалка успеха с email пользователя.
+- Валидация не показывает ошибки на пустых полях при blur — кнопка заблокирована через `hasAllValues`, а не через `required`.
+- Серверные ошибки (email/username уже заняты) выводятся под соответствующим полем через `setError`.
+- Страница подтверждения email: три состояния — загрузка, успех, истёкшая ссылка с формой повторной отправки.
+- Разделение `ConfirmEmailPage` (данные) / `ConfirmEmailView` (UI) для изолированного тестирования.
+- Mock route handlers для трёх эндпоинтов (`registration`, `registration-confirmation`, `resend-registration-email`) — удалить при подключении реального бэкенда.
+- Добавлены Storybook stories: `SignUpForm` (Default, WithValidationErrors), `SignUpSuccessModal` (Open, CloseByOk, CloseByX), `ConfirmEmailView` (Loading, Success, Expired, ExpiredWithError, ResendSuccess).
+
+#### Verification
+
+- `pnpm tsc --noEmit` — 0 ошибок в исходниках.
+- `pnpm lint` — 0 ошибок в наших файлах; 4 pre-existing ошибки в `icon/select/navigation/alert` не затрагивались.
+
 ### 2026-06-09
 
 #### Auth
@@ -1689,49 +1868,6 @@
 #### Verification
 
 - Не запускались; изменение только документационное.
-
-### 2026-06-14
-
-#### Shared UI
-
-- `Recaptcha` переведена на строго контролируемый контракт: компонент больше не хранит внутреннее состояние, не запускает таймер проверки и только сообщает родителю о запросе проверки через `onVerifyRequest`.
-- Storybook-сценарии `Recaptcha` обновлены под внешний state, а форма восстановления пароля использует новый callback-контракт без изменения пользовательского поведения.
-- Из публичного `RecaptchaState` удалено состояние `hover`; наведение осталось обычным CSS-состоянием, а не частью controlled API.
-
-#### Auth
-
-- В форме восстановления пароля изменение email теперь инвалидирует текущую mock reCAPTCHA и отменяет незавершенный таймер проверки, чтобы старый результат не мог подтвердить новый email.
-- Submit-условие формы восстановления пароля выделено в `canSubmit`, а `disabled`-состояние кнопки теперь является производным от этого сценарного условия.
-- Добавлен Storybook-сценарий на быстрый ввод нового email во время `loading`-состояния reCAPTCHA.
-
-#### Verification
-
-- `pnpm exec eslint src/shared/ui/recaptcha/Recaptcha.tsx src/shared/ui/recaptcha/Recaptcha.stories.tsx src/features/forgot-password/ui/ForgotPasswordForm.tsx` прошел успешно.
-- `pnpm exec eslint src/features/forgot-password/model/useForgotPasswordForm.ts src/features/forgot-password/ui/ForgotPasswordForm.stories.tsx` прошел успешно.
-- `pnpm exec eslint src/shared/ui/recaptcha/Recaptcha.tsx src/shared/ui/recaptcha/Recaptcha.stories.tsx src/features/forgot-password/model/useForgotPasswordForm.ts src/features/forgot-password/ui/ForgotPasswordForm.stories.tsx` прошел успешно.
-- `pnpm exec tsc --noEmit` прошел успешно.
-- `pnpm exec vitest run --project storybook src/shared/ui/recaptcha/Recaptcha.stories.tsx` прошел успешно; первый запуск упал на Vite dependency optimization reload, повторный запуск прошел: 8 тестов.
-- `pnpm exec vitest run --project storybook src/features/forgot-password/ui/ForgotPasswordForm.stories.tsx` прошел успешно: 2 теста.
-- `pnpm exec vitest run --project storybook src/shared/ui/recaptcha/Recaptcha.stories.tsx src/features/forgot-password/ui/ForgotPasswordForm.stories.tsx` прошел успешно: 9 тестов.
-
-### 2026-06-10
-
-#### Auth — Registration (UC-1)
-
-- Реализован полный флоу регистрации: форма с валидацией `onBlur`, отправка на `POST /v1/auth/registration`, модалка успеха с email пользователя.
-- Валидация не показывает ошибки на пустых полях при blur — кнопка заблокирована через `hasAllValues`, а не через `required`.
-- Серверные ошибки (email/username уже заняты) выводятся под соответствующим полем через `setError`.
-- Страница подтверждения email: три состояния — загрузка, успех, истёкшая ссылка с формой повторной отправки.
-- Разделение `ConfirmEmailPage` (данные) / `ConfirmEmailView` (UI) для изолированного тестирования.
-- Mock route handlers для трёх эндпоинтов (`registration`, `registration-confirmation`, `resend-registration-email`) — удалить при подключении реального бэкенда.
-- Добавлены Storybook stories: `SignUpForm` (Default, WithValidationErrors), `SignUpSuccessModal` (Open, CloseByOk, CloseByX), `ConfirmEmailView` (Loading, Success, Expired, ExpiredWithError, ResendSuccess).
-
-#### Verification
-
-- `pnpm tsc --noEmit` — 0 ошибок в исходниках.
-- `pnpm lint` — 0 ошибок в наших файлах; 4 pre-existing ошибки в `icon/select/navigation/alert` не затрагивались.
-
-### 2026-06-09
 
 #### Auth
 
