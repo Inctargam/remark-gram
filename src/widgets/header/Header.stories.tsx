@@ -84,6 +84,17 @@ export const AuthWithLanguageSelector: Story = {
   },
 }
 
+export const AuthWithNotificationSlot: Story = {
+  args: {
+    variant: 'auth',
+    notificationSlot: <button type="button">Custom notifications</button>,
+  },
+  play: async ({ canvas }) => {
+    await expect(canvas.getByRole('button', { name: 'Custom notifications' })).toBeInTheDocument()
+    await expect(canvas.queryByRole('button', { name: 'Notifications' })).not.toBeInTheDocument()
+  },
+}
+
 export const LogoLink: Story = {
   play: async ({ canvas }) => {
     const logo = canvas.getByRole('link', { name: 'Remarkgram' })

@@ -1,5 +1,8 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import type { PaymentProvider, SubscriptionPeriod } from '@/entities/subscription'
+
+import { listNotifications, resetNotificationsMockStore } from './notificationsStore'
 import {
   completeCheckoutSession,
   createCheckoutSession,
@@ -14,14 +17,20 @@ const NOW_MS = Date.UTC(2026, 7, 10, 12, 0, 0)
 const DAY_IN_MS = 24 * 60 * 60 * 1000
 
 /** Walks the whole buy flow: create a session, then report the outcome back. */
-const buy = (planId: 'day' | 'week' | 'month', nowMs = NOW_MS, provider = 'stripe' as const) => {
+const buy = (planId: SubscriptionPeriod, nowMs = NOW_MS, provider: PaymentProvider = 'stripe') => {
   const session = createCheckoutSession({ planId, provider })
 
   return completeCheckoutSession({ sessionId: session.id, outcome: 'success', nowMs })
 }
 
 beforeEach(() => {
+  resetNotificationsMockStore()
   resetSubscriptionsMockStore()
+})
+
+afterEach(() => {
+  resetNotificationsMockStore()
+  vi.useRealTimers()
 })
 
 describe('seed', () => {
@@ -109,6 +118,64 @@ describe('completeCheckoutSession', () => {
     completeCheckoutSession({ sessionId: session.id, outcome: 'failed', nowMs: NOW_MS })
 
     expect(findCheckoutSession(session.id)?.outcome).toBe('failed')
+  })
+
+  it('adds an activation notification 30 seconds after a successful payment', () => {
+    vi.useFakeTimers()
+
+    const result = buy('day')
+    const subscription = result?.accountStatus?.subscriptions.at(-1)
+    const notificationId = `mock-notification-activation-${subscription?.id}`
+
+    expect(listNotifications({ limit: 10, nowMs: NOW_MS }).items).not.toContainEqual(
+      expect.objectContaining({ id: notificationId })
+    )
+
+    vi.advanceTimersByTime(30_000)
+
+    expect(listNotifications({ limit: 1, nowMs: NOW_MS + 30_000 }).items[0]).toEqual(
+      expect.objectContaining({
+        id: notificationId,
+        kind: 'subscriptionActivated',
+        message: 'Ваша подписка активирована и действует до 11.08.2026',
+        readAt: null,
+      })
+    )
+  })
+
+  it('does not add activation notifications for failed or replayed checkout sessions', () => {
+    vi.useFakeTimers()
+
+    const failedSession = createCheckoutSession({ planId: 'day', provider: 'stripe' })
+    const successfulSession = createCheckoutSession({ planId: 'day', provider: 'stripe' })
+
+    completeCheckoutSession({
+      sessionId: failedSession.id,
+      outcome: 'failed',
+      nowMs: NOW_MS,
+    })
+    const success = completeCheckoutSession({
+      sessionId: successfulSession.id,
+      outcome: 'success',
+      nowMs: NOW_MS,
+    })
+    completeCheckoutSession({
+      sessionId: successfulSession.id,
+      outcome: 'success',
+      nowMs: NOW_MS,
+    })
+
+    vi.advanceTimersByTime(30_000)
+
+    const subscriptionId = success?.accountStatus?.subscriptions.at(-1)?.id
+    const dynamicActivationNotifications = listNotifications({
+      limit: 10,
+      nowMs: NOW_MS + 30_000,
+    }).items.filter(({ id }) => id.startsWith('mock-notification-activation-'))
+
+    expect(dynamicActivationNotifications).toEqual([
+      expect.objectContaining({ id: `mock-notification-activation-${subscriptionId}` }),
+    ])
   })
 })
 

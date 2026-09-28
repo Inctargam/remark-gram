@@ -12,6 +12,7 @@ type AuthVariant = {
   variant: 'auth'
   languageSelector?: ReactNode
   menu?: ReactNode
+  notificationSlot?: ReactNode
 }
 
 type GuestVariant = {
@@ -52,6 +53,8 @@ export const HeaderMobile = (props: HeaderMobileProps) => {
             </Button>
           </div>
         )}
+
+        {variant === 'auth' && props.notificationSlot}
 
         {variant === 'auth' && props.menu}
       </div>

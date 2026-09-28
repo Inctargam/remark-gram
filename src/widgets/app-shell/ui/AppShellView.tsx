@@ -14,6 +14,7 @@ import {
   HeaderMobileMenu,
 } from '@/widgets/header'
 import { BottomBar, Sidebar } from '@/widgets/navigation'
+import { NotificationsMenu } from '@/widgets/notifications'
 
 import styles from './AppShell.module.css'
 
@@ -43,6 +44,8 @@ export const AppShellView = ({
   const mobileLanguageSelector = (
     <HeaderLanguageSwitcher compact value={language} onValueChange={setLanguage} />
   )
+  const desktopNotifications = <NotificationsMenu />
+  const mobileNotifications = <NotificationsMenu compact />
 
   return (
     <div className={styles.shell}>
@@ -51,7 +54,11 @@ export const AppShellView = ({
         <>
           <div className={styles.desktopHeader}>
             {isAuthenticated ? (
-              <Header languageSelector={desktopLanguageSelector} variant="auth" />
+              <Header
+                languageSelector={desktopLanguageSelector}
+                notificationSlot={desktopNotifications}
+                variant="auth"
+              />
             ) : (
               <Header
                 languageSelector={desktopLanguageSelector}
@@ -65,6 +72,7 @@ export const AppShellView = ({
               <HeaderMobile
                 languageSelector={mobileLanguageSelector}
                 menu={<HeaderMobileMenu onLogout={onLogout} />}
+                notificationSlot={mobileNotifications}
                 variant="auth"
               />
             ) : (

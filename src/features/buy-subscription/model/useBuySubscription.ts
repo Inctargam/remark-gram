@@ -4,6 +4,10 @@ import { useQueryClient } from '@tanstack/react-query'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
+import {
+  notificationQueryKeys,
+  SUBSCRIPTION_ACTIVATION_NOTIFICATION_DELAY_MS,
+} from '@/entities/notification'
 import { paymentsQueryKeys } from '@/entities/payment'
 import type { CheckoutOutcome, PaymentProvider, SubscriptionPeriod } from '@/entities/subscription'
 import { subscriptionQueryKeys } from '@/entities/subscription'
@@ -82,6 +86,15 @@ export const useBuySubscription = ({ planId }: Params): BuySubscriptionState => 
     // cold already. Invalidating anyway keeps the tab right if it ever returns client-side.
     queryClient.invalidateQueries({ queryKey: subscriptionQueryKeys.all })
     queryClient.invalidateQueries({ queryKey: paymentsQueryKeys.all })
+    queryClient.invalidateQueries({ queryKey: notificationQueryKeys.all })
+
+    const timeoutId = window.setTimeout(() => {
+      queryClient.invalidateQueries({ queryKey: notificationQueryKeys.all })
+    }, SUBSCRIPTION_ACTIVATION_NOTIFICATION_DELAY_MS)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+    }
   }, [outcomeFromUrl, queryClient])
 
   const startPayment = (provider: PaymentProvider) => {
