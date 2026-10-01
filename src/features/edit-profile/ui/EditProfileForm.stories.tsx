@@ -1,6 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { StrictMode } from 'react'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 
+import { type Profile, profileQueryKeys } from '@/entities/profile'
 import type { SchemaMyProfileResponseDto } from '@/shared/api/openapi/schema'
 
 import { EDIT_PROFILE_DRAFT_KEY, saveEditProfileDraft } from '../model/editProfileDraft'
@@ -392,8 +395,46 @@ export const RestoredPrivacyPolicyDraft: Story = {
       'dd.mm.yyyy'
     )
     await expect(await canvas.findByRole('link', { name: 'Privacy Policy' })).toBeVisible()
+    await expect(canvas.getByText('A user under 13 cannot create a profile.')).toBeVisible()
+    await waitFor(() =>
+      expect(canvas.getByRole('button', { name: 'Date of birth' })).toHaveStyle({
+        borderColor: 'rgb(204, 20, 57)',
+      })
+    )
+    await expect(canvas.getByRole('button', { name: 'Save Changes' })).toBeDisabled()
     await expect(window.sessionStorage.getItem(EDIT_PROFILE_DRAFT_KEY)).toBeNull()
   },
+}
+
+export const RestoredDraftWithCachedProfile: Story = {
+  ...RestoredPrivacyPolicyDraft,
+  decorators: [
+    (Story) => {
+      const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity } } })
+
+      queryClient.setQueryData(profileQueryKeys.current(), {
+        id: INITIAL_PROFILE.userId,
+        userName: INITIAL_PROFILE.username,
+        firstName: INITIAL_PROFILE.firstName,
+        lastName: INITIAL_PROFILE.lastName,
+        dateOfBirth: INITIAL_PROFILE.dateOfBirth,
+        country: INITIAL_PROFILE.country.name.en,
+        countryCode: INITIAL_PROFILE.country.code,
+        city: INITIAL_PROFILE.city,
+        aboutMe: INITIAL_PROFILE.aboutMe,
+        avatarFileId: null,
+        avatars: [],
+      } satisfies Profile)
+
+      return (
+        <StrictMode>
+          <QueryClientProvider client={queryClient}>
+            <Story />
+          </QueryClientProvider>
+        </StrictMode>
+      )
+    },
+  ],
 }
 
 const COUNTRIES = [

@@ -8,6 +8,7 @@
 
 #### Profile Settings
 
+- После восстановления черновика формы проверка полей запускается отдельным эффектом после инициализации, без отменяемого таймера. Storybook проверяет сообщение об ошибке возраста, красную рамку даты и блокировку сохранения, включая возврат с профилем в кеше и Strict Mode.
 - Черновик формы при переходе к Privacy Policy использует единый ключ `edit-profile:privacy-policy-draft` без суффикса версии; очистка отдельного старого ключа удалена.
 - Результаты поиска стран считаются свежими, пока находятся в кеше React Query (`staleTime: Infinity`); повторное открытие списка с тем же поиском не вызывает обновление по истечении минуты.
 - Чтение своего профиля подключено к `GET /api/v1/users/me/profile` через типизированный клиент. Nullable-поля нормализуются для формы; `avatarFileId` используется для отображения текущего аватара.
@@ -23,6 +24,7 @@
 
 #### Verification
 
+- Для восстановления валидации черновика прошли 15 Storybook-тестов `pnpm exec vitest run --project storybook src/features/edit-profile/ui/EditProfileForm.stories.tsx` с `NEXT_PUBLIC_AUTH_MOCK=true`, ESLint изменённых файлов и `git diff --check`. Storybook MCP недоступен; сборка не запускалась. Исходное исчезновение ошибки в Storybook не воспроизвелось, проверка возврата в приложении остаётся необходимой.
 - После упрощения ключа черновика прошли 8 тестов `pnpm exec vitest run --project unit src/features/edit-profile/model/editProfileDraft.test.ts`, ESLint изменённых файлов и `git diff --check`.
 - Для изменения кеширования стран проверены `pnpm exec eslint src/entities/location/api/useLocationQueries.ts` и `git diff --check`; тесты и сборка для изменения одного параметра не запускались.
 - `pnpm exec next typegen` прошёл; устаревшие типы маршрутов обновлены.

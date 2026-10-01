@@ -22,6 +22,7 @@ type SubmitAlert =
 
 export const useEditProfileForm = () => {
   const [submitAlert, setSubmitAlert] = useState<SubmitAlert>(null)
+  const [isFormInitialized, setIsFormInitialized] = useState(false)
   const isInitializedRef = useRef(false)
   const profileQuery = useProfileQuery()
   const updateMutation = useUpdateProfileMutation()
@@ -59,11 +60,15 @@ export const useEditProfileForm = () => {
     }
 
     isInitializedRef.current = true
-    // Let reset propagate through React Hook Form before validating the restored values.
-    const validationTimeout = window.setTimeout(() => void trigger(), 0)
+    setIsFormInitialized(true)
+  }, [profileQuery.data, reset])
 
-    return () => window.clearTimeout(validationTimeout)
-  }, [profileQuery.data, reset, trigger])
+  useEffect(() => {
+    if (isFormInitialized) {
+      // Validate after reset has propagated to the mounted fields.
+      void trigger()
+    }
+  }, [isFormInitialized, trigger])
 
   const submitHandler = handleSubmit((formValues) => {
     setSubmitAlert(null)
