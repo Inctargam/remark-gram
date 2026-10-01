@@ -5,7 +5,7 @@ import {
   getProfileAvatarImageHandler,
   uploadProfileAvatarHandler,
 } from './profileAvatarHandler'
-import { getMockProfile, resetMockProfile } from './profileStore'
+import { getMockProfileAvatars, resetMockProfileAvatar } from './profileAvatarStore'
 
 const createUploadRequest = (type = 'image/png', size = 4) => {
   const formData = new FormData()
@@ -18,7 +18,7 @@ const createUploadRequest = (type = 'image/png', size = 4) => {
 }
 
 beforeEach(() => {
-  resetMockProfile()
+  resetMockProfileAvatar()
 })
 
 describe('profile avatar mock handlers', () => {
@@ -41,7 +41,7 @@ describe('profile avatar mock handlers', () => {
         fileSize: 4,
       }),
     ])
-    expect(getMockProfile().avatars).toEqual(result.avatars)
+    expect(getMockProfileAvatars()).toEqual(result.avatars)
   })
 
   it('serves the uploaded image without caching', async () => {
@@ -70,7 +70,7 @@ describe('profile avatar mock handlers', () => {
     const response = await deleteProfileAvatarHandler()
 
     await expect(response.json()).resolves.toEqual({ avatars: [] })
-    expect(getMockProfile().avatars).toEqual([])
+    expect(getMockProfileAvatars()).toEqual([])
     expect((await getProfileAvatarImageHandler()).status).toBe(404)
   })
 })

@@ -1,5 +1,4 @@
-// TODO(profile-api): Replace these temporary types with generated OpenAPI types once the
-// backend exposes the profile endpoints in the schema.
+// Avatar mock responses still use this shape until the avatar workflow migrates to the backend.
 export type ProfileAvatar = {
   url: string
   width: number
@@ -15,11 +14,11 @@ export type Profile = {
   lastName: string
   city: string
   country: string
-  region: string
   dateOfBirth: string | null
   aboutMe: string
   avatars: ProfileAvatar[]
-  createdAt: string
+  countryCode: string | null
+  avatarFileId: string | null
 }
 
 export type ProfileAvatarsResponse = Pick<Profile, 'avatars'>

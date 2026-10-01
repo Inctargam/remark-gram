@@ -4,7 +4,7 @@ import {
   deleteMockProfileAvatar,
   getMockProfileAvatarFile,
   updateMockProfileAvatar,
-} from './profileStore'
+} from './profileAvatarStore'
 
 const MAX_PROFILE_PHOTO_SIZE_BYTES = 10 * 1024 * 1024
 const INVALID_PROFILE_PHOTO_ERROR = 'The photo must be less than 10 Mb and have JPEG or PNG format'

@@ -7,6 +7,6 @@ export const updateProfileAvatarCache = (
   { avatars }: ProfileAvatarsResponse
 ) => {
   queryClient.setQueryData<Profile>(profileQueryKeys.current(), (profile) => {
-    return profile ? { ...profile, avatars } : profile
+    return profile ? { ...profile, avatarFileId: null, avatars } : profile
   })
 }

@@ -4,7 +4,7 @@ import type { Profile } from '@/entities/profile'
 
 import {
   formatProfileDate,
-  mapFormValuesToPayload,
+  mapFormValuesToBackendPayload,
   mapProfileToFormValues,
   parseProfileDate,
 } from './editProfileMappers'
@@ -16,11 +16,11 @@ const PROFILE: Profile = {
   lastName: 'Doe',
   city: 'Austin',
   country: 'United States',
-  region: 'Texas',
+  countryCode: 'US',
+  avatarFileId: null,
   dateOfBirth: '1990-01-02',
   aboutMe: 'About me',
   avatars: [],
-  createdAt: '2026-08-06T14:41:15.904Z',
 }
 
 describe('edit profile mappers', () => {
@@ -52,13 +52,13 @@ describe('edit profile mappers', () => {
 
     expect(formValues.username).toBe('user123')
     expect(formValues.dateOfBirth).toEqual(new Date(1990, 0, 2))
-    expect(mapFormValuesToPayload(formValues)).toEqual({
-      userName: 'user123',
+    expect(formValues.country).toBe('US')
+    expect(mapFormValuesToBackendPayload(formValues)).toEqual({
+      username: 'user123',
       firstName: 'John',
       lastName: 'Doe',
       city: 'Austin',
-      country: 'United States',
-      region: 'Texas',
+      countryCode: 'US',
       dateOfBirth: '1990-01-02',
       aboutMe: 'About me',
     })
@@ -68,7 +68,28 @@ describe('edit profile mappers', () => {
     const formValues = mapProfileToFormValues({ ...PROFILE, dateOfBirth: null })
 
     expect(formValues.dateOfBirth).toBeNull()
-    expect(mapFormValuesToPayload(formValues).dateOfBirth).toBeNull()
+    expect(mapFormValuesToBackendPayload(formValues).dateOfBirth).toBe('')
+  })
+
+  it('sends backend field names and empty strings for cleared optional values', () => {
+    const formValues = mapProfileToFormValues({ ...PROFILE, dateOfBirth: null })
+
+    expect(
+      mapFormValuesToBackendPayload({
+        ...formValues,
+        country: '',
+        city: '',
+        aboutMe: '',
+      })
+    ).toEqual({
+      username: 'user123',
+      firstName: 'John',
+      lastName: 'Doe',
+      dateOfBirth: '',
+      aboutMe: '',
+      countryCode: '',
+      city: '',
+    })
   })
 
   it('falls back to a null form date when the API date is invalid', () => {

@@ -8,17 +8,15 @@ const AVATAR_DATA_URL =
   'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="192" height="192"%3E%3Crect width="192" height="192" fill="%236a7d92"/%3E%3Ccircle cx="96" cy="72" r="38" fill="%23f5d0b5"/%3E%3Cpath d="M35 192c5-48 29-72 61-72s56 24 61 72" fill="%232d3440"/%3E%3C/svg%3E'
 
 const BASE_PROFILE = {
-  id: 1,
-  userName: 'user123',
+  userId: 1,
+  username: 'user123',
   firstName: 'John',
   lastName: 'Doe',
   city: 'Austin',
-  country: 'United States',
-  region: 'Texas',
+  country: { code: 'US', name: { en: 'United States', ru: 'США' } },
   dateOfBirth: '1990-01-01',
   aboutMe: 'About me',
-  avatars: [],
-  createdAt: '2026-08-06T14:41:15.904Z',
+  avatarFileId: null,
 }
 
 const PROFILE_AVATAR = {
@@ -41,8 +39,10 @@ const stubProfileAvatarFetch = () => {
   shouldFailDelete = false
   shouldHoldDelete = false
   resolveDeleteRequest = null
-  globalThis.fetch = (async (_input: RequestInfo | URL, init?: RequestInit) => {
-    if (init?.method === 'DELETE') {
+  globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+    const method = input instanceof Request ? input.method : (init?.method ?? 'GET')
+
+    if (method === 'DELETE') {
       if (shouldHoldDelete) {
         await new Promise<void>((resolve) => {
           resolveDeleteRequest = resolve
@@ -57,14 +57,14 @@ const stubProfileAvatarFetch = () => {
       return Response.json({ avatars: [] })
     }
 
-    if (init?.method === 'POST') {
+    if (method === 'POST') {
       hasAvatar = true
       return Response.json({ avatars: [PROFILE_AVATAR] })
     }
 
     return Response.json({
       ...BASE_PROFILE,
-      avatars: hasAvatar ? [PROFILE_AVATAR] : [],
+      avatarFileId: hasAvatar ? 'story-avatar' : null,
     })
   }) as typeof globalThis.fetch
 

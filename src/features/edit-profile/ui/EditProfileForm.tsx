@@ -29,6 +29,8 @@ type Props = {
 export const EditProfileForm = ({ avatar }: Props) => {
   const {
     profile,
+    profileLoadError,
+    reloadProfile,
     register,
     control,
     errors,
@@ -39,6 +41,17 @@ export const EditProfileForm = ({ avatar }: Props) => {
     submitAlert,
     closeAlertHandler,
   } = useEditProfileForm()
+
+  if (profileLoadError) {
+    return (
+      <div role="alert">
+        <p>Failed to load profile.</p>
+        <button type="button" onClick={() => void reloadProfile()}>
+          Retry
+        </button>
+      </div>
+    )
+  }
 
   if (!profile) {
     return null
@@ -121,9 +134,15 @@ export const EditProfileForm = ({ avatar }: Props) => {
               label="Select your country"
               placeholder="Country"
               {...locationFields.country}
+              error={errors.country?.message ?? locationFields.country.error}
             />
 
-            <Combobox label="Select your city" placeholder="City" {...locationFields.city} />
+            <Combobox
+              label="Select your city"
+              placeholder="City"
+              {...locationFields.city}
+              error={errors.city?.message ?? locationFields.city.error}
+            />
           </div>
 
           <TextArea

@@ -47,10 +47,10 @@ describe('api', () => {
   })
 
   it('sends a JSON body with PUT requests', async () => {
-    await api.put('/api/mock/profile', { userName: 'user123' }, { baseUrl: '' })
+    await api.put('/api/mock/example', { name: 'example' }, { baseUrl: '' })
 
     expect(getRequestInit().method).toBe('PUT')
-    expect(getRequestInit().body).toBe(JSON.stringify({ userName: 'user123' }))
+    expect(getRequestInit().body).toBe(JSON.stringify({ name: 'example' }))
   })
 
   it('lets the browser declare the multipart boundary for FormData requests', async () => {

@@ -8,6 +8,7 @@ import type { paths } from './schema'
 export const apiClient = createClient<paths>({
   baseUrl: API_BASE_URL,
   credentials: 'include',
+  fetch: (request) => globalThis.fetch(request),
 })
 
 apiClient.use({

@@ -1,38 +1,39 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 
+import type { SchemaMyProfileResponseDto } from '@/shared/api/openapi/schema'
+
 import { EDIT_PROFILE_DRAFT_KEY, saveEditProfileDraft } from '../model/editProfileDraft'
 import { EditProfileForm } from './EditProfileForm'
 
 const INITIAL_PROFILE = {
-  id: 1,
-  userName: 'user123',
+  userId: 1,
+  username: 'user123',
   firstName: 'John',
   lastName: 'Doe',
   city: 'Austin',
-  country: 'United States',
-  region: 'Texas',
+  country: { code: 'US', name: { en: 'United States', ru: 'США' } },
   dateOfBirth: '1990-01-01',
   aboutMe: 'About me',
-  avatars: [],
-  createdAt: '2026-08-06T14:41:15.904Z',
+  avatarFileId: null,
 }
 
 let shouldFailUpdate = false
+let shouldFailWithUsernameConflict = false
+let shouldFailWithFieldValidation = false
 let shouldFailCities = false
-let profileDateOfBirth = INITIAL_PROFILE.dateOfBirth
+let profileDateOfBirth: string | null = INITIAL_PROFILE.dateOfBirth
 let lastProfileUpdate: Record<string, unknown> | null = null
 let delayedCitiesPath: string | null = null
 let resolveCitiesRequest: (() => void) | null = null
 let cityRequestCounts: Record<string, number> = {}
 
 const LOCATION_FIXTURES: Record<string, unknown> = {
-  '/locations/v1/countries.json': [
-    { code: 'BY', name: 'Belarus' },
-    { code: 'US', name: 'United States' },
-  ],
   '/locations/v1/cities/BY.json': [{ id: '1', name: 'Minsk', region: 'Minsk Region' }],
-  '/locations/v1/cities/US.json': [{ id: '2', name: 'Austin', region: 'Texas' }],
+  '/locations/v1/cities/US.json': [
+    { id: '2', name: 'Austin', region: 'Texas' },
+    { id: '3', name: 'Austin', region: 'Minnesota' },
+  ],
 }
 
 const getRequestUrl = (input: RequestInfo | URL) =>
@@ -40,9 +41,11 @@ const getRequestUrl = (input: RequestInfo | URL) =>
 
 const stubProfileFetch = () => {
   const originalFetch = globalThis.fetch
-  let profile = { ...INITIAL_PROFILE }
+  let profile: SchemaMyProfileResponseDto = { ...INITIAL_PROFILE }
 
   shouldFailUpdate = false
+  shouldFailWithUsernameConflict = false
+  shouldFailWithFieldValidation = false
   shouldFailCities = false
   profileDateOfBirth = INITIAL_PROFILE.dateOfBirth
   lastProfileUpdate = null
@@ -52,6 +55,7 @@ const stubProfileFetch = () => {
 
   globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
     const requestUrl = getRequestUrl(input)
+    const requestMethod = input instanceof Request ? input.method : (init?.method ?? 'GET')
     const locationFixtureEntry = Object.entries(LOCATION_FIXTURES).find(([path]) =>
       requestUrl.endsWith(path)
     )
@@ -76,7 +80,15 @@ const stubProfileFetch = () => {
       return Response.json(fixture)
     }
 
-    if (init?.method !== 'PUT') {
+    if (requestUrl.includes('/api/v1/countries')) {
+      const term = new URL(requestUrl).searchParams.get('term')?.toLowerCase() ?? ''
+
+      return Response.json(
+        COUNTRIES.filter((country) => country.name.en.toLowerCase().includes(term))
+      )
+    }
+
+    if (requestMethod !== 'PUT') {
       return Response.json({ ...profile, dateOfBirth: profileDateOfBirth })
     }
 
@@ -84,16 +96,44 @@ const stubProfileFetch = () => {
       return Response.json({ message: 'Server unavailable.' }, { status: 500 })
     }
 
-    const update = JSON.parse(String(init.body)) as Record<string, unknown>
-    lastProfileUpdate = update
-    profile = { ...profile, ...update }
+    if (shouldFailWithUsernameConflict) {
+      return Response.json(
+        { code: 'USERNAME_ALREADY_EXISTS', message: 'Username already exists' },
+        { status: 409 }
+      )
+    }
 
-    return Response.json(profile)
+    if (shouldFailWithFieldValidation) {
+      return Response.json(
+        { message: 'firstName was rejected by the user service' },
+        { status: 400 }
+      )
+    }
+
+    const requestBody = input instanceof Request ? await input.text() : String(init?.body)
+    const update = JSON.parse(requestBody) as Record<string, string>
+    lastProfileUpdate = update
+    const country = COUNTRIES.find((item) => item.code === update.countryCode) ?? null
+    profileDateOfBirth = update.dateOfBirth || null
+    profile = {
+      ...profile,
+      username: update.username,
+      firstName: update.firstName,
+      lastName: update.lastName,
+      dateOfBirth: profileDateOfBirth,
+      aboutMe: update.aboutMe,
+      country,
+      city: update.city,
+    }
+
+    return new Response(null, { status: 204 })
   }) as typeof globalThis.fetch
 
   return () => {
     resolveCitiesRequest?.()
     shouldFailUpdate = false
+    shouldFailWithUsernameConflict = false
+    shouldFailWithFieldValidation = false
     shouldFailCities = false
     delayedCitiesPath = null
     resolveCitiesRequest = null
@@ -232,8 +272,7 @@ export const CountryAndCitySelection: Story = {
       expect(cityRequestCounts['/locations/v1/cities/BY.json']).toBe(1)
       expect(lastProfileUpdate).toMatchObject({
         city: 'Minsk',
-        country: 'Belarus',
-        region: 'Minsk Region',
+        countryCode: 'BY',
       })
     })
   },
@@ -342,8 +381,7 @@ export const RestoredPrivacyPolicyDraft: Story = {
       firstName: 'Draft',
       lastName: 'User',
       dateOfBirth: underageDate,
-      country: 'United States',
-      region: 'Texas',
+      country: 'US',
       city: 'Austin',
       aboutMe: 'Restored after Privacy Policy',
     })
@@ -355,5 +393,61 @@ export const RestoredPrivacyPolicyDraft: Story = {
     )
     await expect(await canvas.findByRole('link', { name: 'Privacy Policy' })).toBeVisible()
     await expect(window.sessionStorage.getItem(EDIT_PROFILE_DRAFT_KEY)).toBeNull()
+  },
+}
+
+const COUNTRIES = [
+  { code: 'BY', name: { en: 'Belarus', ru: 'Беларусь' } },
+  { code: 'US', name: { en: 'United States', ru: 'США' } },
+]
+
+export const UsernameAlreadyExists: Story = {
+  beforeEach: () => {
+    shouldFailWithUsernameConflict = true
+  },
+  play: async ({ canvas }) => {
+    const username = await canvas.findByLabelText('Username*')
+
+    await userEvent.clear(username)
+    await userEvent.type(username, 'taken-user')
+    await userEvent.tab()
+    await userEvent.click(canvas.getByRole('button', { name: 'Save Changes' }))
+
+    await expect(await canvas.findByText('Username already exists')).toBeVisible()
+    await expect(username).toHaveAttribute('aria-invalid', 'true')
+    await expect(canvas.queryByRole('alert')).not.toBeInTheDocument()
+  },
+}
+
+export const BackendFieldValidation: Story = {
+  beforeEach: () => {
+    shouldFailWithFieldValidation = true
+  },
+  play: async ({ canvas }) => {
+    const firstName = await canvas.findByLabelText('First Name*')
+
+    await userEvent.clear(firstName)
+    await userEvent.type(firstName, 'Jane')
+    await userEvent.tab()
+    await userEvent.click(canvas.getByRole('button', { name: 'Save Changes' }))
+
+    await expect(
+      await canvas.findByText('firstName was rejected by the user service')
+    ).toBeVisible()
+    await expect(firstName).toHaveAttribute('aria-invalid', 'true')
+    await expect(canvas.queryByRole('alert')).not.toBeInTheDocument()
+  },
+}
+
+export const DuplicateCityNames: Story = {
+  play: async ({ canvas, canvasElement }) => {
+    await canvas.findByLabelText('Select your city')
+    await userEvent.click(canvas.getByRole('button', { name: 'Show Select your city options' }))
+
+    const cityOptions = await within(canvasElement.ownerDocument.body).findAllByRole('option', {
+      name: 'Austin',
+    })
+
+    await expect(cityOptions).toHaveLength(1)
   },
 }

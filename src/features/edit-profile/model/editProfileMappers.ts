@@ -1,7 +1,7 @@
 import type { Profile } from '@/entities/profile'
+import type { SchemaUpdateProfileInfoDto } from '@/shared/api/openapi/schema'
 
 import type { EditProfileFormValues } from './editProfileFormValues'
-import type { UpdateProfilePayload } from './editProfileTypes'
 
 const PROFILE_DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/
 
@@ -46,19 +46,19 @@ export const mapProfileToFormValues = (profile: Profile): EditProfileFormValues 
   firstName: profile.firstName,
   lastName: profile.lastName,
   dateOfBirth: parseProfileDate(profile.dateOfBirth),
-  country: profile.country,
-  region: profile.region,
+  country: profile.countryCode ?? profile.country,
   city: profile.city,
   aboutMe: profile.aboutMe,
 })
 
-export const mapFormValuesToPayload = (values: EditProfileFormValues): UpdateProfilePayload => ({
-  userName: values.username,
+export const mapFormValuesToBackendPayload = (
+  values: EditProfileFormValues
+): SchemaUpdateProfileInfoDto => ({
+  username: values.username,
   firstName: values.firstName,
   lastName: values.lastName,
-  dateOfBirth: formatProfileDate(values.dateOfBirth),
-  country: values.country,
-  region: values.region,
-  city: values.city,
+  dateOfBirth: formatProfileDate(values.dateOfBirth) ?? '',
   aboutMe: values.aboutMe,
+  countryCode: values.country,
+  city: values.city,
 })
