@@ -118,3 +118,21 @@ export const Disabled: Story = {
     disabled: true,
   },
 }
+
+export const RemoteSearch: Story = {
+  args: {
+    options: [{ label: 'United States', value: 'US' }],
+    remoteSearch: true,
+    onSearchChange: fn(),
+  },
+  play: async ({ args, canvas, canvasElement }) => {
+    await userEvent.type(canvas.getByRole('combobox'), 'Canada')
+
+    await expect(args.onSearchChange).toHaveBeenCalledWith('Canada')
+    await expect(
+      await within(canvasElement.ownerDocument.body).findByRole('option', {
+        name: 'United States',
+      })
+    ).toBeVisible()
+  },
+}

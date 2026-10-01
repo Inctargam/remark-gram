@@ -17,6 +17,9 @@ export type ComboboxProps = {
   value: string | null
   onValueChange: (value: string | null) => void
   onBlur?: () => void
+  onSearchChange?: (query: string) => void
+  onOpenChange?: (open: boolean) => void
+  remoteSearch?: boolean
   label?: string
   placeholder?: string
   disabled?: boolean
@@ -31,6 +34,9 @@ export const Combobox = ({
   value,
   onValueChange,
   onBlur,
+  onSearchChange,
+  onOpenChange,
+  remoteSearch = false,
   label,
   placeholder = 'Select...',
   disabled = false,
@@ -48,7 +54,13 @@ export const Combobox = ({
 
   const valueChangeHandler = (option: ComboboxOption | null) => {
     setQuery(null)
+    onSearchChange?.('')
     onValueChange(option?.value ?? null)
+  }
+
+  const inputValueChangeHandler = (value: string) => {
+    setQuery(value)
+    onSearchChange?.(value)
   }
 
   const blurHandler = () => {
@@ -57,6 +69,7 @@ export const Combobox = ({
     }
 
     setQuery(null)
+    onSearchChange?.('')
     onBlur?.()
   }
 
@@ -71,13 +84,14 @@ export const Combobox = ({
       <BaseCombobox.Root
         autoHighlight
         disabled={disabled}
-        filter={filter.startsWith}
+        filter={remoteSearch ? null : filter.startsWith}
         isItemEqualToValue={(option, selectedValue) => option.value === selectedValue.value}
         itemToStringLabel={(option) => option.label}
         items={options}
         inputValue={inputValue}
         limit={limit}
-        onInputValueChange={setQuery}
+        onInputValueChange={inputValueChangeHandler}
+        onOpenChange={onOpenChange}
         onValueChange={valueChangeHandler}
         openOnInputClick={false}
         value={selectedOption}>

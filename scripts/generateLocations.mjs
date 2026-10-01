@@ -28,8 +28,6 @@ const generateLocations = async () => {
     .map(({ iso2, name }) => ({ code: iso2, name }))
     .sort(compareLocations)
 
-  await writeJson(path.join(temporaryDirectory, 'countries.json'), countries)
-
   let cityCount = 0
 
   for (const country of countries) {

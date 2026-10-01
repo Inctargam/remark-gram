@@ -1,7 +1,8 @@
 import type { EditProfileFormValues } from './editProfileFormValues'
 import { formatProfileDate, parseProfileDate } from './editProfileMappers'
 
-export const EDIT_PROFILE_DRAFT_KEY = 'edit-profile:privacy-policy-draft'
+const OLD_EDIT_PROFILE_DRAFT_KEY = 'edit-profile:privacy-policy-draft'
+export const EDIT_PROFILE_DRAFT_KEY = 'edit-profile:privacy-policy-draft:v2'
 
 type StoredEditProfileDraft = Omit<EditProfileFormValues, 'dateOfBirth'> & {
   dateOfBirth: string | null
@@ -15,13 +16,12 @@ const parseDraft = (value: unknown): EditProfileFormValues | null => {
     return null
   }
 
-  const { username, firstName, lastName, dateOfBirth, country, region, city, aboutMe } = value
+  const { username, firstName, lastName, dateOfBirth, country, city, aboutMe } = value
   const hasValidStrings =
     typeof username === 'string' &&
     typeof firstName === 'string' &&
     typeof lastName === 'string' &&
     typeof country === 'string' &&
-    typeof region === 'string' &&
     typeof city === 'string' &&
     typeof aboutMe === 'string'
   const hasValidDate = dateOfBirth === null || typeof dateOfBirth === 'string'
@@ -42,7 +42,6 @@ const parseDraft = (value: unknown): EditProfileFormValues | null => {
     lastName,
     dateOfBirth: parsedDate,
     country,
-    region,
     city,
     aboutMe,
   }
@@ -58,6 +57,7 @@ export const saveEditProfileDraft = (values: EditProfileFormValues) => {
     dateOfBirth: formatProfileDate(values.dateOfBirth),
   }
 
+  window.sessionStorage.removeItem(OLD_EDIT_PROFILE_DRAFT_KEY)
   window.sessionStorage.setItem(EDIT_PROFILE_DRAFT_KEY, JSON.stringify(draft))
 }
 
@@ -66,6 +66,7 @@ export const consumeEditProfileDraft = (): EditProfileFormValues | null => {
     return null
   }
 
+  window.sessionStorage.removeItem(OLD_EDIT_PROFILE_DRAFT_KEY)
   const storedDraft = window.sessionStorage.getItem(EDIT_PROFILE_DRAFT_KEY)
   window.sessionStorage.removeItem(EDIT_PROFILE_DRAFT_KEY)
 
@@ -82,6 +83,7 @@ export const consumeEditProfileDraft = (): EditProfileFormValues | null => {
 
 export const clearEditProfileDraft = () => {
   if (typeof window !== 'undefined') {
+    window.sessionStorage.removeItem(OLD_EDIT_PROFILE_DRAFT_KEY)
     window.sessionStorage.removeItem(EDIT_PROFILE_DRAFT_KEY)
   }
 }
