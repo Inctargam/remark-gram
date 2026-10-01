@@ -13,7 +13,7 @@ const VALUES: EditProfileFormValues = {
   firstName: 'John',
   lastName: 'Doe',
   dateOfBirth: new Date(2013, 7, 8),
-  country: 'United States',
+  country: 'US',
   city: 'Austin',
   aboutMe: 'Draft',
 }
@@ -82,16 +82,6 @@ describe('edit profile privacy policy draft', () => {
 
     expect(consumeEditProfileDraft()).toBeNull()
     expect(window.sessionStorage.getItem(EDIT_PROFILE_DRAFT_KEY)).toBeNull()
-  })
-
-  it('discards a draft saved with the old country-name format', () => {
-    window.sessionStorage.setItem(
-      'edit-profile:privacy-policy-draft',
-      JSON.stringify({ ...VALUES, region: 'Texas', dateOfBirth: '2013-08-08' })
-    )
-
-    expect(consumeEditProfileDraft()).toBeNull()
-    expect(window.sessionStorage.getItem('edit-profile:privacy-policy-draft')).toBeNull()
   })
 
   it('is safe to use during server rendering', () => {

@@ -9,7 +9,7 @@ export const useCountriesQuery = (term = '', enabled = true) =>
     queryFn: () => getLocationCountries(term),
     enabled,
     retry: false,
-    staleTime: 60_000,
+    staleTime: Infinity,
   })
 
 export const useCitiesQuery = (countryCode: string | null) =>

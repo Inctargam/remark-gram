@@ -1,8 +1,7 @@
 import type { EditProfileFormValues } from './editProfileFormValues'
 import { formatProfileDate, parseProfileDate } from './editProfileMappers'
 
-const OLD_EDIT_PROFILE_DRAFT_KEY = 'edit-profile:privacy-policy-draft'
-export const EDIT_PROFILE_DRAFT_KEY = 'edit-profile:privacy-policy-draft:v2'
+export const EDIT_PROFILE_DRAFT_KEY = 'edit-profile:privacy-policy-draft'
 
 type StoredEditProfileDraft = Omit<EditProfileFormValues, 'dateOfBirth'> & {
   dateOfBirth: string | null
@@ -57,7 +56,6 @@ export const saveEditProfileDraft = (values: EditProfileFormValues) => {
     dateOfBirth: formatProfileDate(values.dateOfBirth),
   }
 
-  window.sessionStorage.removeItem(OLD_EDIT_PROFILE_DRAFT_KEY)
   window.sessionStorage.setItem(EDIT_PROFILE_DRAFT_KEY, JSON.stringify(draft))
 }
 
@@ -66,7 +64,6 @@ export const consumeEditProfileDraft = (): EditProfileFormValues | null => {
     return null
   }
 
-  window.sessionStorage.removeItem(OLD_EDIT_PROFILE_DRAFT_KEY)
   const storedDraft = window.sessionStorage.getItem(EDIT_PROFILE_DRAFT_KEY)
   window.sessionStorage.removeItem(EDIT_PROFILE_DRAFT_KEY)
 
@@ -83,7 +80,6 @@ export const consumeEditProfileDraft = (): EditProfileFormValues | null => {
 
 export const clearEditProfileDraft = () => {
   if (typeof window !== 'undefined') {
-    window.sessionStorage.removeItem(OLD_EDIT_PROFILE_DRAFT_KEY)
     window.sessionStorage.removeItem(EDIT_PROFILE_DRAFT_KEY)
   }
 }
