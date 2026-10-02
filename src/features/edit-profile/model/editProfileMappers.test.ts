@@ -20,7 +20,6 @@ const PROFILE: Profile = {
   avatarFileId: null,
   dateOfBirth: '1990-01-02',
   aboutMe: 'About me',
-  avatars: [],
 }
 
 describe('edit profile mappers', () => {

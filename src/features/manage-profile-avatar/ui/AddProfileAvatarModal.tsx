@@ -15,6 +15,7 @@ type Props = {
   crop: Point
   error: string | null
   isSaving: boolean
+  isSaveDisabled: boolean
   open: boolean
   previewUrl: string | null
   zoom: number
@@ -30,6 +31,7 @@ export const AddProfileAvatarModal = ({
   crop,
   error,
   isSaving,
+  isSaveDisabled,
   open,
   previewUrl,
   zoom,
@@ -65,6 +67,7 @@ export const AddProfileAvatarModal = ({
         aria-label="Profile photo file"
         className={styles.fileInput}
         type="file"
+        disabled={isSaving}
         onChange={fileChangeHandler}
       />
 
@@ -95,7 +98,7 @@ export const AddProfileAvatarModal = ({
           </div>
 
           <div className={styles.saveAction}>
-            <Button disabled={isSaving} type="button" onClick={onSave}>
+            <Button disabled={isSaveDisabled} type="button" onClick={onSave}>
               Save
             </Button>
           </div>

@@ -1,13 +1,13 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
+import type { AvatarChangeOperation } from '../model/avatarUploadOperation'
 import { deleteProfileAvatar } from './profileAvatarApi'
-import { updateProfileAvatarCache } from './updateProfileAvatarCache'
-
+import { changeProfileAvatar } from './updateProfileAvatarCache'
 export const useDeleteProfileAvatarMutation = () => {
   const queryClient = useQueryClient()
-
   return useMutation({
-    mutationFn: deleteProfileAvatar,
-    onSuccess: (response) => updateProfileAvatarCache(queryClient, response),
+    mutationFn: (operation: AvatarChangeOperation) =>
+      changeProfileAvatar(queryClient, operation, null, deleteProfileAvatar),
+    retry: false,
   })
 }

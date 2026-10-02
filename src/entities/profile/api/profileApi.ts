@@ -13,7 +13,6 @@ export const mapMyProfile = (profile: SchemaMyProfileResponseDto): Profile => ({
   city: profile.city ?? '',
   aboutMe: profile.aboutMe ?? '',
   avatarFileId: profile.avatarFileId,
-  avatars: [],
 })
 
 export const getProfile = async (): Promise<Profile> => {

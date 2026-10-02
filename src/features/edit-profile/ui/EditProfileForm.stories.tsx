@@ -423,7 +423,6 @@ export const RestoredDraftWithCachedProfile: Story = {
         city: INITIAL_PROFILE.city,
         aboutMe: INITIAL_PROFILE.aboutMe,
         avatarFileId: null,
-        avatars: [],
       } satisfies Profile)
 
       return (

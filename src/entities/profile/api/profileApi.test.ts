@@ -34,7 +34,6 @@ describe('backend profile reading', () => {
       city: 'Austin',
       aboutMe: '',
       avatarFileId: PROFILE.avatarFileId,
-      avatars: [],
     })
   })
 

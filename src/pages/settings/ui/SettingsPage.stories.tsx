@@ -31,6 +31,7 @@ const createPngFile = () => {
 
 const stubProfileFetch = () => {
   const originalFetch = globalThis.fetch
+  let avatarFileId: string | null = null
 
   globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
     const requestUrl = input instanceof Request ? input.url : String(input)
@@ -48,10 +49,26 @@ const stubProfileFetch = () => {
     }
 
     if (method === 'POST') {
-      return Response.json({ avatars: [] })
+      if (requestUrl.endsWith('/files/avatar-upload')) {
+        return Response.json(
+          {
+            id: 'uploaded-avatar',
+            clientFileId: 'local-file',
+            url: 'https://storage.example.com/avatar',
+            fields: { key: 'avatar' },
+          },
+          { status: 201 }
+        )
+      }
+      return new Response(null, { status: 204 })
     }
 
-    return Response.json(PROFILE)
+    if (method === 'PUT' && requestUrl.endsWith('/profile/avatar')) {
+      avatarFileId = 'uploaded-avatar'
+      return new Response(null, { status: 204 })
+    }
+
+    return Response.json({ ...PROFILE, avatarFileId })
   }) as typeof globalThis.fetch
 
   return () => {

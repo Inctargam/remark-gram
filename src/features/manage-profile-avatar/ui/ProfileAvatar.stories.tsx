@@ -4,9 +4,6 @@ import { expect, screen, userEvent, waitFor } from 'storybook/test'
 
 import { ProfileAvatar } from './ProfileAvatar'
 
-const AVATAR_DATA_URL =
-  'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="192" height="192"%3E%3Crect width="192" height="192" fill="%236a7d92"/%3E%3Ccircle cx="96" cy="72" r="38" fill="%23f5d0b5"/%3E%3Cpath d="M35 192c5-48 29-72 61-72s56 24 61 72" fill="%232d3440"/%3E%3C/svg%3E'
-
 const BASE_PROFILE = {
   userId: 1,
   username: 'user123',
@@ -19,18 +16,18 @@ const BASE_PROFILE = {
   avatarFileId: null,
 }
 
-const PROFILE_AVATAR = {
-  url: AVATAR_DATA_URL,
-  width: 192,
-  height: 192,
-  fileSize: 300,
-  createdAt: '2026-08-06T14:41:15.904Z',
-}
-
 let hasAvatar = false
 let shouldFailDelete = false
 let shouldHoldDelete = false
 let resolveDeleteRequest: (() => void) | null = null
+let failConfirmationOnce = false
+let failInstallationOnce = false
+let holdInstallation = false
+let resolveInstallation: (() => void) | null = null
+let uploadSessionCount = 0
+let storageUploadCount = 0
+let confirmationCount = 0
+let installationKeys: string[] = []
 
 const stubProfileAvatarFetch = () => {
   const originalFetch = globalThis.fetch
@@ -39,6 +36,14 @@ const stubProfileAvatarFetch = () => {
   shouldFailDelete = false
   shouldHoldDelete = false
   resolveDeleteRequest = null
+  failConfirmationOnce = false
+  failInstallationOnce = false
+  holdInstallation = false
+  resolveInstallation = null
+  uploadSessionCount = 0
+  storageUploadCount = 0
+  confirmationCount = 0
+  installationKeys = []
   globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
     const method = input instanceof Request ? input.method : (init?.method ?? 'GET')
 
@@ -54,12 +59,48 @@ const stubProfileAvatarFetch = () => {
       }
 
       hasAvatar = false
-      return Response.json({ avatars: [] })
+      return new Response(null, { status: 204 })
     }
 
     if (method === 'POST') {
+      const url = input instanceof Request ? input.url : String(input)
+      if (url.endsWith('/files/avatar-upload')) {
+        uploadSessionCount += 1
+        return Response.json(
+          {
+            id: 'story-avatar',
+            clientFileId: 'local-file',
+            url: 'https://storage.example.com/avatar',
+            fields: { key: 'avatar' },
+          },
+          { status: 201 }
+        )
+      }
+      if (url.endsWith('/image-uploads/complete')) {
+        confirmationCount += 1
+        if (failConfirmationOnce) {
+          failConfirmationOnce = false
+          return Response.json({ message: 'Confirmation unavailable.' }, { status: 503 })
+        }
+      } else {
+        storageUploadCount += 1
+      }
+      return new Response(null, { status: 204 })
+    }
+
+    if (method === 'PUT') {
+      installationKeys.push((input as Request).headers.get('Idempotency-Key') ?? '')
+      if (holdInstallation) {
+        await new Promise<void>((resolve) => {
+          resolveInstallation = resolve
+        })
+      }
+      if (failInstallationOnce) {
+        failInstallationOnce = false
+        return Response.json({ message: 'Installation unavailable.' }, { status: 503 })
+      }
       hasAvatar = true
-      return Response.json({ avatars: [PROFILE_AVATAR] })
+      return new Response(null, { status: 204 })
     }
 
     return Response.json({
@@ -70,6 +111,7 @@ const stubProfileAvatarFetch = () => {
 
   return () => {
     resolveDeleteRequest?.()
+    resolveInstallation?.()
     globalThis.fetch = originalFetch
   }
 }
@@ -156,6 +198,7 @@ export const SuccessfulUpload: Story = {
     await userEvent.click(await canvas.findByRole('button', { name: 'Add Profile Photo' }))
     await userEvent.upload(screen.getByLabelText('Profile photo file'), createPngFile())
     await screen.findByLabelText('Profile photo crop area')
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled())
     await userEvent.click(screen.getByRole('button', { name: 'Save' }))
 
     await waitFor(() => {
@@ -265,6 +308,9 @@ export const DeletePending: Story = {
     await userEvent.click(screen.getByRole('button', { name: 'Yes' }))
 
     await waitFor(() => expect(resolveDeleteRequest).toBeTypeOf('function'))
+    await expect(
+      canvas.getByRole('button', { name: 'Delete profile photo', hidden: true })
+    ).toBeDisabled()
     await expect(screen.getByRole('button', { name: 'Yes' })).toBeDisabled()
     await expect(screen.getByRole('button', { name: 'No' })).toBeDisabled()
     await expect(screen.getByRole('button', { name: 'Close' })).toBeDisabled()
@@ -272,5 +318,135 @@ export const DeletePending: Story = {
     await expect(screen.getByRole('dialog', { name: 'Delete Photo' })).toBeVisible()
 
     resolveDeleteRequest?.()
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Delete Photo' })).toBeNull())
+    expect(canvas.queryByRole('button', { name: 'Delete profile photo' })).toBeNull()
+  },
+}
+
+export const RetryConfirmation: Story = {
+  beforeEach: () => {
+    failConfirmationOnce = true
+  },
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: 'Add Profile Photo' }))
+    await userEvent.upload(screen.getByLabelText('Profile photo file'), createPngFile())
+    await screen.findByLabelText('Profile photo crop area')
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled())
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await expect(await screen.findByRole('alert')).toHaveTextContent('Confirmation unavailable.')
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled())
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await waitFor(() =>
+      expect(screen.queryByRole('dialog', { name: 'Add a Profile Photo' })).toBeNull()
+    )
+    expect(uploadSessionCount).toBe(1)
+    expect(storageUploadCount).toBe(1)
+    expect(confirmationCount).toBe(2)
+  },
+}
+
+export const RetryInstallationAfter503: Story = {
+  beforeEach: () => {
+    failInstallationOnce = true
+  },
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: 'Add Profile Photo' }))
+    await userEvent.upload(screen.getByLabelText('Profile photo file'), createPngFile())
+    await screen.findByLabelText('Profile photo crop area')
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled())
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await expect(await screen.findByRole('alert')).toHaveTextContent('Installation unavailable.')
+    expect(canvas.queryByRole('button', { name: 'Delete profile photo', hidden: true })).toBeNull()
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled())
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await waitFor(() =>
+      expect(screen.queryByRole('dialog', { name: 'Add a Profile Photo' })).toBeNull()
+    )
+    expect(uploadSessionCount).toBe(1)
+    expect(storageUploadCount).toBe(1)
+    expect(confirmationCount).toBe(1)
+    expect(installationKeys).toHaveLength(2)
+    expect(installationKeys[0]).not.toBe(installationKeys[1])
+  },
+}
+
+export const InstallationPending: Story = {
+  beforeEach: () => {
+    holdInstallation = true
+  },
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: 'Add Profile Photo' }))
+    await userEvent.upload(screen.getByLabelText('Profile photo file'), createPngFile())
+    await screen.findByLabelText('Profile photo crop area')
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled())
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(resolveInstallation).toBeTypeOf('function'))
+    expect(canvas.queryByRole('button', { name: 'Delete profile photo', hidden: true })).toBeNull()
+    await expect(
+      canvas.getByRole('button', { name: 'Add Profile Photo', hidden: true })
+    ).toBeDisabled()
+    await expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled()
+    await expect(screen.getByRole('button', { name: 'Close' })).toBeDisabled()
+    await userEvent.keyboard('{Escape}')
+    await expect(screen.getByRole('dialog', { name: 'Add a Profile Photo' })).toBeVisible()
+    resolveInstallation?.()
+    await waitFor(() =>
+      expect(screen.queryByRole('dialog', { name: 'Add a Profile Photo' })).toBeNull()
+    )
+    await expect(canvas.getByRole('button', { name: 'Delete profile photo' })).toBeVisible()
+  },
+}
+
+export const CloseFailedUpload: Story = {
+  beforeEach: () => {
+    failConfirmationOnce = true
+  },
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: 'Add Profile Photo' }))
+    await userEvent.upload(screen.getByLabelText('Profile photo file'), createPngFile())
+    await screen.findByLabelText('Profile photo crop area')
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled())
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await screen.findByRole('alert')
+    await userEvent.click(screen.getByRole('button', { name: 'Close' }))
+    await userEvent.click(canvas.getByRole('button', { name: 'Add Profile Photo' }))
+    await expect(screen.getByRole('button', { name: 'Select from Computer' })).toBeVisible()
+    expect(screen.queryByRole('alert')).toBeNull()
+    await userEvent.upload(screen.getByLabelText('Profile photo file'), createPngFile())
+    await screen.findByLabelText('Profile photo crop area')
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled())
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await waitFor(() =>
+      expect(screen.queryByRole('dialog', { name: 'Add a Profile Photo' })).toBeNull()
+    )
+    expect(uploadSessionCount).toBe(2)
+  },
+}
+
+export const ChangedCropStartsNewUpload: Story = {
+  beforeEach: () => {
+    failConfirmationOnce = true
+  },
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: 'Add Profile Photo' }))
+    await userEvent.upload(screen.getByLabelText('Profile photo file'), createPngFile())
+    const cropArea = await screen.findByLabelText('Profile photo crop area')
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled())
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await screen.findByRole('alert')
+    const cropper = cropArea.firstElementChild as HTMLElement
+    const image = cropper.querySelector('img')
+    const previousTransform = image?.style.transform
+    cropper.dispatchEvent(
+      new WheelEvent('wheel', { bubbles: true, cancelable: true, deltaY: -200 })
+    )
+    await waitFor(() => expect(image?.style.transform).not.toBe(previousTransform))
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled())
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await waitFor(() =>
+      expect(screen.queryByRole('dialog', { name: 'Add a Profile Photo' })).toBeNull()
+    )
+    expect(uploadSessionCount).toBe(2)
+    expect(storageUploadCount).toBe(2)
   },
 }

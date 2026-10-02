@@ -57,7 +57,7 @@ describe('api', () => {
     const formData = new FormData()
     formData.append('file', new Blob(['photo'], { type: 'image/png' }), 'photo.png')
 
-    await api.postForm('/api/mock/profile/avatar', formData, { baseUrl: '' })
+    await api.postForm('/api/mock/example/upload', formData, { baseUrl: '' })
 
     expect(getRequestInit().headers).toEqual({})
     expect(getRequestInit().body).toBe(formData)

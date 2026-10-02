@@ -3,7 +3,6 @@
 import clsx from 'clsx'
 import Image from 'next/image'
 
-import { IS_MOCK_AUTH } from '@/shared/config'
 import { Alert } from '@/shared/ui/alert'
 import { Button } from '@/shared/ui/button'
 import { ConfirmDialog } from '@/shared/ui/confirm-dialog'
@@ -21,6 +20,7 @@ export const ProfileAvatar = () => {
     crop,
     isAddModalOpen,
     isSaving,
+    isSaveDisabled,
     previewUrl,
     uploadError,
     zoom,
@@ -62,7 +62,7 @@ export const ProfileAvatar = () => {
           <button
             aria-label="Delete profile photo"
             className={styles.deleteAvatarButton}
-            disabled={!IS_MOCK_AUTH}
+            disabled={isSaving || isDeleting || isAddModalOpen || isDeleteModalOpen}
             type="button"
             onClick={deleteAvatarClickHandler}>
             <Icon iconId="icon-close" width={16} height={16} />
@@ -72,7 +72,7 @@ export const ProfileAvatar = () => {
 
       <Button
         className={styles.selectAvatarButton}
-        disabled={!IS_MOCK_AUTH}
+        disabled={isSaving || isDeleting || isAddModalOpen || isDeleteModalOpen}
         type="button"
         variant="outline"
         onClick={addAvatarClickHandler}>
@@ -83,6 +83,7 @@ export const ProfileAvatar = () => {
         crop={crop}
         error={uploadError}
         isSaving={isSaving}
+        isSaveDisabled={isSaveDisabled}
         open={isAddModalOpen}
         previewUrl={previewUrl}
         zoom={zoom}
