@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import type { Area, Point } from 'react-easy-crop'
 
 import { profileQueryKeys } from '@/entities/profile'
@@ -8,38 +8,23 @@ import { useUploadProfileAvatarMutation } from '../api/useUploadProfileAvatarMut
 import { exportCroppedProfileAvatar } from '../lib/exportCroppedProfileAvatar'
 import { type AvatarUploadOperation, createAvatarUploadOperation } from './avatarUploadOperation'
 import { getProfileAvatarErrorMessage } from './getProfileAvatarErrorMessage'
-import { DEFAULT_PROFILE_AVATAR_CROP, DEFAULT_PROFILE_AVATAR_ZOOM } from './profileAvatarCrop'
 import { PROFILE_AVATAR_FILE_ERROR, validateProfileAvatar } from './profileAvatarFile'
+import { useProfileAvatarEditor } from './useProfileAvatarEditor'
 
 export const useUploadProfileAvatar = () => {
   const uploadMutation = useUploadProfileAvatarMutation()
   const queryClient = useQueryClient()
+  const editor = useProfileAvatarEditor()
+  const { selectedFile, croppedAreaPixels, crop, zoom, previewUrl } = editor
   const operationRef = useRef<AvatarUploadOperation | null>(null)
   const savingRef = useRef(false)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
-  const [crop, setCrop] = useState<Point>(DEFAULT_PROFILE_AVATAR_CROP)
-  const [zoom, setZoom] = useState(DEFAULT_PROFILE_AVATAR_ZOOM)
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null)
   const [uploadError, setUploadError] = useState<string | null>(null)
-
-  useEffect(() => {
-    return () => {
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl)
-      }
-    }
-  }, [previewUrl])
 
   const resetSelection = () => {
     operationRef.current = null
-    setSelectedFile(null)
-    setPreviewUrl(null)
-    setCrop(DEFAULT_PROFILE_AVATAR_CROP)
-    setZoom(DEFAULT_PROFILE_AVATAR_ZOOM)
-    setCroppedAreaPixels(null)
+    editor.resetEditor()
     setUploadError(null)
   }
 
@@ -75,26 +60,16 @@ export const useUploadProfileAvatar = () => {
 
     setUploadError(null)
     operationRef.current = null
-    setSelectedFile(file)
-    setPreviewUrl(URL.createObjectURL(file))
-    setCrop(DEFAULT_PROFILE_AVATAR_CROP)
-    setZoom(DEFAULT_PROFILE_AVATAR_ZOOM)
-    setCroppedAreaPixels(null)
+    editor.selectFile(file)
   }
 
   const cropCompleteHandler = (_croppedArea: Area, nextCroppedAreaPixels: Area) => {
     if (savingRef.current) {
       return
     }
-    const cropChanged =
-      !croppedAreaPixels ||
-      (['x', 'y', 'width', 'height'] as const).some(
-        (dimension) => croppedAreaPixels[dimension] !== nextCroppedAreaPixels[dimension]
-      )
-    if (cropChanged) {
+    if (editor.cropCompleteHandler(nextCroppedAreaPixels)) {
       operationRef.current = null
     }
-    setCroppedAreaPixels(nextCroppedAreaPixels)
   }
 
   const saveAvatarHandler = async () => {
@@ -127,18 +102,20 @@ export const useUploadProfileAvatar = () => {
   }
 
   const cropChangeHandler = (nextCrop: Point) => {
-    if (!savingRef.current && (nextCrop.x !== crop.x || nextCrop.y !== crop.y)) {
+    if (savingRef.current) {
+      return
+    }
+    if (editor.cropChangeHandler(nextCrop)) {
       operationRef.current = null
-      setCroppedAreaPixels(null)
-      setCrop(nextCrop)
     }
   }
 
   const zoomChangeHandler = (nextZoom: number) => {
-    if (!savingRef.current && nextZoom !== zoom) {
+    if (savingRef.current) {
+      return
+    }
+    if (editor.zoomChangeHandler(nextZoom)) {
       operationRef.current = null
-      setCroppedAreaPixels(null)
-      setZoom(nextZoom)
     }
   }
 
