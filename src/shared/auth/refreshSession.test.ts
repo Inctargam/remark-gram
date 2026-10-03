@@ -136,6 +136,7 @@ describe('createRefreshSession', () => {
     expect(sessionStore.getState()).toMatchObject({
       accessToken: 'new-token',
       currentUser: null,
+      currentUserLoadFailureAt: expect.any(Number),
       status: 'authenticated',
     })
   })

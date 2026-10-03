@@ -10,8 +10,6 @@ type CurrentUserApiClient = Pick<Client<paths>, 'GET'>
 
 const CURRENT_USER_LOAD_FAILURE_COOLDOWN_MS = 30_000
 
-let lastCurrentUserLoadFailureAt: number | null = null
-
 export class CurrentUserLoadError extends Error {
   constructor(public readonly status: number | null) {
     super(status ? `Current user loading failed with ${status}` : 'Current user loading failed')
@@ -20,16 +18,21 @@ export class CurrentUserLoadError extends Error {
 }
 
 const markCurrentUserLoadFailure = () => {
-  lastCurrentUserLoadFailureAt = Date.now()
+  sessionStore.setState({ currentUserLoadFailureAt: Date.now() })
 }
 
 export const clearCurrentUserLoadFailure = () => {
-  lastCurrentUserLoadFailureAt = null
+  sessionStore.setState({ currentUserLoadFailureAt: null })
 }
 
-export const hasRecentCurrentUserLoadFailure = () =>
-  lastCurrentUserLoadFailureAt !== null &&
-  Date.now() - lastCurrentUserLoadFailureAt < CURRENT_USER_LOAD_FAILURE_COOLDOWN_MS
+export const hasRecentCurrentUserLoadFailure = () => {
+  const { currentUserLoadFailureAt } = sessionStore.getState()
+
+  return (
+    currentUserLoadFailureAt !== null &&
+    Date.now() - currentUserLoadFailureAt < CURRENT_USER_LOAD_FAILURE_COOLDOWN_MS
+  )
+}
 
 const mapCurrentUser = ({
   avatarUrl,
@@ -44,6 +47,8 @@ const mapCurrentUser = ({
 })
 
 export const createLoadCurrentUser = (client: CurrentUserApiClient) => async () => {
+  clearCurrentUserLoadFailure()
+
   try {
     const { data, response } = await client.GET('/api/v1/auth/me')
 
@@ -58,8 +63,6 @@ export const createLoadCurrentUser = (client: CurrentUserApiClient) => async () 
 
       throw new CurrentUserLoadError(response.status)
     }
-
-    clearCurrentUserLoadFailure()
 
     const currentUser = mapCurrentUser(data)
     const { accessToken } = sessionStore.getState()

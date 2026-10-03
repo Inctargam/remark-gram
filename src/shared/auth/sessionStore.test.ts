@@ -12,13 +12,19 @@ const CURRENT_USER: CurrentUser = {
 
 describe('sessionStore', () => {
   afterEach(() => {
-    sessionStore.setState({ accessToken: null, currentUser: null, status: 'loading' })
+    sessionStore.setState({
+      accessToken: null,
+      currentUser: null,
+      currentUserLoadFailureAt: null,
+      status: 'loading',
+    })
   })
 
   it('starts in the loading state without an access token', () => {
     expect(sessionStore.getState()).toMatchObject({
       accessToken: null,
       currentUser: null,
+      currentUserLoadFailureAt: null,
       status: 'loading',
     })
   })
@@ -49,5 +55,22 @@ describe('sessionStore', () => {
       currentUser: null,
       status: 'authenticated',
     })
+  })
+
+  it('clears a previous identity error when a new session is established', () => {
+    sessionStore.setState({ currentUserLoadFailureAt: Date.now() })
+
+    sessionStore.getState().setAuthenticated('access-token', CURRENT_USER)
+
+    expect(sessionStore.getState().currentUserLoadFailureAt).toBeNull()
+  })
+
+  it('clears an identity error on logout', () => {
+    sessionStore.getState().setAuthenticated('access-token')
+    sessionStore.setState({ currentUserLoadFailureAt: Date.now() })
+
+    sessionStore.getState().setGuest()
+
+    expect(sessionStore.getState().currentUserLoadFailureAt).toBeNull()
   })
 })
