@@ -29,6 +29,12 @@ const parseDraft = (value: unknown): EditProfileFormValues | null => {
     return null
   }
 
+  const hasValidCountry = country === '' || /^[A-Z]{2}$/.test(country)
+
+  if (!hasValidCountry) {
+    return null
+  }
+
   const parsedDate = parseProfileDate(dateOfBirth)
 
   if (dateOfBirth !== null && !parsedDate) {

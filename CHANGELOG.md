@@ -4,6 +4,20 @@
 
 ## Unreleased
 
+### 2026-10-04
+
+#### Profile Settings
+
+- При восстановлении черновика формы страна проверяется на пустое значение или двухбуквенный код в верхнем регистре. Старые черновики с названием страны отбрасываются и удаляются из sessionStorage, чтобы название не отправлялось в backend как countryCode. Ключ хранения сохранён.
+- Добавлены регрессионные проверки старого мокового формата и восстановления черновика без выбранной страны.
+
+#### Verification
+
+- `pnpm exec vitest run --project unit src/features/edit-profile/model/editProfileDraft.test.ts` прошёл — 10 тестов.
+- Storybook MCP `run-story-tests` — 3 функциональных сценария сохранения и восстановления черновика прошли.
+- ESLint и Prettier изменённых файлов, `pnpm exec tsc --noEmit --pretty false --incremental false` и `git diff --check` прошли.
+- Сборка для этого исправления не запускалась.
+
 ### 2026-10-03
 
 #### Create Post
