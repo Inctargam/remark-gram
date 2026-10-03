@@ -1,5 +1,6 @@
 import { Combobox as BaseCombobox } from '@base-ui/react/combobox'
 import clsx from 'clsx'
+import type { KeyboardEvent } from 'react'
 import { useId, useState } from 'react'
 
 import { Icon } from '@/shared/ui/icon'
@@ -15,6 +16,8 @@ export type ComboboxOption = {
 export type ComboboxProps = {
   options: readonly ComboboxOption[]
   value: string | null
+  /** Keeps the selected label available outside the search results. */
+  selectedOption?: ComboboxOption | null
   onValueChange: (value: string | null) => void
   onBlur?: () => void
   onSearchChange?: (query: string) => void
@@ -32,6 +35,7 @@ export type ComboboxProps = {
 export const Combobox = ({
   options,
   value,
+  selectedOption: selectedValueOption,
   onValueChange,
   onBlur,
   onSearchChange,
@@ -48,7 +52,9 @@ export const Combobox = ({
   const inputId = useId()
   const messageId = useId()
   const [query, setQuery] = useState<string | null>(null)
-  const selectedOption = options.find((option) => option.value === value) ?? null
+  const selectedOption =
+    options.find((option) => option.value === value) ??
+    (selectedValueOption?.value === value ? selectedValueOption : null)
   const filter = BaseCombobox.useFilter({ sensitivity: 'base' })
   const inputValue = query ?? selectedOption?.label ?? ''
 
@@ -61,6 +67,27 @@ export const Combobox = ({
   const inputValueChangeHandler = (value: string) => {
     setQuery(value)
     onSearchChange?.(value)
+  }
+
+  const keyDownHandler = (event: KeyboardEvent<HTMLInputElement>) => {
+    const shouldSelectFirstOption =
+      remoteSearch &&
+      event.key === 'Enter' &&
+      !event.currentTarget.hasAttribute('aria-activedescendant')
+
+    if (shouldSelectFirstOption) {
+      const popupId = event.currentTarget.getAttribute('aria-controls')
+      const firstOption = popupId
+        ? event.currentTarget.ownerDocument
+            .getElementById(popupId)
+            ?.querySelector<HTMLElement>('[role="option"]')
+        : null
+
+      if (firstOption) {
+        event.preventDefault()
+        firstOption.click()
+      }
+    }
   }
 
   const blurHandler = () => {
@@ -102,6 +129,7 @@ export const Combobox = ({
             className={styles.input}
             id={inputId}
             onBlur={blurHandler}
+            onKeyDown={keyDownHandler}
             placeholder={placeholder}
           />
           <BaseCombobox.Trigger

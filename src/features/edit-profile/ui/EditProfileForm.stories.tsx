@@ -258,9 +258,22 @@ export const CountryAndCitySelection: Story = {
     const documentBody = canvasElement.ownerDocument.body
     const countryInput = await canvas.findByLabelText('Select your country')
 
-    await userEvent.clear(countryInput)
-    await userEvent.type(countryInput, 'Bela')
-    await userEvent.click(await within(documentBody).findByRole('option', { name: 'Belarus' }))
+    await expect(countryInput).toHaveValue('United States')
+    await userEvent.click(countryInput)
+    await userEvent.keyboard('{Control>}a{/Control}')
+    await userEvent.keyboard('zzzzzz')
+    await expect(await within(documentBody).findByText('No Results')).toBeVisible()
+    await expect(within(documentBody).queryByRole('option')).not.toBeInTheDocument()
+    await userEvent.tab()
+    await expect(countryInput).toHaveValue('United States')
+
+    await userEvent.click(countryInput)
+    await userEvent.keyboard('{Control>}a{/Control}')
+    await userEvent.keyboard('Bela')
+    await within(documentBody).findByRole('option', { name: 'Belarus' })
+    await expect(within(documentBody).getAllByRole('option')).toHaveLength(1)
+    await userEvent.keyboard('{Enter}')
+    await expect(countryInput).toHaveValue('Belarus')
 
     const cityInput = canvas.getByLabelText('Select your city')
     await waitFor(() => expect(cityInput).toBeEnabled())

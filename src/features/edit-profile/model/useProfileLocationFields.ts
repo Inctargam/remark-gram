@@ -38,10 +38,9 @@ export const useProfileLocationFields = ({ control, profile }: Params) => {
     label: country.name,
     value: country.code,
   }))
-  if (
-    selectedCountryCode &&
-    !countryOptions.some((option) => option.value === selectedCountryCode)
-  ) {
+  let currentCountryOption =
+    countryOptions.find((option) => option.value === selectedCountryCode) ?? null
+  if (selectedCountryCode && !currentCountryOption) {
     const selectedName =
       selectedCountryOption?.value === selectedCountryCode
         ? selectedCountryOption.label
@@ -49,7 +48,7 @@ export const useProfileLocationFields = ({ control, profile }: Params) => {
           ? profile.country
           : selectedCountryCode
 
-    countryOptions.unshift({ label: selectedName, value: selectedCountryCode })
+    currentCountryOption = { label: selectedName, value: selectedCountryCode }
   }
 
   const cityOptions: ComboboxOption[] = cityNames.map((name) => ({
@@ -92,6 +91,7 @@ export const useProfileLocationFields = ({ control, profile }: Params) => {
       onOpenChange: setIsCountryOpen,
       onSearchChange: setCountrySearch,
       options: countryOptions,
+      selectedOption: currentCountryOption,
       value: selectedCountryCode,
       remoteSearch: true,
     },
