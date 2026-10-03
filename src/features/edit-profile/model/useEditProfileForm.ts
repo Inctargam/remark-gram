@@ -1,7 +1,8 @@
+import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
-import { useProfileQuery } from '@/entities/profile'
+import { updateCurrentProfileCaches, useProfileQuery } from '@/entities/profile'
 
 import { ProfileUpdateError } from '../api/editProfileApi'
 import { useUpdateProfileMutation } from '../api/useUpdateProfileMutation'
@@ -21,6 +22,7 @@ type SubmitAlert =
   | null
 
 export const useEditProfileForm = () => {
+  const queryClient = useQueryClient()
   const [submitAlert, setSubmitAlert] = useState<SubmitAlert>(null)
   const [isFormInitialized, setIsFormInitialized] = useState(false)
   const isInitializedRef = useRef(false)
@@ -86,6 +88,7 @@ export const useEditProfileForm = () => {
           return
         }
 
+        updateCurrentProfileCaches(queryClient, refreshedProfile.data)
         reset(mapProfileToFormValues(refreshedProfile.data))
         setSubmitAlert({ variant: 'success', message: 'Your settings are saved!' })
       },

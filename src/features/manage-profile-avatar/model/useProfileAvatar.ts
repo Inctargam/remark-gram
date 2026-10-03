@@ -1,14 +1,9 @@
-import { useProfileQuery } from '@/entities/profile'
-import { API_BASE_URL } from '@/shared/config'
+import { getProfileAvatarUrl, useProfileQuery } from '@/entities/profile'
 
 export const useProfileAvatar = () => {
   const profileQuery = useProfileQuery()
 
-  const avatarFileId = profileQuery.data?.avatarFileId
+  const avatarUrl = getProfileAvatarUrl(profileQuery.data?.avatarFileId)
 
-  if (avatarFileId) {
-    return { url: `${API_BASE_URL}/api/v1/files/images/${avatarFileId}` }
-  }
-
-  return null
+  return avatarUrl ? { url: avatarUrl } : null
 }

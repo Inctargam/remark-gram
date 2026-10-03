@@ -2,6 +2,7 @@ import { QueryClient } from '@tanstack/react-query'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getProfile, type Profile, profileQueryKeys } from '@/entities/profile'
+import { sessionStore } from '@/shared/auth'
 
 import { createAvatarChangeOperation } from '../model/avatarUploadOperation'
 import { ProfileAvatarRequestError } from './profileAvatarApi'
@@ -26,11 +27,20 @@ let queryClient: QueryClient
 const avatarId = () => queryClient.getQueryData<Profile>(profileQueryKeys.current())?.avatarFileId
 beforeEach(() => {
   vi.resetAllMocks()
+  sessionStore.getState().setAuthenticated('token', {
+    id: String(PROFILE.id),
+    username: PROFILE.userName,
+    email: 'user@example.com',
+    avatarUrl: null,
+  })
   queryClient = new QueryClient()
   queryClient.setQueryData(profileQueryKeys.current(), PROFILE)
   vi.mocked(getProfile).mockResolvedValue(PROFILE)
 })
-afterEach(() => queryClient.clear())
+afterEach(() => {
+  queryClient.clear()
+  sessionStore.getState().setGuest()
+})
 describe('confirmed avatar changes and reconciliation', () => {
   it.each([
     { avatarFileId: 'new', uncertain: false },

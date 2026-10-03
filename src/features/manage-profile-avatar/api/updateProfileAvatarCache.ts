@@ -1,23 +1,31 @@
 import type { QueryClient } from '@tanstack/react-query'
 
-import { getProfile, type Profile, profileQueryKeys } from '@/entities/profile'
+import {
+  getProfile,
+  type Profile,
+  profileQueryKeys,
+  updateCurrentProfileCaches,
+} from '@/entities/profile'
 
 import type { AvatarChangeOperation } from '../model/avatarUploadOperation'
 import { ProfileAvatarRequestError } from './profileAvatarApi'
 
 const updateAvatar = (queryClient: QueryClient, avatarFileId: string | null) => {
-  queryClient.setQueryData<Profile>(profileQueryKeys.current(), (profile) =>
-    profile ? { ...profile, avatarFileId } : profile
-  )
+  const profile = queryClient.getQueryData<Profile>(profileQueryKeys.current())
+  if (profile) {
+    updateCurrentProfileCaches(queryClient, { ...profile, avatarFileId })
+  }
 }
 const refreshProfile = async (queryClient: QueryClient) => {
   await queryClient.cancelQueries({ queryKey: profileQueryKeys.current(), exact: true })
-  return queryClient.fetchQuery({
+  const profile = await queryClient.fetchQuery({
     queryKey: profileQueryKeys.current(),
     queryFn: getProfile,
     staleTime: 0,
     retry: false,
   })
+  updateCurrentProfileCaches(queryClient, profile)
+  return profile
 }
 
 export const changeProfileAvatar = async (

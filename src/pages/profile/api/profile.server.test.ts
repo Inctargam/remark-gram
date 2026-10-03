@@ -38,16 +38,8 @@ describe('getPublicProfile', () => {
     expect(getPublicProfile('missing-user')).toBeNull()
   })
 
-  it('returns a backend profile placeholder for numeric user ids', () => {
-    expect(getPublicProfile('3')).toEqual({
-      id: '3',
-      username: 'User 3',
-      description: '',
-      followingCount: 0,
-      followersCount: 0,
-      publicationsCount: 0,
-      avatarUrl: null,
-    })
+  it('leaves backend profiles to the client query', () => {
+    expect(getPublicProfile('3')).toBeNull()
   })
 
   it('derives publication count from the posts store', () => {
