@@ -15,18 +15,23 @@ const parseDraft = (value: unknown): EditProfileFormValues | null => {
     return null
   }
 
-  const { username, firstName, lastName, dateOfBirth, country, region, city, aboutMe } = value
+  const { username, firstName, lastName, dateOfBirth, country, city, aboutMe } = value
   const hasValidStrings =
     typeof username === 'string' &&
     typeof firstName === 'string' &&
     typeof lastName === 'string' &&
     typeof country === 'string' &&
-    typeof region === 'string' &&
     typeof city === 'string' &&
     typeof aboutMe === 'string'
   const hasValidDate = dateOfBirth === null || typeof dateOfBirth === 'string'
 
   if (!hasValidStrings || !hasValidDate) {
+    return null
+  }
+
+  const hasValidCountry = country === '' || /^[A-Z]{2}$/.test(country)
+
+  if (!hasValidCountry) {
     return null
   }
 
@@ -42,7 +47,6 @@ const parseDraft = (value: unknown): EditProfileFormValues | null => {
     lastName,
     dateOfBirth: parsedDate,
     country,
-    region,
     city,
     aboutMe,
   }

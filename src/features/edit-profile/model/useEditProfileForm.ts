@@ -1,8 +1,10 @@
+import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
-import { useProfileQuery } from '@/entities/profile'
+import { updateCurrentProfileCaches, useProfileQuery } from '@/entities/profile'
 
+import { ProfileUpdateError } from '../api/editProfileApi'
 import { useUpdateProfileMutation } from '../api/useUpdateProfileMutation'
 import {
   clearEditProfileDraft,
@@ -10,7 +12,8 @@ import {
   saveEditProfileDraft,
 } from './editProfileDraft'
 import { type EditProfileFormValues, EMPTY_EDIT_PROFILE_FORM_VALUES } from './editProfileFormValues'
-import { mapFormValuesToPayload, mapProfileToFormValues } from './editProfileMappers'
+import { mapProfileToFormValues } from './editProfileMappers'
+import { getProfileValidationField } from './getProfileValidationField'
 import { useProfileLocationFields } from './useProfileLocationFields'
 
 type SubmitAlert =
@@ -19,7 +22,9 @@ type SubmitAlert =
   | null
 
 export const useEditProfileForm = () => {
+  const queryClient = useQueryClient()
   const [submitAlert, setSubmitAlert] = useState<SubmitAlert>(null)
+  const [isFormInitialized, setIsFormInitialized] = useState(false)
   const isInitializedRef = useRef(false)
   const profileQuery = useProfileQuery()
   const updateMutation = useUpdateProfileMutation()
@@ -31,13 +36,14 @@ export const useEditProfileForm = () => {
     formState: { errors, isDirty, isValid },
     getValues,
     reset,
+    setError,
     trigger,
   } = useForm<EditProfileFormValues>({
     defaultValues: EMPTY_EDIT_PROFILE_FORM_VALUES,
     mode: 'onTouched',
     reValidateMode: 'onChange',
   })
-  const locationFields = useProfileLocationFields({ control })
+  const locationFields = useProfileLocationFields({ control, profile: profileQuery.data })
 
   useEffect(() => {
     if (!profileQuery.data || isInitializedRef.current) {
@@ -56,22 +62,70 @@ export const useEditProfileForm = () => {
     }
 
     isInitializedRef.current = true
-    // Let reset propagate through React Hook Form before validating the restored values.
-    const validationTimeout = window.setTimeout(() => void trigger(), 0)
+    setIsFormInitialized(true)
+  }, [profileQuery.data, reset])
 
-    return () => window.clearTimeout(validationTimeout)
-  }, [profileQuery.data, reset, trigger])
+  useEffect(() => {
+    if (isFormInitialized) {
+      // Validate after reset has propagated to the mounted fields.
+      void trigger()
+    }
+  }, [isFormInitialized, trigger])
 
   const submitHandler = handleSubmit((formValues) => {
     setSubmitAlert(null)
 
-    updateMutation.mutate(mapFormValuesToPayload(formValues), {
-      onSuccess: (profile) => {
+    updateMutation.mutate(formValues, {
+      onSuccess: async () => {
         clearEditProfileDraft()
-        reset(mapProfileToFormValues(profile))
+        const refreshedProfile = await profileQuery.refetch()
+
+        if (!refreshedProfile.data || refreshedProfile.isError) {
+          setSubmitAlert({
+            variant: 'error',
+            message: 'Settings were saved, but the updated profile could not be loaded.',
+          })
+          return
+        }
+
+        updateCurrentProfileCaches(queryClient, refreshedProfile.data)
+        reset(mapProfileToFormValues(refreshedProfile.data))
         setSubmitAlert({ variant: 'success', message: 'Your settings are saved!' })
       },
       onError: (error) => {
+        if (error instanceof ProfileUpdateError) {
+          if (error.status === 409) {
+            setError('username', { type: 'server', message: error.message })
+            return
+          }
+
+          if (error.status === 400) {
+            const fieldMessages = new Map<keyof EditProfileFormValues, string[]>()
+            const generalMessages: string[] = []
+
+            for (const message of error.messages) {
+              const field = getProfileValidationField(message)
+
+              if (field) {
+                fieldMessages.set(field, [...(fieldMessages.get(field) ?? []), message])
+              } else {
+                generalMessages.push(message)
+              }
+            }
+
+            for (const [field, messages] of fieldMessages) {
+              setError(field, { type: 'server', message: messages.join('; ') })
+            }
+
+            if (generalMessages.length === 0) {
+              return
+            }
+
+            setSubmitAlert({ variant: 'error', message: generalMessages.join('; ') })
+            return
+          }
+        }
+
         setSubmitAlert({
           variant: 'error',
           message: error instanceof Error ? error.message : 'Failed to save profile settings.',
@@ -90,10 +144,12 @@ export const useEditProfileForm = () => {
 
   return {
     profile: profileQuery.data,
+    profileLoadError: profileQuery.isError && !profileQuery.data,
+    reloadProfile: profileQuery.refetch,
     register,
     control,
     errors,
-    isSubmitDisabled: !isDirty || !isValid || updateMutation.isPending,
+    isSubmitDisabled: !isDirty || !isValid || updateMutation.isPending || profileQuery.isFetching,
     locationFields,
     submitHandler,
     privacyPolicyClickHandler,

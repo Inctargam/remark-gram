@@ -1,7 +1,9 @@
-import { selectLargestProfileAvatar, useProfileQuery } from '@/entities/profile'
+import { getProfileAvatarUrl, useProfileQuery } from '@/entities/profile'
 
 export const useProfileAvatar = () => {
   const profileQuery = useProfileQuery()
 
-  return selectLargestProfileAvatar(profileQuery.data?.avatars ?? [])
+  const avatarUrl = getProfileAvatarUrl(profileQuery.data?.avatarFileId)
+
+  return avatarUrl ? { url: avatarUrl } : null
 }

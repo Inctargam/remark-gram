@@ -152,6 +152,18 @@ export default meta
 
 type Story = StoryObj<typeof meta>
 
+export const WithAvatar: Story = {
+  beforeEach: setOwnerSession,
+  args: {
+    profile: { ...createProfile(MOCK_CURRENT_USER_ID), avatarUrl: createImageUrl('Avatar', 210) },
+  },
+  play: async ({ canvas }) => {
+    const avatar = await canvas.findByAltText('UserName avatar')
+    await expect(avatar).toBeVisible()
+    await waitFor(() => expect((avatar as HTMLImageElement).naturalWidth).toBeGreaterThan(0))
+  },
+}
+
 export const OwnProfile: Story = {
   beforeEach: () => {
     const router = getRouter()

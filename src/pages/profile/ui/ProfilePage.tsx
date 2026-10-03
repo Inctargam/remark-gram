@@ -4,8 +4,8 @@ import { notFound } from 'next/navigation'
 import { getProfilePostServer, prefetchProfilePostsQueryServer } from '@/entities/post/index.server'
 
 import { getPublicProfile } from '../api/publicProfile.server'
-import { shouldDeferProfilePostLookupToClient } from '../model/profileRoute'
-import { ProfilePageView } from './ProfilePageView'
+import { isBackendProfileUserId, shouldDeferProfilePostLookupToClient } from '../model/profileRoute'
+import { ProfilePageContent } from './ProfilePageContent'
 
 type Props = {
   postId: string | null
@@ -20,7 +20,7 @@ export const ProfilePage = async ({ postId, userId }: Props) => {
     postId ? getProfilePostServer({ userId, postId }) : null,
   ])
 
-  if (!profile || !prefetchedPosts) {
+  if ((!profile && !isBackendProfileUserId(userId)) || !prefetchedPosts) {
     notFound()
   }
 
@@ -33,9 +33,9 @@ export const ProfilePage = async ({ postId, userId }: Props) => {
 
   return (
     <HydrationBoundary state={prefetchedPosts.dehydratedState}>
-      <ProfilePageView
+      <ProfilePageContent
         initialSelectedPost={initialSelectedPost}
-        profile={profile}
+        initialProfile={profile}
         userId={userId}
       />
     </HydrationBoundary>

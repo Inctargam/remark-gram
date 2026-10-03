@@ -13,8 +13,7 @@ const VALUES: EditProfileFormValues = {
   firstName: 'John',
   lastName: 'Doe',
   dateOfBirth: new Date(2013, 7, 8),
-  country: 'United States',
-  region: 'Texas',
+  country: 'US',
   city: 'Austin',
   aboutMe: 'Draft',
 }
@@ -60,6 +59,14 @@ describe('edit profile privacy policy draft', () => {
     expect(consumeEditProfileDraft()).toEqual(valuesWithoutDate)
   })
 
+  it('restores a draft without a selected country', () => {
+    const valuesWithoutCountry = { ...VALUES, country: '', city: '' }
+
+    saveEditProfileDraft(valuesWithoutCountry)
+
+    expect(consumeEditProfileDraft()).toEqual(valuesWithoutCountry)
+  })
+
   it.each([
     ['malformed JSON', '{invalid-json'],
     [
@@ -70,7 +77,6 @@ describe('edit profile privacy policy draft', () => {
         lastName: VALUES.lastName,
         dateOfBirth: '2013-08-08',
         country: VALUES.country,
-        region: VALUES.region,
         city: VALUES.city,
       }),
     ],
@@ -79,6 +85,15 @@ describe('edit profile privacy policy draft', () => {
       JSON.stringify({ ...VALUES, username: 123, dateOfBirth: '2013-08-08' }),
     ],
     ['an invalid date', JSON.stringify({ ...VALUES, dateOfBirth: '2013-02-30' })],
+    [
+      'a country name from the legacy mock format',
+      JSON.stringify({
+        ...VALUES,
+        dateOfBirth: '2013-08-08',
+        country: 'United States',
+        region: 'Texas',
+      }),
+    ],
   ])('discards a stored draft containing %s', (_caseName, storedValue) => {
     window.sessionStorage.setItem(EDIT_PROFILE_DRAFT_KEY, storedValue)
 

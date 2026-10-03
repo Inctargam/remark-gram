@@ -4,7 +4,6 @@ export type EditProfileFormValues = {
   lastName: string
   dateOfBirth: Date | null
   country: string
-  region: string
   city: string
   aboutMe: string
 }
@@ -15,7 +14,6 @@ export const EMPTY_EDIT_PROFILE_FORM_VALUES: EditProfileFormValues = {
   lastName: '',
   dateOfBirth: null,
   country: '',
-  region: '',
   city: '',
   aboutMe: '',
 }

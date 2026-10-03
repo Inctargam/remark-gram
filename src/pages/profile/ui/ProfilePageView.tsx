@@ -1,7 +1,8 @@
 'use client'
 
+import Image from 'next/image'
+
 import type { Post } from '@/entities/post'
-import { useCurrentUser } from '@/shared/auth'
 import { ProfilePostsGrid } from '@/widgets/profile-posts'
 
 import type { PublicProfile } from '../model/publicProfile'
@@ -32,19 +33,28 @@ const getProfileStats = ({
 ]
 
 export const ProfilePageView = ({ initialSelectedPost, profile, userId }: ProfilePageViewProps) => {
-  const currentUser = useCurrentUser()
-  const username = currentUser?.id === userId ? currentUser.username : profile.username
   const stats = getProfileStats(profile)
 
   return (
     <section className={styles.page} aria-labelledby="profile-title">
       <div className={styles.header}>
-        <div className={styles.avatar} aria-hidden="true" />
+        {profile.avatarUrl ? (
+          <Image
+            alt={`${profile.username} avatar`}
+            className={styles.avatar}
+            height={204}
+            width={204}
+            src={profile.avatarUrl}
+            unoptimized
+          />
+        ) : (
+          <div className={styles.avatar} aria-hidden="true" />
+        )}
 
         <div className={styles.summary}>
           <div className={styles.topRow}>
             <h1 className={styles.title} id="profile-title">
-              {username}
+              {profile.username}
             </h1>
             <ProfileSettingsControl userId={userId} />
           </div>

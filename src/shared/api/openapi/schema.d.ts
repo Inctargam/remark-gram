@@ -4,6 +4,26 @@
  */
 
 export interface paths {
+    "/api/v1/files/avatar-upload": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create an avatar upload session
+         * @description Send metadata of one final JPEG or PNG file, from 1 byte to 10 MiB inclusive. The response is one presigned POST session. Copy every returned field into FormData, append the file last and POST directly to the returned Object Storage URL. Example: const form = new FormData(); Object.entries(session.fields).forEach(([key, value]) => form.append(key, value)); form.append("file", file); await fetch(session.url, { method: "POST", body: form }); After a successful upload, call POST /api/v1/files/image-uploads/complete with { "uploadIds": [session.id] }. This only confirms the file; it does not set the profile avatar. Completed uploads that remain unattached are eligible for cleanup after 24 hours.
+         */
+        post: operations["initiateAvatarUpload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/files/image-uploads": {
         parameters: {
             query?: never;
@@ -75,7 +95,7 @@ export interface paths {
         put?: never;
         /**
          * Create a post with completed image uploads
-         * @description Final step of publication creation. Supply the IDs previously confirmed through files/image-uploads/complete in their display order. Posts asks Files over gRPC to reserve images that exist, belong to the authenticated author, are not soft-deleted and have status COMPLETED. The post and its ordered image relations are then created atomically, after which the reservation is marked as attached.
+         * @description Final step of publication creation. Supply the IDs previously confirmed through files/image-uploads/complete in their display order. Posts first creates an unpublished post and its ordered image relations atomically. Files then attaches the entire set of existing, confirmed, unowned images belonging to the authenticated author in one transaction. The post becomes visible only after successful attachment. A business rejection cancels the attachment operation before deleting the unpublished post. An identical request with the same Idempotency-Key waits for an ongoing workflow or returns its stored result. After success it returns the same post ID; after a final failure it returns the stored error without starting new attempts.
          */
         post: operations["createPost"];
         delete?: never;
@@ -98,7 +118,11 @@ export interface paths {
          */
         put: operations["updatePost"];
         post?: never;
-        delete?: never;
+        /**
+         * Delete a post
+         * @description Deletes a post owned by the authenticated author.
+         */
+        delete: operations["deletePost"];
         options?: never;
         head?: never;
         patch?: never;
@@ -424,6 +448,91 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/users/me/profile/avatar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Set or replace the current user avatar
+         * @description First POST /files/avatar-upload, upload directly to S3, then POST /files/image-uploads/complete with {"uploadIds":["<id>"]}. Pass that id as fileId here. Accepts an owned, completed JPEG/PNG of 1 byte through 10 MiB inclusive. A successful response means the profile avatarFileId is updated and the image is available via GET /files/images/{fileId}. The previous avatar is scheduled for deletion. The request waits for the workflow result. Repeat requests must use the same Idempotency-Key and fileId. Read avatarFileId from GET /users/me/profile or GET /users/{userId}/profile.
+         */
+        put: operations["setAvatar"];
+        post?: never;
+        /**
+         * Delete the current user avatar
+         * @description Call after confirming "Do you really want to delete your profile photo?". No request body. 204 means avatarFileId is cleared and, when a file existed, its deletion event is persisted in the outbox. RabbitMQ delivery and S3 deletion happen asynchronously. A missing avatar or profile also returns 204. Broker unavailability does not prevent success; pending messages are retried every 6 hours.
+         */
+        delete: operations["deleteAvatar"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/me/profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get the authenticated user profile
+         * @description Returns the complete profile of the authenticated user.
+         */
+        get: operations["getMyProfile"];
+        /**
+         * Update the current user profile
+         * @description Updates the username and personal information of the authenticated user. The first name and last name are required; the date of birth and biography are optional.
+         */
+        put: operations["updateProfileInfo"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/{userId}/profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a public user profile
+         * @description Returns the public profile available by user identifier.
+         */
+        get: operations["getPublicProfile"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/countries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get list of countries */
+        get: operations["getCountries"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -448,7 +557,7 @@ export interface components {
             /** @example Bad Request */
             error: string;
         };
-        ImageUploadMetadataDto: {
+        InitiateAvatarUploadDto: {
             /**
              * Format: uuid
              * @description Client-generated correlation ID used to match the returned session to this local file.
@@ -467,19 +576,15 @@ export interface components {
              */
             contentType: "image/jpeg" | "image/png";
             /**
-             * @description Exact size of the final file in bytes. The presigned POST policy and completion check require this exact value.
+             * @description Exact size of the final avatar file in bytes after any client-side crop. Maximum: 10 MiB inclusive.
              * @example 1048576
              */
             size: number;
         };
-        InitiateImageUploadsDto: {
-            /** @description Metadata for 1–10 final images after any client-side crop or filter processing. */
-            images: components["schemas"]["ImageUploadMetadataDto"][];
-        };
         ImageUploadSessionDto: {
             /**
              * Format: uuid
-             * @description Server-generated upload ID used for confirmation and later as the post image ID.
+             * @description Server-generated file ID used for upload confirmation and later attachment.
              * @example 83d26252-a350-4e39-a78e-0bdf54d2341d
              */
             id: string;
@@ -509,6 +614,34 @@ export interface components {
             fields: {
                 [key: string]: string;
             };
+        };
+        ImageUploadMetadataDto: {
+            /**
+             * Format: uuid
+             * @description Client-generated correlation ID used to match the returned session to this local file.
+             * @example 83d26252-a350-4e39-a78e-0bdf54d2341d
+             */
+            clientFileId: string;
+            /**
+             * @description Original filename kept as file metadata; it is not used as the Object Storage key.
+             * @example photo.jpg
+             */
+            originalFilename: string;
+            /**
+             * @description MIME type of the exact file that will be uploaded. Only JPEG and PNG are supported.
+             * @example image/jpeg
+             * @enum {string}
+             */
+            contentType: "image/jpeg" | "image/png";
+            /**
+             * @description Exact size of the final file in bytes. The presigned POST policy and completion check require this exact value.
+             * @example 1048576
+             */
+            size: number;
+        };
+        InitiateImageUploadsDto: {
+            /** @description Metadata for 1–10 final images after any client-side crop or filter processing. */
+            images: components["schemas"]["ImageUploadMetadataDto"][];
         };
         InitiateImageUploadsResponseDto: {
             /** @description One presigned POST session for each requested image. */
@@ -722,6 +855,117 @@ export interface components {
             /** @example true */
             isCurrent: boolean;
         };
+        SetAvatarDto: {
+            /**
+             * Format: uuid
+             * @description ID of a completed JPEG/PNG upload, up to 10 MiB inclusive.
+             * @example 11111111-1111-4111-8111-111111111111
+             */
+            fileId: string;
+        };
+        UpdateProfileInfoDto: {
+            /**
+             * Format: /^[A-Za-z0-9_-]+$/
+             * @example username
+             */
+            username: string;
+            /** @example First name */
+            firstName: string;
+            /** @example Last name */
+            lastName: string;
+            /**
+             * Format: date
+             * @example 2012-12-12
+             */
+            dateOfBirth?: string;
+            /** @example About me */
+            aboutMe?: string;
+            /**
+             * @description ISO 3166-1 alpha-2 country code.
+             * @example US
+             */
+            countryCode?: string;
+            /** @example New York */
+            city?: string;
+        };
+        CountryNamesDto: {
+            /**
+             * @description Country name in English.
+             * @example United States
+             */
+            en: string;
+            /**
+             * @description Country name in Russian.
+             * @example США
+             */
+            ru: string;
+        };
+        CountryResponseDto: {
+            /**
+             * @description The ISO 3166-1 alpha-2 country code. Example: US.
+             * @example US
+             */
+            code: string;
+            /** @description The localized country names. */
+            name: components["schemas"]["CountryNamesDto"];
+        };
+        MyProfileResponseDto: {
+            /**
+             * @description User identifier.
+             * @example 42
+             */
+            userId: number;
+            /**
+             * @description Username.
+             * @example client123
+             */
+            username: string;
+            /** @example Ivan */
+            firstName: string | null;
+            /** @example Ivanov */
+            lastName: string | null;
+            /**
+             * Format: date
+             * @description ISO 8601 calendar date in YYYY-MM-DD format.
+             * @example 1990-01-15
+             */
+            dateOfBirth: string | null;
+            /** @example Backend developer */
+            aboutMe: string | null;
+            /** @description Country with localized names. */
+            country: components["schemas"]["CountryResponseDto"] | null;
+            /** @example Kyiv */
+            city: string | null;
+            /**
+             * Format: uuid
+             * @description Identifier of the profile avatar file.
+             * @example 550e8400-e29b-41d4-a716-446655440000
+             */
+            avatarFileId: string | null;
+        };
+        PublicProfileResponseDto: {
+            /**
+             * @description User identifier.
+             * @example 42
+             */
+            userId: number;
+            /**
+             * @description Public username.
+             * @example client123
+             */
+            username: string;
+            /**
+             * @description Public profile biography.
+             * @example Backend developer
+             */
+            aboutMe: string | null;
+            /**
+             * Format: uuid
+             * @description Identifier of the profile avatar file.
+             * @example 550e8400-e29b-41d4-a716-446655440000
+             */
+            avatarFileId: string | null;
+        };
     };
     responses: never;
     parameters: never;
@@ -731,9 +975,10 @@ export interface components {
 }
 export type SchemaApiErrorResponseDto = components['schemas']['ApiErrorResponseDto'];
 export type SchemaValidationErrorResponseDto = components['schemas']['ValidationErrorResponseDto'];
+export type SchemaInitiateAvatarUploadDto = components['schemas']['InitiateAvatarUploadDto'];
+export type SchemaImageUploadSessionDto = components['schemas']['ImageUploadSessionDto'];
 export type SchemaImageUploadMetadataDto = components['schemas']['ImageUploadMetadataDto'];
 export type SchemaInitiateImageUploadsDto = components['schemas']['InitiateImageUploadsDto'];
-export type SchemaImageUploadSessionDto = components['schemas']['ImageUploadSessionDto'];
 export type SchemaInitiateImageUploadsResponseDto = components['schemas']['InitiateImageUploadsResponseDto'];
 export type SchemaCompleteImageUploadsDto = components['schemas']['CompleteImageUploadsDto'];
 export type SchemaCreatePostDto = components['schemas']['CreatePostDto'];
@@ -754,8 +999,81 @@ export type SchemaPasswordResetResponse = components['schemas']['PasswordResetRe
 export type SchemaConfirmPasswordResetDto = components['schemas']['ConfirmPasswordResetDto'];
 export type SchemaConfirmPasswordResetResponseDto = components['schemas']['ConfirmPasswordResetResponseDto'];
 export type SchemaSessionResponseDto = components['schemas']['SessionResponseDto'];
+export type SchemaSetAvatarDto = components['schemas']['SetAvatarDto'];
+export type SchemaUpdateProfileInfoDto = components['schemas']['UpdateProfileInfoDto'];
+export type SchemaCountryNamesDto = components['schemas']['CountryNamesDto'];
+export type SchemaCountryResponseDto = components['schemas']['CountryResponseDto'];
+export type SchemaMyProfileResponseDto = components['schemas']['MyProfileResponseDto'];
+export type SchemaPublicProfileResponseDto = components['schemas']['PublicProfileResponseDto'];
 export type $defs = Record<string, never>;
 export interface operations {
+    initiateAvatarUpload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InitiateAvatarUploadDto"];
+            };
+        };
+        responses: {
+            /** @description One presigned POST session was created and saved as PENDING. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImageUploadSessionDto"];
+                };
+            };
+            /** @description Invalid request structure, image size or content type. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"] | components["schemas"]["ValidationErrorResponseDto"];
+                };
+            };
+            /** @description The access token is missing, invalid or expired. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 401 */
+                        statusCode: number;
+                        /** @example Invalid access token */
+                        message: string;
+                        /** @example Unauthorized */
+                        error: string;
+                    };
+                };
+            };
+            /** @description The files service or Object Storage returned an unexpected error. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description The files service is unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
     initiateImageUploads: {
         parameters: {
             query?: never;
@@ -1018,9 +1336,9 @@ export interface operations {
     createPost: {
         parameters: {
             query?: never;
-            header?: {
-                /** @description Client-generated UUID for one publication attempt. Reuse the same value only when retrying an identical request. The current API version accepts this header but does not yet enforce request-level idempotency. */
-                "Idempotency-Key"?: string;
+            header: {
+                /** @description Required client-generated UUID v4 for one publication attempt. Reuse the same value only when retrying an identical request. */
+                "Idempotency-Key": string;
             };
             path?: never;
             cookie?: never;
@@ -1041,7 +1359,7 @@ export interface operations {
                     "application/json": components["schemas"]["CreatePostResponseDto"];
                 };
             };
-            /** @description The request shape is invalid or a post invariant is violated: description length, image count or unique image IDs. */
+            /** @description The Idempotency-Key or request shape is invalid, or a post invariant is violated: description length, image count, UUID v4 format or unique image IDs. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -1075,7 +1393,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description At least one image cannot be reserved in its current state or is already attached to another post. */
+            /** @description The Idempotency-Key conflicts with another payload, or at least one image cannot be attached in its current state or is already attached to another post. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -1093,7 +1411,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Posts could not verify images because Files is unavailable or exceeded its deadline. */
+            /** @description Files remains unavailable after three attempts for a step, with delays of 1 and 2 seconds. Retries apply to attachment and cancellation of the attachment operation. The 3 seconds cover only delays for one step; call durations and delays across steps add up. No overall request deadline is configured. Repeating the same Idempotency-Key returns the stored error without new attempts. */
             503: {
                 headers: {
                     [name: string]: unknown;
@@ -1171,6 +1489,78 @@ export interface operations {
             };
             /** @description The post was modified concurrently and could not be updated. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description The upstream service returned an unexpected error. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description The posts service is unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    deletePost: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                postId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The post has been successfully deleted or was already absent. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The path parameter or authenticated user ID is invalid. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseDto"] | components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description The access token is missing, invalid or expired. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 401 */
+                        statusCode: number;
+                        /** @example Invalid access token */
+                        message: string;
+                        /** @example Unauthorized */
+                        error: string;
+                    };
+                };
+            };
+            /** @description The authenticated author is not allowed to delete a post owned by another user. */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2011,6 +2401,397 @@ export interface operations {
             };
             /** @description The user-accounts service is unavailable. */
             503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    setAvatar: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description UUID v4 identifying this operation. Reuse it with the same fileId when repeating the request. */
+                "Idempotency-Key": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetAvatarDto"];
+            };
+        };
+        responses: {
+            /** @description Avatar installed; response has no body. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid UUID or metadata. Image validation message: The photo must be less than 10 Mb and have JPEG or PNG format */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Access token is missing, invalid or expired. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description User or owned file not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Another avatar update is in progress, the file is unavailable, or the key was used with a different fileId. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Files remains unavailable after three attempts with delays of 1 and 2 seconds. The 3 seconds cover only retry delays, not the duration of the calls; no overall request deadline is configured. The workflow retains its error and lock. Repeating the same Idempotency-Key returns the stored error without new attempts. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    deleteAvatar: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description UUID v4. Reuse the same key when repeating this deletion; a later avatar will not be removed. */
+                "Idempotency-Key": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Profile has no avatar; response has no body. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid Idempotency-Key (UUID v4 required). */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Access token is missing, invalid or expired. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Active user not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Another avatar update is in progress. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getMyProfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The authenticated user profile. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyProfileResponseDto"];
+                };
+            };
+            /** @description The access token is missing, invalid, or expired. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The authenticated user was not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "statusCode": 404,
+                     *       "code": "USER_NOT_FOUND",
+                     *       "message": "User not found"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description A downstream service returned an unexpected response. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description A required downstream service is unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    updateProfileInfo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateProfileInfoDto"];
+            };
+        };
+        responses: {
+            /** @description The profile was updated successfully. The response has no body. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The request body failed HTTP validation, or the user-accounts service rejected the username, personal information, or date of birth. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseDto"] | components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description The access token is missing, invalid, or expired. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 401 */
+                        statusCode: number;
+                        /** @example Invalid access token */
+                        message: string;
+                        /** @example Unauthorized */
+                        error: string;
+                    };
+                };
+            };
+            /** @description The authenticated user no longer exists. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "statusCode": 404,
+                     *       "code": "USER_NOT_FOUND",
+                     *       "message": "User Not Found"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description The requested username is already used by another user. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "statusCode": 409,
+                     *       "code": "USERNAME_ALREADY_EXISTS",
+                     *       "message": "Username already exists"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description The user-accounts service returned an unexpected error. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "statusCode": 502,
+                     *       "code": "INTERNAL",
+                     *       "message": "Internal server error"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description The user-accounts service is temporarily unavailable or cannot be reached. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "statusCode": 503,
+                     *       "code": "UNAVAILABLE",
+                     *       "message": "The user-accounts service is unavailable"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    getPublicProfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description User identifier. */
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The public user profile. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicProfileResponseDto"];
+                };
+            };
+            /** @description The userId path parameter is not a positive integer. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseDto"];
+                };
+            };
+            /** @description The requested user was not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "statusCode": 404,
+                     *       "code": "USER_NOT_FOUND",
+                     *       "message": "User not found"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description The user-accounts service returned an unexpected response. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description The user-accounts service is unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    getCountries: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Use this "term" to search for a country. The search includes standard Alpha-2 or Alpha-3 codes, as well as country names.
+                 *     If you leave the “term” field blank, a list of countries will be displayed. The search is not case-sensitive.
+                 */
+                "Search by term"?: string;
+                /** @description Limitation: the list of countries in the results. Default: 20 */
+                Limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of Countries */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CountryResponseDto"][];
+                };
+            };
+            /** @description The query parameter is invalid. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized invalid credentials. */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };

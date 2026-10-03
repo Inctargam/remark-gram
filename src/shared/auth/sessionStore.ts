@@ -12,6 +12,7 @@ export type CurrentUser = {
 type SessionState = {
   accessToken: string | null
   currentUser: CurrentUser | null
+  currentUserLoadFailureAt: number | null
   status: SessionStatus
   setAuthenticated: (accessToken: string, currentUser?: CurrentUser | null) => void
   setGuest: () => void
@@ -20,8 +21,10 @@ type SessionState = {
 export const sessionStore = createStore<SessionState>()((set) => ({
   accessToken: null,
   currentUser: null,
+  currentUserLoadFailureAt: null,
   status: 'loading',
   setAuthenticated: (accessToken, currentUser = null) =>
-    set({ accessToken, currentUser, status: 'authenticated' }),
-  setGuest: () => set({ accessToken: null, currentUser: null, status: 'guest' }),
+    set({ accessToken, currentUser, currentUserLoadFailureAt: null, status: 'authenticated' }),
+  setGuest: () =>
+    set({ accessToken: null, currentUser: null, currentUserLoadFailureAt: null, status: 'guest' }),
 }))

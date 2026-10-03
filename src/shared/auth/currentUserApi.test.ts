@@ -92,6 +92,48 @@ describe('createLoadCurrentUser', () => {
     expect(sessionStore.getState()).toMatchObject({
       accessToken: 'access-token',
       currentUser: null,
+      currentUserLoadFailureAt: expect.any(Number),
+      status: 'authenticated',
+    })
+  })
+
+  it('preserves the token and exposes a network failure to session subscribers', async () => {
+    const getMock = vi.fn().mockRejectedValue(new TypeError('Failed to fetch'))
+    const loadCurrentUser = createLoadCurrentUser(createApiClient(getMock))
+    sessionStore.getState().setAuthenticated('access-token')
+
+    await expect(loadCurrentUser()).rejects.toMatchObject(new CurrentUserLoadError(null))
+
+    expect(sessionStore.getState()).toMatchObject({
+      accessToken: 'access-token',
+      currentUser: null,
+      currentUserLoadFailureAt: expect.any(Number),
+      status: 'authenticated',
+    })
+    expect(hasRecentCurrentUserLoadFailure()).toBe(true)
+  })
+
+  it('clears the previous error while retrying and stores the recovered identity', async () => {
+    const getMock = vi
+      .fn()
+      .mockResolvedValueOnce({ response: new Response(null, { status: 500 }) })
+      .mockResolvedValueOnce({
+        data: CURRENT_USER_RESPONSE,
+        response: new Response(null, { status: 200 }),
+      })
+    const loadCurrentUser = createLoadCurrentUser(createApiClient(getMock))
+    sessionStore.getState().setAuthenticated('access-token')
+    await expect(loadCurrentUser()).rejects.toBeInstanceOf(CurrentUserLoadError)
+
+    const retryPromise = loadCurrentUser()
+    expect(sessionStore.getState()).toMatchObject({ currentUserLoadFailureAt: null })
+    expect(hasRecentCurrentUserLoadFailure()).toBe(false)
+
+    await expect(retryPromise).resolves.toMatchObject({ id: '7', username: 'UserName' })
+    expect(sessionStore.getState()).toMatchObject({
+      accessToken: 'access-token',
+      currentUser: { id: '7' },
+      currentUserLoadFailureAt: null,
       status: 'authenticated',
     })
   })

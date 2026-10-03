@@ -14,9 +14,11 @@
 
 .avatar {
   width: 204px;
+  height: auto;
   aspect-ratio: 1;
   border-radius: 50%;
   background-color: var(--color-dark-900);
+  object-fit: cover;
 }
 
 .summary {

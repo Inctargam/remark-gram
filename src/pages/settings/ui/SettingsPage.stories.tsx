@@ -7,17 +7,15 @@ import { AppShellView } from '@/widgets/app-shell'
 import { SettingsPage } from './SettingsPage'
 
 const PROFILE = {
-  id: 1,
-  userName: 'user123',
+  userId: 1,
+  username: 'user123',
   firstName: 'John',
   lastName: 'Doe',
   city: 'Austin',
-  country: 'United States',
-  region: 'Texas',
+  country: { code: 'US', name: { en: 'United States', ru: 'США' } },
   dateOfBirth: '1990-01-01',
   aboutMe: 'About me',
-  avatars: [],
-  createdAt: '2026-08-06T14:41:15.904Z',
+  avatarFileId: null,
 }
 
 const createPngFile = () => {
@@ -33,14 +31,16 @@ const createPngFile = () => {
 
 const stubProfileFetch = () => {
   const originalFetch = globalThis.fetch
+  let avatarFileId: string | null = null
 
-  globalThis.fetch = (async (input: RequestInfo | URL) => {
+  globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
     const requestUrl = input instanceof Request ? input.url : String(input)
+    const method = input instanceof Request ? input.method : (init?.method ?? 'GET')
 
-    if (requestUrl.endsWith('/locations/v1/countries.json')) {
+    if (requestUrl.includes('/api/v1/countries')) {
       return Response.json([
-        { code: 'BY', name: 'Belarus' },
-        { code: 'US', name: 'United States' },
+        { code: 'BY', name: { en: 'Belarus', ru: 'Беларусь' } },
+        { code: 'US', name: { en: 'United States', ru: 'США' } },
       ])
     }
 
@@ -48,7 +48,27 @@ const stubProfileFetch = () => {
       return Response.json([{ id: '2', name: 'Austin', region: 'Texas' }])
     }
 
-    return Response.json(PROFILE)
+    if (method === 'POST') {
+      if (requestUrl.endsWith('/files/avatar-upload')) {
+        return Response.json(
+          {
+            id: 'uploaded-avatar',
+            clientFileId: 'local-file',
+            url: 'https://storage.example.com/avatar',
+            fields: { key: 'avatar' },
+          },
+          { status: 201 }
+        )
+      }
+      return new Response(null, { status: 204 })
+    }
+
+    if (method === 'PUT' && requestUrl.endsWith('/profile/avatar')) {
+      avatarFileId = 'uploaded-avatar'
+      return new Response(null, { status: 204 })
+    }
+
+    return Response.json({ ...PROFILE, avatarFileId })
   }) as typeof globalThis.fetch
 
   return () => {

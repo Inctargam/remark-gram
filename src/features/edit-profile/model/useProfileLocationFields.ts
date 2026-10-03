@@ -1,38 +1,63 @@
+import { useEffect, useState } from 'react'
 import type { Control } from 'react-hook-form'
 import { useController } from 'react-hook-form'
 
 import { useCitiesQuery, useCountriesQuery } from '@/entities/location'
+import type { Profile } from '@/entities/profile'
 import type { ComboboxOption } from '@/shared/ui/combobox'
 
 import type { EditProfileFormValues } from './editProfileFormValues'
 
 type Params = {
   control: Control<EditProfileFormValues>
+  profile: Profile | undefined
 }
 
-export const useProfileLocationFields = ({ control }: Params) => {
+export const useProfileLocationFields = ({ control, profile }: Params) => {
   const { field: countryField } = useController({ control, name: 'country' })
-  const { field: regionField } = useController({ control, name: 'region' })
   const { field: cityField } = useController({ control, name: 'city' })
-  const countriesQuery = useCountriesQuery()
+  const [isCountryOpen, setIsCountryOpen] = useState(false)
+  const [countrySearch, setCountrySearch] = useState('')
+  const [debouncedCountrySearch, setDebouncedCountrySearch] = useState('')
+  const [selectedCountryOption, setSelectedCountryOption] = useState<ComboboxOption | null>(null)
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => setDebouncedCountrySearch(countrySearch.trim()), 250)
+
+    return () => window.clearTimeout(timeout)
+  }, [countrySearch])
+
+  const countriesQuery = useCountriesQuery(debouncedCountrySearch, isCountryOpen)
   const countries = countriesQuery.data ?? []
-  const selectedCountry = countries.find((country) => country.name === countryField.value)
-  const selectedCountryCode = selectedCountry?.code ?? null
+  const selectedCountryCode = countryField.value || null
   const citiesQuery = useCitiesQuery(selectedCountryCode)
   const cities = citiesQuery.data ?? []
-  const selectedCity = cities.find(
-    (city) => city.name === cityField.value && city.region === regionField.value
-  )
+  const cityNames = [...new Set(cities.map((city) => city.name))]
 
   const countryOptions: ComboboxOption[] = countries.map((country) => ({
     label: country.name,
     value: country.code,
   }))
-  const cityOptions: ComboboxOption[] = cities.map((city) => ({
-    label: city.name,
-    value: city.id,
-    description: city.region,
+  let currentCountryOption =
+    countryOptions.find((option) => option.value === selectedCountryCode) ?? null
+  if (selectedCountryCode && !currentCountryOption) {
+    const selectedName =
+      selectedCountryOption?.value === selectedCountryCode
+        ? selectedCountryOption.label
+        : profile?.countryCode === selectedCountryCode
+          ? profile.country
+          : selectedCountryCode
+
+    currentCountryOption = { label: selectedName, value: selectedCountryCode }
+  }
+
+  const cityOptions: ComboboxOption[] = cityNames.map((name) => ({
+    label: name,
+    value: name,
   }))
+  if (cityField.value && !cityOptions.some((option) => option.value === cityField.value)) {
+    cityOptions.unshift({ label: cityField.value, value: cityField.value })
+  }
 
   const countryValueChangeHandler = (countryCode: string | null) => {
     if (countryCode === selectedCountryCode) {
@@ -40,21 +65,18 @@ export const useProfileLocationFields = ({ control }: Params) => {
     }
 
     const country = countries.find((item) => item.code === countryCode)
+    setSelectedCountryOption(country ? { label: country.name, value: country.code } : null)
 
-    countryField.onChange(country?.name ?? '')
-    regionField.onChange('')
+    countryField.onChange(country?.code ?? '')
     cityField.onChange('')
   }
 
-  const cityValueChangeHandler = (cityId: string | null) => {
-    if (cityId === selectedCity?.id) {
+  const cityValueChangeHandler = (cityName: string | null) => {
+    if (cityName === cityField.value) {
       return
     }
 
-    const city = cities.find((item) => item.id === cityId)
-
-    cityField.onChange(city?.name ?? '')
-    regionField.onChange(city?.region ?? '')
+    cityField.onChange(cityName ?? '')
   }
 
   const hasSelectedCountry = Boolean(selectedCountryCode)
@@ -63,22 +85,25 @@ export const useProfileLocationFields = ({ control }: Params) => {
 
   return {
     country: {
-      disabled: countriesQuery.isError,
       error: countryError,
       onBlur: countryField.onBlur,
       onValueChange: countryValueChangeHandler,
+      onOpenChange: setIsCountryOpen,
+      onSearchChange: setCountrySearch,
       options: countryOptions,
-      value: selectedCountry?.code ?? null,
+      selectedOption: currentCountryOption,
+      value: selectedCountryCode,
+      remoteSearch: true,
     },
     city: {
-      disabled: !hasSelectedCountry || countriesQuery.isError || citiesQuery.isError,
+      disabled: !hasSelectedCountry || citiesQuery.isError,
       emptyMessage: citiesQuery.isSuccess ? 'No Results' : null,
       error: cityError,
       limit: 50,
       onBlur: cityField.onBlur,
       onValueChange: cityValueChangeHandler,
       options: cityOptions,
-      value: selectedCity?.id ?? null,
+      value: cityField.value || null,
     },
   }
 }

@@ -3,10 +3,11 @@ import { useQuery } from '@tanstack/react-query'
 import { getLocationCities, getLocationCountries } from './locationApi'
 import { locationQueryKeys } from './locationQueryKeys'
 
-export const useCountriesQuery = () =>
+export const useCountriesQuery = (term = '', enabled = true) =>
   useQuery({
-    queryKey: locationQueryKeys.countries(),
-    queryFn: getLocationCountries,
+    queryKey: locationQueryKeys.countries(term),
+    queryFn: () => getLocationCountries(term),
+    enabled,
     retry: false,
     staleTime: Infinity,
   })

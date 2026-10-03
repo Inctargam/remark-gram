@@ -5,15 +5,13 @@ import type { ReactNode } from 'react'
 import { useEffect } from 'react'
 
 import { checkMockAuth, refreshSession, sessionStore } from '@/shared/auth'
+import { IS_MOCK_AUTH } from '@/shared/config'
 
 import { shouldClearQueryClientOnSessionChange } from './sessionQueryCleanup'
 
 type Props = {
   children: ReactNode
 }
-
-// TODO(auth-me): Remove the mock switch after the backend exposes the current-user endpoint.
-const isMockAuth = process.env.NEXT_PUBLIC_AUTH_MOCK !== 'false'
 
 export const SessionBootstrap = ({ children }: Props) => {
   const queryClient = useQueryClient()
@@ -26,7 +24,7 @@ export const SessionBootstrap = ({ children }: Props) => {
       }
     })
 
-    if (isMockAuth) {
+    if (IS_MOCK_AUTH) {
       void checkMockAuth()
     } else {
       void refreshSession()

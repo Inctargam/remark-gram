@@ -1,14 +1,33 @@
-import type { Profile } from '@/entities/profile'
-import { api } from '@/shared/api/baseApi'
+import { apiClient } from '@/shared/api/openapi'
 
-import type { UpdateProfilePayload } from '../model/editProfileTypes'
+import type { EditProfileFormValues } from '../model/editProfileFormValues'
+import { mapFormValuesToBackendPayload } from '../model/editProfileMappers'
 
-const PROFILE_API_PATH = '/api/mock/profile'
+export class ProfileUpdateError extends Error {
+  constructor(
+    public readonly messages: string[],
+    public readonly status: number,
+    public readonly code?: string
+  ) {
+    super(messages.join('; '))
+    this.name = 'ProfileUpdateError'
+  }
+}
 
-// TODO(profile-api): Replace the local mock request with the typed OpenAPI client once the
-// backend exposes the profile endpoint in the schema.
-export const updateProfile = async (payload: UpdateProfilePayload): Promise<Profile> => {
-  const response = await api.put(PROFILE_API_PATH, payload, { baseUrl: '' })
+export const updateProfile = async (values: EditProfileFormValues): Promise<void> => {
+  const { error, response } = await apiClient.PUT('/api/v1/users/me/profile', {
+    body: mapFormValuesToBackendPayload(values),
+  })
 
-  return response.json()
+  if (!response.ok) {
+    const message = error && 'message' in error ? error.message : null
+    const messages = Array.isArray(message)
+      ? message
+      : typeof message === 'string'
+        ? [message]
+        : [`Failed to save profile (${response.status})`]
+    const code = error && 'code' in error ? error.code : undefined
+
+    throw new ProfileUpdateError(messages, response.status, code)
+  }
 }
