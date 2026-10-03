@@ -10,13 +10,15 @@ const updateAvatar = (queryClient: QueryClient, avatarFileId: string | null) => 
     profile ? { ...profile, avatarFileId } : profile
   )
 }
-const refreshProfile = (queryClient: QueryClient) =>
-  queryClient.fetchQuery({
+const refreshProfile = async (queryClient: QueryClient) => {
+  await queryClient.cancelQueries({ queryKey: profileQueryKeys.current(), exact: true })
+  return queryClient.fetchQuery({
     queryKey: profileQueryKeys.current(),
     queryFn: getProfile,
     staleTime: 0,
     retry: false,
   })
+}
 
 export const changeProfileAvatar = async (
   queryClient: QueryClient,

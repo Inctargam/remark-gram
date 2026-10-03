@@ -32,17 +32,57 @@ beforeEach(() => {
 })
 afterEach(() => queryClient.clear())
 describe('confirmed avatar changes and reconciliation', () => {
+  it.each([
+    { avatarFileId: 'new', uncertain: false },
+    { avatarFileId: null, uncertain: false },
+    { avatarFileId: 'new', uncertain: true },
+  ])(
+    'starts a fresh GET after mutation: avatar=$avatarFileId, uncertain=$uncertain',
+    async ({ avatarFileId, uncertain }) => {
+      let resolveOldProfile!: (profile: Profile) => void
+      const oldProfilePromise = new Promise<Profile>((resolve) => {
+        resolveOldProfile = resolve
+      })
+      vi.mocked(getProfile)
+        .mockReturnValueOnce(oldProfilePromise)
+        .mockResolvedValue({ ...PROFILE, avatarFileId })
+      const operation = createAvatarChangeOperation()
+      let backgroundGet: Promise<Profile> | undefined
+      const request = vi.fn(async () => {
+        backgroundGet = queryClient.fetchQuery({
+          queryKey: profileQueryKeys.current(),
+          queryFn: getProfile,
+          staleTime: 0,
+          retry: false,
+        })
+        if (uncertain) {
+          throw new Error('offline')
+        }
+      })
+
+      const changePromise = changeProfileAvatar(queryClient, operation, avatarFileId, request)
+      try {
+        await vi.waitFor(() => expect(getProfile).toHaveBeenCalledTimes(2))
+      } finally {
+        resolveOldProfile(PROFILE)
+        await Promise.allSettled([changePromise, backgroundGet])
+      }
+      await changePromise
+      expect(operation.applied).toBe(true)
+      expect(avatarId()).toBe(avatarFileId)
+
+      await oldProfilePromise
+      await backgroundGet
+      expect(avatarId()).toBe(avatarFileId)
+      expect(request).toHaveBeenCalledTimes(1)
+    }
+  )
   it('keeps the previous avatar until PUT succeeds then refreshes the profile', async () => {
     vi.mocked(getProfile).mockResolvedValue({ ...PROFILE, avatarFileId: 'new' })
     const request = vi.fn(async () => {
       expect(avatarId()).toBe('old')
     })
-    await changeProfileAvatar(
-      queryClient,
-      createAvatarChangeOperation(),
-      'new',
-      request
-    )
+    await changeProfileAvatar(queryClient, createAvatarChangeOperation(), 'new', request)
     expect(getProfile).toHaveBeenCalledTimes(1)
     expect(avatarId()).toBe('new')
   })
