@@ -172,7 +172,7 @@ const createPost = async (
   const { data, error, response } = await apiClient.POST('/api/v1/posts', {
     body: payload,
     fetch: createAbortableFetch(signal),
-    headers: { 'Idempotency-Key': crypto.randomUUID() },
+    params: { header: { 'Idempotency-Key': crypto.randomUUID() } },
   })
 
   if (!response.ok) {

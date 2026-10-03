@@ -4,6 +4,19 @@
 
 ## Unreleased
 
+### 2026-10-03
+
+#### Create Post
+
+- Создание поста передаёт обязательный `Idempotency-Key` через `params.header` типизированного OpenAPI-клиента в соответствии с обновлённой схемой. Генерация UUID для попытки публикации сохранена; существующий unit-тест обновлён под контракт запроса.
+
+#### Verification
+
+- `pnpm exec tsc --noEmit --pretty false` прошёл.
+- `pnpm exec vitest run --project unit src/features/create-post/api/publishPostApi.test.ts` прошёл: 7 тестов.
+- `pnpm lint --quiet` и `pnpm build` прошли.
+- `git diff --check` прошёл.
+
 ### 2026-10-02
 
 #### Profile Settings
